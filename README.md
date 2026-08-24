@@ -20,7 +20,7 @@ Prerequisite: https://flutter.dev/docs/get-started/install
 
 2. Clone the repo.
     ```sh
-     git clone https://github.com/hifiaz/duekasir
+     git clone https://github.com/Shan0h/Pos
     ```
 3. Install packages.
     ```sh
