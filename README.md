@@ -1,5 +1,5 @@
 <img width="150" src="assets/logo.png" alt="Due Kasir Logo">
-# Due Kasir
+# PosOffline
 
 Is Open source for POS app focus on offline first
 
@@ -76,9 +76,14 @@ Prerequisite: https://flutter.dev/docs/get-started/install
 * IOS Support
 * Android Support
 
-## Author
+## Original Author
 
 👤 **Luthfi**
 
 * Twitter: [@hifiaz](https://twitter.com/hifiaz)
 * LinkedIn: [@luthfiazhari](https://linkedin.com/in/luthfiazhari)
+
+## Modified Author
+👤 **Shan0h**
+* Twitter: [@shan0h](https://twitter.com/shan0h)
+* LinkedIn: [@akmalfauzi34](https://linkedin.com/in/akmalfauzi34)
