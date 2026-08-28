@@ -5,6 +5,7 @@ import 'package:due_kasir/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:due_kasir/pages/pos_modern/pos_modern_page.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -52,6 +53,15 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Selling'),
               leading: const Icon(Icons.sell_outlined),
               onTap: () => context.go('/'),
+            ),
+            ListTile(
+              title: const Text('Modern POS (Beta)'),
+              leading: const Icon(Icons.tablet_mac),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const PosModernPage()),
+                );
+              },
             ),
             ListTile(
               title: const Text('Report'),
