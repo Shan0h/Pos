@@ -18,7 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: Environment.url,
-    anonKey: Environment.anonKey,
+    publishableKey: Environment.anonKey,
   );
   setup();
   runApp(const MyApp());

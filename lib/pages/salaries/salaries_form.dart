@@ -317,7 +317,7 @@ class _SalariesFormState extends State<SalariesForm> {
 
                           Database().addSalary(salary).whenComplete(() {
                             salaryController.salaries.refresh();
-                            Navigator.of(context).pop(false);
+                            if (context.mounted) Navigator.of(context).pop(false);
                           });
                         }
                       },

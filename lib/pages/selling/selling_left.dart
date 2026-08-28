@@ -31,13 +31,15 @@ class SellingLeft extends HookWidget {
                   ShadButton.ghost(
                     icon: const Icon(Icons.camera_alt),
                     onPressed: () async {
-                      var res = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const SimpleBarcodeScannerPage(),
-                          ));
-                      final data = await Database().searchByBarcode(res);
+                      String? res = await SimpleBarcodeScanner.scanBarcode(
+                        context,
+                        lineColor: '#ff6666',
+                        cancelButtonText: 'Cancel',
+                        isShowFlashIcon: true,
+                        scanType: ScanType.barcode,
+                      );
+                      if (res != null && res != '-1') {
+                        final data = await Database().searchByBarcode(res);
                       if (data != null) {
                         editingBarcode.text = res;
                         getIt
@@ -57,6 +59,7 @@ class SellingLeft extends HookWidget {
                               ),
                             ),
                           );
+                        }
                         }
                       }
                     },
@@ -298,7 +301,7 @@ class SellingLeft extends HookWidget {
                     )
                     .toList(),
               ),
-              error: (e, __) => Text('$__'),
+              error: (e, st) => Text('$st'),
               loading: () => const Text('Loading'),
             ),
           ],

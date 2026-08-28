@@ -136,7 +136,7 @@ class UserForm extends HookWidget {
                           onPressed: () {
                             Database().deleteUser(user.id!).whenComplete(() {
                               userController.users.refresh();
-                              Navigator.pop(context);
+                              if (context.mounted) Navigator.pop(context);
                             });
                           },
                         ),
@@ -161,7 +161,7 @@ class UserForm extends HookWidget {
                                   .whenComplete(() {
                                 Future.delayed(Durations.short1).then((_) {
                                   userController.users.refresh();
-                                  context.pop();
+                                  if (context.mounted) context.pop();
                                 });
                               });
                             } else {
@@ -177,7 +177,7 @@ class UserForm extends HookWidget {
 
                               Database().addNewUser(newUser).whenComplete(() {
                                 userController.users.refresh();
-                                context.pop();
+                                if (context.mounted) context.pop();
                               });
                             }
                           }

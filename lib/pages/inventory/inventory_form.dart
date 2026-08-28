@@ -123,13 +123,16 @@ class InventoryForm extends HookWidget {
                     ShadButton.ghost(
                       icon: const Icon(Icons.camera_alt),
                       onPressed: () async {
-                        var res = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const SimpleBarcodeScannerPage(),
-                            ));
-                        editingCode.text = res;
+                        String? res = await SimpleBarcodeScanner.scanBarcode(
+                          context,
+                          lineColor: '#ff6666',
+                          cancelButtonText: 'Cancel',
+                          isShowFlashIcon: true,
+                          scanType: ScanType.barcode,
+                        );
+                        if (res != null && res != '-1') {
+                          editingCode.text = res;
+                        }
                       },
                     ),
                   ],

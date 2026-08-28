@@ -94,9 +94,10 @@ class _StoreState extends State<Store> {
                                   Database().addStore(val).whenComplete(
                                     () {
                                       storeController.store.refresh();
-                                      context.pop();
-                                      ShadToaster.of(context).show(
-                                        const ShadToast(
+                                      if (context.mounted) {
+                                        context.pop();
+                                        ShadToaster.of(context).show(
+                                          const ShadToast(
                                           backgroundColor: Colors.green,
                                           description: Text(
                                             'Store Success Updated',
@@ -105,6 +106,7 @@ class _StoreState extends State<Store> {
                                           ),
                                         ),
                                       );
+                                      }
                                     },
                                   );
                                 } else {
@@ -119,17 +121,19 @@ class _StoreState extends State<Store> {
                                   Database().addStore(val).whenComplete(
                                     () {
                                       storeController.store.refresh();
-                                      context.pop();
-                                      ShadToaster.of(context).show(
-                                        const ShadToast(
-                                          backgroundColor: Colors.green,
-                                          description: Text(
-                                            'Store Success Saved',
-                                            style:
-                                                TextStyle(color: Colors.white),
+                                      if (context.mounted) {
+                                        context.pop();
+                                        ShadToaster.of(context).show(
+                                          const ShadToast(
+                                            backgroundColor: Colors.green,
+                                            description: Text(
+                                              'Store Success Saved',
+                                              style:
+                                                  TextStyle(color: Colors.white),
+                                            ),
                                           ),
-                                        ),
-                                      );
+                                        );
+                                      }
                                     },
                                   );
                                 }
@@ -201,7 +205,7 @@ class _StoreState extends State<Store> {
               ),
             );
           },
-          error: (error, __) => Text('$error'),
+          error: (error, st) => Text('$error'),
           loading: () => const Center(
             child: Text('Loading...'),
           ),

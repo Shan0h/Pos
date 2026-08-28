@@ -233,7 +233,7 @@ class PrintSettingState extends State<PrintSetting> {
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.all(Radius.circular(10)),
                     color:
-                        const Color.fromARGB(255, 69, 51, 51).withOpacity(0.3),
+                        const Color.fromARGB(255, 69, 51, 51).withValues(alpha: 0.3),
                   ),
                   child: ListView.builder(
                     itemCount: items.isNotEmpty ? items.length : 0,
@@ -255,7 +255,7 @@ class PrintSettingState extends State<PrintSetting> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withValues(alpha: 0.3),
                 ),
                 child: Column(children: [
                   const Text(

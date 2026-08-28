@@ -16,26 +16,28 @@ class ReportBestSeller extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final items = reportController.bestSeller.watch(context);
-    reportController.report.listen(context, () {
-      final List<PenjualanModel>? listValue =
-          reportController.report.value.value;
-      if (listValue != null) {
-        if (totalItem.value != listValue.length) {
-          totalItem.value = listValue.length;
-          for (var i in listValue) {
-            for (var r in i.items) {
-              var res = items.firstWhereOrNull((v) => v.id == r.id);
-              if (res != null) {
-                items[items.indexWhere((element) => element.id == r.id)] = res
-                  ..quantity = (res.quantity! + r.quantity!);
-              } else {
-                items.add(r);
+    useEffect(() {
+      return reportController.report.subscribe((_) {
+        final List<PenjualanModel>? listValue =
+            reportController.report.value.value;
+        if (listValue != null) {
+          if (totalItem.value != listValue.length) {
+            totalItem.value = listValue.length;
+            for (var i in listValue) {
+              for (var r in i.items) {
+                var res = items.firstWhereOrNull((v) => v.id == r.id);
+                if (res != null) {
+                  items[items.indexWhere((element) => element.id == r.id)] = res
+                    ..quantity = (res.quantity! + r.quantity!);
+                } else {
+                  items.add(r);
+                }
               }
             }
           }
         }
-      }
-    });
+      });
+    }, []);
 
     final theme = ShadTheme.of(context);
     return ShadCard(

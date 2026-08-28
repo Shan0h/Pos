@@ -69,7 +69,7 @@ Future<dynamic> pdfGenerator(
                           Container(
                             child: Text(
                               "Name",
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontStyle: FontStyle.italic,
                                   fontWeight: FontWeight.bold),
                             ),
@@ -79,7 +79,7 @@ Future<dynamic> pdfGenerator(
                           Container(
                             child: Text(
                               "Jabatan",
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontStyle: FontStyle.italic,
                                   fontWeight: FontWeight.bold),
                             ),
@@ -92,7 +92,7 @@ Future<dynamic> pdfGenerator(
                 alignment: Alignment.bottomLeft,
                 child: Text('Salary Details',
                     style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
               ),
               SizedBox(height: 10),
               Container(
@@ -154,7 +154,7 @@ Future<dynamic> pdfGenerator(
                   alignment: Alignment.bottomLeft,
                   child: Text('Deductions Details',
                       style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 ),
                 SizedBox(height: 10),
                 Container(
@@ -241,7 +241,7 @@ Future<dynamic> pdfGenerator(
                 SizedBox(width: 5),
                 Text(
                   salary.note ?? '-',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: const TextStyle(fontStyle: FontStyle.italic),
                 )
               ])
             ],
