@@ -1,7 +1,7 @@
-import 'package:due_kasir/controller/store_controller.dart';
-import 'package:due_kasir/model/store_model.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/controller/store_controller.dart';
+import 'package:pos/model/store_model.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/service/database.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -98,14 +98,14 @@ class _StoreState extends State<Store> {
                                         context.pop();
                                         ShadToaster.of(context).show(
                                           const ShadToast(
-                                          backgroundColor: Colors.green,
-                                          description: Text(
-                                            'Store Success Updated',
-                                            style:
-                                                TextStyle(color: Colors.white),
+                                            backgroundColor: Colors.green,
+                                            description: Text(
+                                              'Store Success Updated',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
                                           ),
-                                        ),
-                                      );
+                                        );
                                       }
                                     },
                                   );
@@ -128,8 +128,8 @@ class _StoreState extends State<Store> {
                                             backgroundColor: Colors.green,
                                             description: Text(
                                               'Store Success Saved',
-                                              style:
-                                                  TextStyle(color: Colors.white),
+                                              style: TextStyle(
+                                                  color: Colors.white),
                                             ),
                                           ),
                                         );

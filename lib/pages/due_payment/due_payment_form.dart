@@ -1,9 +1,9 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
-import 'package:due_kasir/controller/due_payment_controller.dart';
-import 'package:due_kasir/main.dart';
-import 'package:due_kasir/model/due_payment_model.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/date_utils.dart';
+import 'package:pos/controller/due_payment_controller.dart';
+import 'package:pos/main.dart';
+import 'package:pos/model/due_payment_model.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';

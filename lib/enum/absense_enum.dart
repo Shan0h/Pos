@@ -1,11 +1,11 @@
 enum AbsenseEnum {
- checkin,
- checkout;
+  checkin,
+  checkout;
 
- String get message {
-   return switch (this) {
-     checkin => 'Present In',
-     checkout => 'Present Out',
-   };
- }
+  String get message {
+    return switch (this) {
+      checkin => 'Present In',
+      checkout => 'Present Out',
+    };
+  }
 }

@@ -7,6 +7,7 @@ part of 'router.dart';
 // **************************************************************************
 
 List<RouteBase> get $appRoutes => [
+      $posModernRoute,
       $sellingRoute,
       $homeRoute,
       $inventoryRoute,
@@ -27,8 +28,31 @@ List<RouteBase> get $appRoutes => [
       $testingRoute,
     ];
 
-RouteBase get $sellingRoute => GoRouteData.$route(
+RouteBase get $posModernRoute => GoRouteData.$route(
       path: '/',
+      factory: $PosModernRouteExtension._fromState,
+    );
+
+extension $PosModernRouteExtension on PosModernRoute {
+  static PosModernRoute _fromState(GoRouterState state) =>
+      const PosModernRoute();
+
+  String get location => GoRouteData.$location(
+        '/',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $sellingRoute => GoRouteData.$route(
+      path: '/legacy-pos',
       factory: $SellingRouteExtension._fromState,
     );
 
@@ -36,7 +60,7 @@ extension $SellingRouteExtension on SellingRoute {
   static SellingRoute _fromState(GoRouterState state) => const SellingRoute();
 
   String get location => GoRouteData.$location(
-        '/',
+        '/legacy-pos',
       );
 
   void go(BuildContext context) => context.go(location);

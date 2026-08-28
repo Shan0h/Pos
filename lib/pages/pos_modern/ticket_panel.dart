@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'mock_data.dart';
+import 'package:pos/model/item_model.dart';
 
 class TicketPanel extends StatelessWidget {
-  final List<CartItem> cartItems;
+  final List<ItemModel> cartItems;
   final VoidCallback onClear;
-  final ValueChanged<CartItem> onIncrement;
-  final ValueChanged<CartItem> onDecrement;
+  final ValueChanged<ItemModel> onIncrement;
+  final ValueChanged<ItemModel> onDecrement;
   final VoidCallback onPay;
 
   const TicketPanel({
@@ -19,7 +19,12 @@ class TicketPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double subtotal = cartItems.fold(0, (sum, item) => sum + item.total);
+    double subtotal = cartItems.fold(0, (sum, item) {
+      double itemPrice = item.diskonPersen == null 
+          ? (item.quantity * item.hargaJual).toDouble()
+          : (item.quantity * (item.hargaJual - item.hargaJual * (item.diskonPersen! / 100)));
+      return sum + itemPrice;
+    });
     double tax = subtotal * 0.06; // 6% SST example
     double grandTotal = subtotal + tax;
 
@@ -50,12 +55,13 @@ class TicketPanel extends StatelessWidget {
                 TextButton.icon(
                   onPressed: cartItems.isEmpty ? null : onClear,
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  label: const Text('Clear', style: TextStyle(color: Colors.red)),
+                  label:
+                      const Text('Clear', style: TextStyle(color: Colors.red)),
                 ),
               ],
             ),
           ),
-          
+
           // Cart Items List
           Expanded(
             child: cartItems.isEmpty
@@ -63,11 +69,13 @@ class TicketPanel extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.shopping_basket_outlined, size: 64, color: Colors.grey[300]),
+                        Icon(Icons.shopping_basket_outlined,
+                            size: 64, color: Colors.grey[300]),
                         const SizedBox(height: 16),
                         Text(
                           'No items in order',
-                          style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                          style:
+                              TextStyle(color: Colors.grey[500], fontSize: 16),
                         ),
                       ],
                     ),
@@ -75,11 +83,13 @@ class TicketPanel extends StatelessWidget {
                 : ListView.separated(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: cartItems.length,
-                    separatorBuilder: (context, index) => const Divider(height: 1),
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final item = cartItems[index];
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
                         child: Row(
                           children: [
                             // Qty Controls
@@ -93,18 +103,22 @@ class TicketPanel extends StatelessWidget {
                                   IconButton(
                                     icon: const Icon(Icons.remove, size: 18),
                                     onPressed: () => onDecrement(item),
-                                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                                    constraints: const BoxConstraints(
+                                        minWidth: 36, minHeight: 36),
                                     padding: EdgeInsets.zero,
                                     splashRadius: 18,
                                   ),
                                   Text(
                                     '${item.quantity}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.add, size: 18),
                                     onPressed: () => onIncrement(item),
-                                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                                    constraints: const BoxConstraints(
+                                        minWidth: 36, minHeight: 36),
                                     padding: EdgeInsets.zero,
                                     splashRadius: 18,
                                   ),
@@ -118,14 +132,14 @@ class TicketPanel extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    item.product.name,
+                                    item.nama,
                                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'RM ${item.product.price.toStringAsFixed(2)}',
+                                    'RM ${item.hargaJual.toStringAsFixed(2)}',
                                     style: TextStyle(color: Colors.grey[600], fontSize: 12),
                                   ),
                                 ],
@@ -134,8 +148,9 @@ class TicketPanel extends StatelessWidget {
                             const SizedBox(width: 8),
                             // Item Total
                             Text(
-                              'RM ${item.total.toStringAsFixed(2)}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              'RM ${(item.quantity * item.hargaJual).toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                           ],
                         ),
@@ -143,7 +158,7 @@ class TicketPanel extends StatelessWidget {
                     },
                   ),
           ),
-          
+
           // Summary Section
           Container(
             padding: const EdgeInsets.all(16.0),
@@ -167,11 +182,15 @@ class TicketPanel extends StatelessWidget {
                   children: [
                     const Text(
                       'Total',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'RM ${grandTotal.toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.teal),
+                      style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal),
                     ),
                   ],
                 ),
@@ -192,7 +211,8 @@ class TicketPanel extends StatelessWidget {
                     ),
                     child: const Text(
                       'PAY NOW',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

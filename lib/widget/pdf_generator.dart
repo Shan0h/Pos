@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:due_kasir/model/salary_model.dart';
-import 'package:due_kasir/model/store_model.dart';
-import 'package:due_kasir/model/user_model.dart';
-import 'package:due_kasir/utils/constant.dart';
-import 'package:due_kasir/utils/date_utils.dart';
+import 'package:pos/model/salary_model.dart';
+import 'package:pos/model/store_model.dart';
+import 'package:pos/model/user_model.dart';
+import 'package:pos/utils/constant.dart';
+import 'package:pos/utils/date_utils.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -91,8 +91,8 @@ Future<dynamic> pdfGenerator(
               Align(
                 alignment: Alignment.bottomLeft,
                 child: Text('Salary Details',
-                    style:
-                        const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.bold)),
               ),
               SizedBox(height: 10),
               Container(
@@ -153,8 +153,8 @@ Future<dynamic> pdfGenerator(
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Text('Deductions Details',
-                      style:
-                          const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold)),
                 ),
                 SizedBox(height: 10),
                 Container(

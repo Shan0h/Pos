@@ -1,4 +1,4 @@
-import 'package:due_kasir/model/item_model.dart';
+import 'package:pos/model/item_model.dart';
 import 'package:equatable/equatable.dart';
 
 class Cart extends Equatable {

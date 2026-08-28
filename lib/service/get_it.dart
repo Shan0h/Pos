@@ -1,8 +1,8 @@
-import 'package:due_kasir/controller/selling/events.dart';
-import 'package:due_kasir/controller/selling/service.dart';
-import 'package:due_kasir/controller/selling_controller.dart';
-import 'package:due_kasir/controller/user_controller.dart';
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/controller/selling/events.dart';
+import 'package:pos/controller/selling/service.dart';
+import 'package:pos/controller/selling_controller.dart';
+import 'package:pos/controller/user_controller.dart';
+import 'package:pos/service/database.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;

@@ -1,13 +1,13 @@
 import 'package:collection/collection.dart';
-import 'package:due_kasir/controller/inventory_controller.dart';
-import 'package:due_kasir/controller/selling/events.dart';
-import 'package:due_kasir/controller/selling/service.dart';
-import 'package:due_kasir/enum/payment_enum.dart';
-import 'package:due_kasir/model/card_model.dart';
-import 'package:due_kasir/model/item_model.dart';
-import 'package:due_kasir/model/customer_model.dart';
-import 'package:due_kasir/model/user_model.dart';
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/controller/inventory_controller.dart';
+import 'package:pos/controller/selling/events.dart';
+import 'package:pos/controller/selling/service.dart';
+import 'package:pos/enum/payment_enum.dart';
+import 'package:pos/model/card_model.dart';
+import 'package:pos/model/item_model.dart';
+import 'package:pos/model/customer_model.dart';
+import 'package:pos/model/user_model.dart';
+import 'package:pos/service/database.dart';
 import 'package:flutter/material.dart';
 import 'package:signals/signals_flutter.dart';
 
@@ -63,6 +63,30 @@ class SellingController {
                 items: [...value.items]..remove(event.item),
               ),
             );
+          } catch (e, s) {
+            _cart.value = AsyncError(e, s);
+          }
+        }
+
+      case CartItemDecremented(:final item):
+        if (_cart.value case AsyncData<Cart>(:final value)) {
+          try {
+            final isSame = value.items.firstWhereOrNull((val) => val.code == item.code);
+            if (isSame != null) {
+              if (isSame.quantity > 1) {
+                _cartService.decrement(item);
+                // Force rebuild
+                _cart.value = AsyncData(Cart(items: [...value.items, item]));
+                _cart.value = AsyncData(Cart(items: [...value.items]..remove(item)));
+              } else {
+                _cartService.decrement(item);
+                _cart.value = AsyncData(
+                  Cart(
+                    items: [...value.items]..remove(isSame),
+                  ),
+                );
+              }
+            }
           } catch (e, s) {
             _cart.value = AsyncError(e, s);
           }

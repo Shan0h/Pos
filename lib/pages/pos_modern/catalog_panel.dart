@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'mock_data.dart';
+import 'package:pos/model/item_model.dart';
 
 class CatalogPanel extends StatelessWidget {
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;
   final String selectedCategory;
   final ValueChanged<String> onCategorySelected;
-  final List<PosProduct> products;
-  final ValueChanged<PosProduct> onProductTap;
+  final List<ItemModel> products;
+  final ValueChanged<ItemModel> onProductTap;
+  final ValueChanged<String> onBarcodeScanned;
+  final List<String> categories;
 
   const CatalogPanel({
     super.key,
@@ -17,6 +19,8 @@ class CatalogPanel extends StatelessWidget {
     required this.onCategorySelected,
     required this.products,
     required this.onProductTap,
+    required this.onBarcodeScanned,
+    required this.categories,
   });
 
   @override
@@ -43,60 +47,57 @@ class CatalogPanel extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     onChanged: onSearchChanged,
+                    onSubmitted: (value) {
+                      onBarcodeScanned(value);
+                    },
                     decoration: InputDecoration(
-                      hintText: 'Search products...',
-                      prefixIcon: const Icon(Icons.search, color: Colors.teal),
+                      hintText: 'Search or Scan Barcode...',
+                      prefixIcon: const Icon(Icons.qr_code_scanner, color: Colors.teal),
                       filled: true,
                       fillColor: Colors.grey[200],
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          
+
           // Category Choice Chips
-          Container(
-            height: 60,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            color: Colors.white,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: mockCategories.length,
-              itemBuilder: (context, index) {
-                final category = mockCategories[index];
-                final isSelected = category == selectedCategory;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0, top: 8.0, bottom: 8.0),
-                  child: ChoiceChip(
+          if (categories.isNotEmpty)
+            Container(
+              height: 60,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: categories.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final cat = categories[index];
+                  final isSelected = cat == selectedCategory;
+                  return ChoiceChip(
                     label: Text(
-                      category,
+                      cat,
                       style: TextStyle(
                         color: isSelected ? Colors.white : Colors.black87,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                     selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) onCategorySelected(category);
-                    },
                     selectedColor: Colors.teal,
-                    backgroundColor: Colors.grey[200],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    showCheckmark: false,
-                  ),
-                );
-              },
+                    backgroundColor: Colors.white,
+                    onSelected: (selected) {
+                      if (selected) onCategorySelected(cat);
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-          
           // Products Grid
           Expanded(
             child: Padding(
@@ -126,25 +127,30 @@ class CatalogPanel extends StatelessWidget {
 }
 
 class ProductCard extends StatelessWidget {
-  final PosProduct product;
+  final ItemModel product;
   final VoidCallback onTap;
 
   const ProductCard({super.key, required this.product, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final color = Color(int.parse('0xFF${product.colorHex}'));
+    // Generate a pseudo-random color based on the item code or name
+    final colorHash = product.nama.hashCode;
+    final color = Color((colorHash & 0xFFFFFF) | 0xFF000000).withValues(alpha: 0.8);
+    final isOutOfStock = product.jumlahBarang == 0;
 
     return InkWell(
-      onTap: onTap,
+      onTap: isOutOfStock ? null : onTap,
       borderRadius: BorderRadius.circular(16),
-      child: Container(
+      child: Opacity(
+        opacity: isOutOfStock ? 0.5 : 1.0,
+        child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -159,13 +165,26 @@ class ProductCard extends StatelessWidget {
               height: 8,
               color: color,
             ),
-            // Product Icon or Image Placeholder
+            // Product Initial Placeholder
             Expanded(
               child: Center(
-                child: Icon(
-                  Icons.fastfood, // Placeholder icon
-                  size: 48,
-                  color: color.withOpacity(0.5),
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      product.nama.isNotEmpty ? product.nama[0].toUpperCase() : '?',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -176,7 +195,7 @@ class ProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product.name,
+                    product.nama,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -187,18 +206,26 @@ class ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'RM ${product.price.toStringAsFixed(2)}',
+                    product.hargaJual == 0 
+                        ? 'Open Price'
+                        : 'RM ${product.hargaJual.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       color: Colors.teal,
                     ),
                   ),
+                  if (isOutOfStock)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4.0),
+                      child: Text('OUT OF STOCK', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 10)),
+                    ),
                 ],
               ),
             ),
           ],
         ),
+      ),
       ),
     );
   }

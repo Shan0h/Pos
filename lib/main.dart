@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:due_kasir/routes/router.dart';
-import 'package:due_kasir/service/get_it.dart';
-import 'package:due_kasir/utils/env.dart';
+import 'package:pos/routes/router.dart';
+import 'package:pos/service/get_it.dart';
+import 'package:pos/utils/env.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';

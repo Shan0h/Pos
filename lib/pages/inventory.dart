@@ -1,7 +1,7 @@
-import 'package:due_kasir/controller/inventory_controller.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/pages/inventory/inventory_list.dart';
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/controller/inventory_controller.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/pages/inventory/inventory_list.dart';
+import 'package:pos/service/database.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -14,7 +14,9 @@ class Inventory extends StatelessWidget {
     return Scaffold(
       drawer: const NavDrawer(),
       appBar: AppBar(
-        title: const Text('Inventory'),
+        title: const Text('Inventory Data'),
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         centerTitle: false,
         actions: [
           PopupMenuButton<String>(
@@ -81,8 +83,10 @@ class Inventory extends StatelessWidget {
       ),
       body: const InventoryList(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/inventory/form'),
+        onPressed: () => context.push('/inventory/form'),
         tooltip: 'Add',
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
     );

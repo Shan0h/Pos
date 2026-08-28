@@ -11,7 +11,8 @@ class PriceNumpadDialog extends StatefulWidget {
   });
 
   /// Helper function to easily show this dialog
-  static Future<double?> show(BuildContext context, {required String itemName, double initialPrice = 0.0}) {
+  static Future<double?> show(BuildContext context,
+      {required String itemName, double initialPrice = 0.0}) {
     return showDialog<double>(
       context: context,
       barrierDismissible: false,
@@ -44,7 +45,7 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
         int val = int.parse(digit);
         _cents = (_cents * 10) + val;
       }
-      
+
       // Safety limit to prevent extremely large numbers
       if (_cents > 99999999) {
         _cents = 99999999;
@@ -99,10 +100,11 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Display Screen
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(16),
@@ -120,7 +122,7 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Numpad Grid
             GridView.count(
               shrinkWrap: true,
@@ -145,7 +147,7 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
               ],
             ),
             const SizedBox(height: 24),
-            
+
             // OK / Add to Cart Button
             SizedBox(
               height: 56,

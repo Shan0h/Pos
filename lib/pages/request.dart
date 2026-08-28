@@ -1,6 +1,6 @@
-import 'package:due_kasir/controller/request_controller.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/pages/request/request_card.dart';
+import 'package:pos/controller/request_controller.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/pages/request/request_card.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signals/signals_flutter.dart';

@@ -12,8 +12,6 @@
 
   <br />
 
-  [<img src="https://github.com/Shan0h/Pos/assets/20653803/b0af666a-99c3-414a-b9e0-0558e8bee10b" width="250" alt="Get it on Google Play">](https://play.google.com/store/apps/details?id=com.shan0h.pos)
-
 </div>
 
 ---
@@ -35,8 +33,6 @@
 
 ### 💳 2. Sales & Checkout
 - **Cart & Order Processing**: Fast product addition, discount handling, and order summary.
-- **Modern Tablet POS UI (Beta)**: A dedicated landscape-mode interface with split-screen catalog and ticket panels optimized for touch devices.
-- **Custom Price Numpad**: On-screen custom numpad for quickly entering variable prices (e.g. open price items) without triggering the system keyboard.
 - **Thermal Printing**: Direct ESC/POS thermal receipt printing via Bluetooth and USB (Windows & Android).
 - **Cash Drawer Integration**: Automatically triggers cash drawer kick-out on transaction completion.
 - **Multi-currency Support**: Default currency formatted in Malaysian Ringgit (`RM`).

@@ -1,12 +1,12 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:collection/collection.dart';
-import 'package:due_kasir/controller/salary_controller.dart';
-import 'package:due_kasir/controller/user_controller.dart';
-import 'package:due_kasir/model/salary_model.dart';
-import 'package:due_kasir/model/user_model.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/constant.dart';
-import 'package:due_kasir/utils/date_utils.dart';
+import 'package:pos/controller/salary_controller.dart';
+import 'package:pos/controller/user_controller.dart';
+import 'package:pos/model/salary_model.dart';
+import 'package:pos/model/user_model.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/constant.dart';
+import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -317,7 +317,9 @@ class _SalariesFormState extends State<SalariesForm> {
 
                           Database().addSalary(salary).whenComplete(() {
                             salaryController.salaries.refresh();
-                            if (context.mounted) Navigator.of(context).pop(false);
+                            if (context.mounted) {
+                              Navigator.of(context).pop(false);
+                            }
                           });
                         }
                       },

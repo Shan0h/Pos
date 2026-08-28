@@ -1,14 +1,14 @@
 import 'dart:developer';
 
-import 'package:due_kasir/controller/salary_controller.dart';
-import 'package:due_kasir/controller/store_controller.dart';
-import 'package:due_kasir/model/salary_model.dart';
-import 'package:due_kasir/model/user_model.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/constant.dart';
-import 'package:due_kasir/utils/extension.dart';
-import 'package:due_kasir/widget/pdf_generator.dart';
+import 'package:pos/controller/salary_controller.dart';
+import 'package:pos/controller/store_controller.dart';
+import 'package:pos/model/salary_model.dart';
+import 'package:pos/model/user_model.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/constant.dart';
+import 'package:pos/utils/extension.dart';
+import 'package:pos/widget/pdf_generator.dart';
 import 'package:email_otp/email_otp.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -34,9 +34,10 @@ class _SalariesState extends State<Salaries> {
     final store = storeController.store.watch(context);
     final salaries = salaryController.salaries.watch(context);
     return Scaffold(
-      drawer: const NavDrawer(),
       appBar: AppBar(
         title: const Text('Salaries'),
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         centerTitle: false,
         actions: [
           if (password != null)

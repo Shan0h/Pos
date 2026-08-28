@@ -1,7 +1,7 @@
-import 'package:due_kasir/controller/user_controller.dart';
-import 'package:due_kasir/model/user_model.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/date_utils.dart';
+import 'package:pos/controller/user_controller.dart';
+import 'package:pos/model/user_model.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';

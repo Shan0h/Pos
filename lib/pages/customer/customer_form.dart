@@ -1,7 +1,7 @@
-import 'package:due_kasir/controller/customer_controller.dart';
-import 'package:due_kasir/model/customer_model.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/date_utils.dart';
+import 'package:pos/controller/customer_controller.dart';
+import 'package:pos/model/customer_model.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';

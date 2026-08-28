@@ -1,35 +1,44 @@
-import 'package:due_kasir/pages/customer.dart';
-import 'package:due_kasir/pages/customer/customer_form.dart';
-import 'package:due_kasir/pages/due_payment.dart';
-import 'package:due_kasir/pages/due_payment/due_payment_form.dart';
-import 'package:due_kasir/pages/expenses.dart';
-import 'package:due_kasir/pages/home.dart';
-import 'package:due_kasir/pages/inventory.dart';
-import 'package:due_kasir/pages/inventory/csv_preview.dart';
-import 'package:due_kasir/pages/inventory/inventory_form.dart';
-import 'package:due_kasir/pages/login.dart';
-import 'package:due_kasir/pages/presence.dart';
-import 'package:due_kasir/pages/register.dart';
-import 'package:due_kasir/pages/rent.dart';
-import 'package:due_kasir/pages/rent/rent_item_form.dart';
-import 'package:due_kasir/pages/report.dart';
-import 'package:due_kasir/pages/request.dart';
-import 'package:due_kasir/pages/request/request_form.dart';
-import 'package:due_kasir/pages/salaries.dart';
-import 'package:due_kasir/pages/salaries/salaries_form.dart';
-import 'package:due_kasir/pages/selling.dart';
-import 'package:due_kasir/pages/selling/print_setting.dart';
-import 'package:due_kasir/pages/store.dart';
-import 'package:due_kasir/pages/sync.dart';
-import 'package:due_kasir/pages/testing.dart';
-import 'package:due_kasir/pages/users.dart';
-import 'package:due_kasir/pages/users/user_form.dart';
+import 'package:pos/pages/customer.dart';
+import 'package:pos/pages/customer/customer_form.dart';
+import 'package:pos/pages/due_payment.dart';
+import 'package:pos/pages/due_payment/due_payment_form.dart';
+import 'package:pos/pages/expenses.dart';
+import 'package:pos/pages/home.dart';
+import 'package:pos/pages/inventory.dart';
+import 'package:pos/pages/inventory/csv_preview.dart';
+import 'package:pos/pages/inventory/inventory_form.dart';
+import 'package:pos/pages/login.dart';
+import 'package:pos/pages/presence.dart';
+import 'package:pos/pages/register.dart';
+import 'package:pos/pages/rent.dart';
+import 'package:pos/pages/rent/rent_item_form.dart';
+import 'package:pos/pages/report.dart';
+import 'package:pos/pages/request.dart';
+import 'package:pos/pages/request/request_form.dart';
+import 'package:pos/pages/salaries.dart';
+import 'package:pos/pages/salaries/salaries_form.dart';
+import 'package:pos/pages/selling.dart';
+import 'package:pos/pages/selling/print_setting.dart';
+import 'package:pos/pages/store.dart';
+import 'package:pos/pages/sync.dart';
+import 'package:pos/pages/testing.dart';
+import 'package:pos/pages/users.dart';
+import 'package:pos/pages/users/user_form.dart';
+import 'package:pos/pages/pos_modern/pos_modern_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 part 'router.g.dart';
 
-@TypedGoRoute<SellingRoute>(path: '/')
+@TypedGoRoute<PosModernRoute>(path: '/')
+class PosModernRoute extends GoRouteData {
+  const PosModernRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const PosModernPage();
+}
+
+@TypedGoRoute<SellingRoute>(path: '/legacy-pos')
 class SellingRoute extends GoRouteData {
   const SellingRoute();
 

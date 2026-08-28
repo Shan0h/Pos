@@ -1,17 +1,17 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:due_kasir/model/customer_model.dart';
-import 'package:due_kasir/model/due_payment_model.dart';
-import 'package:due_kasir/model/expenses_model.dart';
-import 'package:due_kasir/model/item_model.dart';
-import 'package:due_kasir/model/penjualan_model.dart';
-import 'package:due_kasir/model/presence_model.dart';
-import 'package:due_kasir/model/rent_item_model.dart';
-import 'package:due_kasir/model/request_model.dart';
-import 'package:due_kasir/model/salary_model.dart';
-import 'package:due_kasir/model/store_model.dart';
-import 'package:due_kasir/model/user_model.dart';
+import 'package:pos/model/customer_model.dart';
+import 'package:pos/model/due_payment_model.dart';
+import 'package:pos/model/expenses_model.dart';
+import 'package:pos/model/item_model.dart';
+import 'package:pos/model/penjualan_model.dart';
+import 'package:pos/model/presence_model.dart';
+import 'package:pos/model/rent_item_model.dart';
+import 'package:pos/model/request_model.dart';
+import 'package:pos/model/salary_model.dart';
+import 'package:pos/model/store_model.dart';
+import 'package:pos/model/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../model/rent_model.dart';

@@ -1,7 +1,7 @@
-import 'package:due_kasir/controller/report_controller.dart';
-import 'package:due_kasir/pages/report/report_visitors_all.dart';
-import 'package:due_kasir/utils/constant.dart';
-import 'package:due_kasir/utils/date_utils.dart';
+import 'package:pos/controller/report_controller.dart';
+import 'package:pos/pages/report/report_visitors_all.dart';
+import 'package:pos/utils/constant.dart';
+import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:signals/signals_flutter.dart';

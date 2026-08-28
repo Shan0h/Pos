@@ -1,7 +1,7 @@
-import 'package:due_kasir/controller/user_controller.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/pages/users/user_list.dart';
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/controller/user_controller.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/pages/users/user_list.dart';
+import 'package:pos/service/database.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -12,9 +12,10 @@ class Users extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const NavDrawer(),
       appBar: AppBar(
-        title: const Text('Users'),
+        title: const Text('Users Management'),
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         centerTitle: false,
         actions: [
           ShadButton.ghost(
@@ -56,8 +57,10 @@ class Users extends StatelessWidget {
       ),
       body: const UserList(),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         onPressed: () => context.push('/users/form'),
-        tooltip: 'Add',
+        tooltip: 'Add User',
         child: const Icon(Icons.add),
       ),
     );

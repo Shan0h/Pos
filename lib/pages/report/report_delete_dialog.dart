@@ -1,5 +1,5 @@
-import 'package:due_kasir/controller/report_controller.dart';
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/controller/report_controller.dart';
+import 'package:pos/service/database.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';

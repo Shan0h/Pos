@@ -1,9 +1,9 @@
-import 'package:due_kasir/controller/inventory_controller.dart';
-import 'package:due_kasir/controller/rent_controller.dart';
-import 'package:due_kasir/main.dart';
-import 'package:due_kasir/model/rent_item_model.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/extension.dart';
+import 'package:pos/controller/inventory_controller.dart';
+import 'package:pos/controller/rent_controller.dart';
+import 'package:pos/main.dart';
+import 'package:pos/model/rent_item_model.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';

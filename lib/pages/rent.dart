@@ -1,10 +1,10 @@
-import 'package:due_kasir/controller/rent_controller.dart';
-import 'package:due_kasir/model/rent_item_model.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/pages/rent/rent_form.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/constant.dart';
-import 'package:due_kasir/utils/extension.dart';
+import 'package:pos/controller/rent_controller.dart';
+import 'package:pos/model/rent_item_model.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/pages/rent/rent_form.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/constant.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -24,9 +24,10 @@ class _RentState extends State<Rent> {
     final rents = rentController.rents.watch(context);
     final screen = context.isMobile ? context.width : (context.width - 60) / 2;
     return Scaffold(
-      drawer: const NavDrawer(),
       appBar: AppBar(
-        title: const Text('Rent'),
+        title: const Text('Rentals'),
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         centerTitle: false,
         actions: [
           ShadButton.ghost(
@@ -82,25 +83,32 @@ class _RentState extends State<Rent> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: val
-                        .map((p) => ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              leading: IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () {
-                                  rentController.rentItemSelected.value = p;
-                                  context.go('/rent/form');
-                                },
-                              ),
-                              title: Text(p.name),
-                              subtitle: Text(
-                                '${currency.format(p.rentOneMonth)}/Month\n${currency.format(p.rentOneWeek)}/Week\n${currency.format(p.rentThreeDay)}/3 Days',
-                                style: ShadTheme.of(context).textTheme.muted,
-                              ),
-                              trailing: const Icon(Icons.arrow_right),
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => RentForm(item: p)),
+                        .map((p) => Card(
+                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 1,
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.brown[800]?.withValues(alpha: 0.1),
+                                  child: Icon(Icons.shopping_bag, color: Colors.brown[800]),
+                                ),
+                                title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                subtitle: Text(
+                                  '${currency.format(p.rentOneMonth)}/Month\n${currency.format(p.rentOneWeek)}/Week\n${currency.format(p.rentThreeDay)}/3 Days',
+                                  style: ShadTheme.of(context).textTheme.muted.copyWith(height: 1.5),
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () {
+                                    rentController.rentItemSelected.value = p;
+                                    context.push('/rent/form');
+                                  },
+                                ),
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => RentForm(item: p)),
+                                ),
                               ),
                             ))
                         .toList(),
@@ -124,43 +132,46 @@ class _RentState extends State<Rent> {
                       return FutureBuilder<RentItemModel?>(
                         future: Database().getRentItemById(p.item),
                         builder: (context, snapshot) {
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(p.name,
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            color: p.paid ? Colors.grey[100] : Colors.white,
+                            elevation: p.paid ? 0 : 1,
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              leading: CircleAvatar(
+                                backgroundColor: (p.paid ? Colors.grey : Colors.teal).withValues(alpha: 0.1),
+                                child: Icon(Icons.person, color: p.paid ? Colors.grey : Colors.teal),
+                              ),
+                              title: Text(p.name,
+                                  style: p.paid
+                                      ? const TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey)
+                                      : const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text(
+                                p.paid
+                                    ? (snapshot.data?.name ?? '')
+                                    : '${snapshot.data?.name}\nExpired on ${(DateTime.now().difference(p.rentDate).inDays)} days - ${p.rentDate.day}/${p.rentDate.month}/${p.rentDate.year}',
                                 style: p.paid
-                                    ? const TextStyle(
-                                        decoration: TextDecoration.lineThrough)
-                                    : null),
-                            subtitle: Text(
-                              p.paid
-                                  ? snapshot.data?.name ?? ''
-                                  : '${snapshot.data?.name} - Expired on ${(DateTime.now().difference(p.rentDate).inDays)} days - ${p.rentDate.day}/${p.rentDate.month}/${p.rentDate.year}',
-                              style: p.paid
-                                  ? const TextStyle(
-                                      decoration: TextDecoration.lineThrough)
-                                  : null,
+                                    ? const TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey)
+                                    : const TextStyle(height: 1.5),
+                              ),
+                              trailing: p.paid
+                                  ? const Icon(Icons.check, color: Colors.grey)
+                                  : DateTime.now().difference(p.rentDate).inDays.isNegative
+                                      ? const Icon(Icons.check_circle, color: Colors.green)
+                                      : const Icon(Icons.warning, color: Colors.red),
+                              onTap: () {
+                                if (p.paid) return;
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => RentForm(
+                                            item: snapshot.data!,
+                                            rent: p,
+                                          )),
+                                );
+                              },
                             ),
-                            trailing: p.paid
-                                ? null
-                                : DateTime.now()
-                                        .difference(p.rentDate)
-                                        .inDays
-                                        .isNegative
-                                    ? const Icon(Icons.check_circle,
-                                        color: Colors.green)
-                                    : const Icon(Icons.close,
-                                        color: Colors.red),
-                            onTap: () {
-                              if (p.paid) return;
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => RentForm(
-                                          item: snapshot.data!,
-                                          rent: p,
-                                        )),
-                              );
-                            },
                           );
                         },
                       );
@@ -176,8 +187,10 @@ class _RentState extends State<Rent> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         onPressed: () => context.push('/rent/form'),
-        tooltip: 'Add',
+        tooltip: 'Add Rent',
         child: const Icon(Icons.add),
       ),
     );

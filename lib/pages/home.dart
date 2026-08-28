@@ -1,6 +1,6 @@
-import 'package:due_kasir/controller/auth_controller.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/pages/home/users_sheet.dart';
+import 'package:pos/controller/auth_controller.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/pages/home/users_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';

@@ -1,4 +1,4 @@
-import 'package:due_kasir/model/item_model.dart';
+import 'package:pos/model/item_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
@@ -23,6 +23,15 @@ final class CartItemAdded extends CartEvent {
 
 final class CartItemRemoved extends CartEvent {
   const CartItemRemoved(this.item);
+
+  final ItemModel item;
+
+  @override
+  List<Object> get props => [item];
+}
+
+final class CartItemDecremented extends CartEvent {
+  const CartItemDecremented(this.item);
 
   final ItemModel item;
 

@@ -1,13 +1,15 @@
-import 'package:due_kasir/controller/auth_controller.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/date_utils.dart';
-import 'package:due_kasir/utils/extension.dart';
+import 'package:pos/controller/auth_controller.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/date_utils.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:due_kasir/pages/pos_modern/pos_modern_page.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pos/pages/pos_modern/owner_pin_dialog.dart';
+
+final isOwnerUnlocked = signal(false);
 
 class NavDrawer extends StatelessWidget {
   const NavDrawer({super.key});
@@ -50,195 +52,216 @@ class NavDrawer extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: const Text('Selling'),
+              title: const Text('Legacy POS'),
               leading: const Icon(Icons.sell_outlined),
-              onTap: () => context.go('/'),
+              onTap: () => context.go('/legacy-pos'),
             ),
             ListTile(
               title: const Text('Modern POS (Beta)'),
               leading: const Icon(Icons.tablet_mac),
               onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const PosModernPage()),
-                );
+                context.go('/');
               },
             ),
-            ListTile(
-              title: const Text('Report'),
-              leading: const Icon(Icons.home_repair_service_outlined),
-              onTap: () => context.go('/report'),
-            ),
-            ListTile(
-              title: const Text('Inventory'),
-              leading: const Icon(Icons.inventory),
-              onTap: () => context.go('/inventory'),
-            ),
-            ListTile(
-              title: const Text('Request'),
-              leading: const Icon(Icons.edit_note),
-              onTap: () => context.go('/request'),
-            ),
-            ListTile(
-              title: const Text('Rent'),
-              leading: const Icon(Icons.shopping_bag),
-              onTap: () {
-                context.go('/rent');
-              },
-            ),
-            ListTile(
-              title: const Text('Due Payment'),
-              leading: const Icon(Icons.payment),
-              onTap: () {
-                context.go('/due-payment');
-              },
-            ),
-            ListTile(
-              title: const Text('Presence'),
-              leading: const Icon(Icons.adobe_sharp),
-              onTap: () {
-                context.go('/presence');
-              },
-            ),
-            ListTile(
-              title: const Text('Expenses'),
-              leading: const Icon(Icons.monetization_on),
-              onTap: () {
-                context.go('/expenses');
-              },
-            ),
-            ListTile(
-              title: const Text('Users'),
-              leading: const Icon(Icons.person_2),
-              onTap: () => context.go('/users'),
-            ),
-            ListTile(
-              title: const Text('Customer'),
-              leading: const Icon(Icons.people),
-              onTap: () {
-                context.go('/customer');
-              },
-            ),
-            ListTile(
-              title: const Text('Salaries'),
-              leading: const Icon(Icons.account_balance),
-              onTap: () {
-                context.go('/salaries');
-              },
-            ),
-            ListTile(
-              title: const Text('Account'),
-              leading: const Icon(Icons.account_circle),
-              trailing: PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (item) async {
-                  if (item == 'restore') {
-                    ShadToaster.of(context).show(
-                      ShadToast(
-                        title: const Text('Restore Backup?'),
-                        description:
-                            const Text('Please pick isar file to restore'),
-                        action: ShadButton.outline(
-                          child: const Text('Select'),
-                          onPressed: () => Database().restoreDB().whenComplete(
-                            () {
-                              if (context.mounted) {
-                                ShadToaster.of(context).show(
-                                  const ShadToast(
-                                    title: Text('Restore Database Success!'),
-                                    description: Text(
-                                        'Please make sure all data is imported'),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    );
-                  } else if (item == 'login') {
-                    context.pop();
-                    context.push('/login');
-                  } else if (item == 'backup') {
-                    context.pop();
-                    Database().createBackUp().then((_) => const ShadToast(
-                          title: Text('Backup Database Success!'),
-                          description: Text('All your data on download folder'),
-                        ));
-                  } else if (item == 'clear') {
-                    context.pop();
-                    showShadDialog(
-                      context: context,
-                      builder: (context) => ShadDialog.alert(
-                        title: const Text('Are you absolutely sure?'),
-                        description: const Padding(
-                          padding: EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            'This action cannot be undone. This will permanently delete your data.',
-                          ),
-                        ),
-                        actions: [
-                          ShadButton.outline(
-                            child: const Text('Cancel'),
-                            onPressed: () => Navigator.of(context).pop(false),
-                          ),
-                          ShadButton(
-                            child: const Text('Continue'),
-                            onPressed: () async {
-                              await Database().clearAllData().whenComplete(() {
-                                if (context.mounted) {
-                                  Navigator.of(context).pop(true);
-                                  context.go('/');
-                                }
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  } else if (item == 'logout') {
-                    context.pop();
-                    await Supabase.instance.client.auth.signOut();
-                  } else if (item == 'sync') {
-                    context.pop();
-                    context.go('/sync');
+            const Divider(),
+            if (!isOwnerUnlocked.watch(context))
+              ListTile(
+                title: const Text('Owner Management'),
+                leading: const Icon(Icons.admin_panel_settings),
+                onTap: () async {
+                  final success = await OwnerPinDialog.show(context);
+                  if (success) {
+                    isOwnerUnlocked.value = true;
                   }
                 },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'restore',
-                    child: Text('Restore'),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: 'backup',
-                    child: Text('Backup'),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: 'clear',
-                    child: Text('Clear/Reset'),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: 'store',
-                    child: Text('Store'),
-                  ),
-                  if (user == null)
-                    const PopupMenuItem<String>(
-                      value: 'login',
-                      child: Text('Login'),
-                    )
-                  else ...[
-                    const PopupMenuItem<String>(
-                      value: 'sync',
-                      child: Text('Sync'),
-                    ),
-                    const PopupMenuItem<String>(
-                      value: 'logout',
-                      child: Text('Logout'),
-                    ),
-                  ]
-                ],
+              )
+            else ...[
+              ListTile(
+                title: const Text('Lock Owner Mode'),
+                leading: const Icon(Icons.lock),
+                iconColor: Colors.red,
+                textColor: Colors.red,
+                onTap: () {
+                  isOwnerUnlocked.value = false;
+                },
               ),
-              onTap: () => context.go('/home'),
-            ),
+              ListTile(
+                title: const Text('Report'),
+                leading: const Icon(Icons.home_repair_service_outlined),
+                onTap: () => context.push('/report'),
+              ),
+              ListTile(
+                title: const Text('Inventory'),
+                leading: const Icon(Icons.inventory),
+                onTap: () => context.push('/inventory'),
+              ),
+              ListTile(
+                title: const Text('Request'),
+                leading: const Icon(Icons.edit_note),
+                onTap: () => context.push('/request'),
+              ),
+              ListTile(
+                title: const Text('Rent'),
+                leading: const Icon(Icons.shopping_bag),
+                onTap: () {
+                  context.push('/rent');
+                },
+              ),
+              ListTile(
+                title: const Text('Due Payment'),
+                leading: const Icon(Icons.payment),
+                onTap: () {
+                  context.push('/due-payment');
+                },
+              ),
+              ListTile(
+                title: const Text('Presence'),
+                leading: const Icon(Icons.adobe_sharp),
+                onTap: () {
+                  context.push('/presence');
+                },
+              ),
+              ListTile(
+                title: const Text('Expenses'),
+                leading: const Icon(Icons.monetization_on),
+                onTap: () {
+                  context.push('/expenses');
+                },
+              ),
+              ListTile(
+                title: const Text('Users'),
+                leading: const Icon(Icons.person_2),
+                onTap: () => context.push('/users'),
+              ),
+              ListTile(
+                title: const Text('Customer'),
+                leading: const Icon(Icons.people),
+                onTap: () {
+                  context.push('/customer');
+                },
+              ),
+              ListTile(
+                title: const Text('Salaries'),
+                leading: const Icon(Icons.account_balance),
+                onTap: () {
+                  context.push('/salaries');
+                },
+              ),
+              ListTile(
+                title: const Text('Account'),
+                leading: const Icon(Icons.account_circle),
+                trailing: PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (item) async {
+                    if (item == 'restore') {
+                      ShadToaster.of(context).show(
+                        ShadToast(
+                          title: const Text('Restore Backup?'),
+                          description:
+                              const Text('Please pick isar file to restore'),
+                          action: ShadButton.outline(
+                            child: const Text('Select'),
+                            onPressed: () => Database().restoreDB().whenComplete(
+                              () {
+                                if (context.mounted) {
+                                  ShadToaster.of(context).show(
+                                    const ShadToast(
+                                      title: Text('Restore Database Success!'),
+                                      description: Text(
+                                          'Please make sure all data is imported'),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    } else if (item == 'login') {
+                      context.pop();
+                      context.push('/login');
+                    } else if (item == 'backup') {
+                      context.pop();
+                      Database().createBackUp().then((_) => const ShadToast(
+                            title: Text('Backup Database Success!'),
+                            description: Text('All your data on download folder'),
+                          ));
+                    } else if (item == 'clear') {
+                      context.pop();
+                      showShadDialog(
+                        context: context,
+                        builder: (context) => ShadDialog.alert(
+                          title: const Text('Are you absolutely sure?'),
+                          description: const Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              'This action cannot be undone. This will permanently delete your data.',
+                            ),
+                          ),
+                          actions: [
+                            ShadButton.outline(
+                              child: const Text('Cancel'),
+                              onPressed: () => Navigator.of(context).pop(false),
+                            ),
+                            ShadButton(
+                              child: const Text('Continue'),
+                              onPressed: () async {
+                                await Database().clearAllData().whenComplete(() {
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop(true);
+                                    context.go('/');
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    } else if (item == 'logout') {
+                      context.pop();
+                      await Supabase.instance.client.auth.signOut();
+                    } else if (item == 'sync') {
+                      context.pop();
+                      context.go('/sync');
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuItem<String>(
+                      value: 'restore',
+                      child: Text('Restore'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'backup',
+                      child: Text('Backup'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'clear',
+                      child: Text('Clear/Reset'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'store',
+                      child: Text('Store'),
+                    ),
+                    if (user == null)
+                      const PopupMenuItem<String>(
+                        value: 'login',
+                        child: Text('Login'),
+                      )
+                    else ...[
+                      const PopupMenuItem<String>(
+                        value: 'sync',
+                        child: Text('Sync'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'logout',
+                        child: Text('Logout'),
+                      ),
+                    ]
+                  ],
+                ),
+                onTap: () => context.go('/home'),
+              ),
+            ],
           ],
         ),
       ),

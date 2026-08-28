@@ -1,7 +1,7 @@
-import 'package:due_kasir/controller/customer_controller.dart';
-import 'package:due_kasir/pages/customer/customer_list.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/controller/customer_controller.dart';
+import 'package:pos/pages/customer/customer_list.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/service/database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -12,9 +12,10 @@ class Customer extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const NavDrawer(),
       appBar: AppBar(
-        title: const Text('Customer'),
+        title: const Text('Customers'),
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         centerTitle: false,
         actions: [
           PopupMenuButton<String>(
@@ -42,8 +43,10 @@ class Customer extends HookWidget {
       ),
       body: const CustomerList(),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         onPressed: () => context.push('/customer/form'),
-        tooltip: 'Add',
+        tooltip: 'Add Customer',
         child: const Icon(Icons.add),
       ),
     );

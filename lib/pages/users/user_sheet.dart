@@ -1,6 +1,6 @@
-import 'package:due_kasir/controller/user_controller.dart';
-import 'package:due_kasir/model/user_model.dart';
-import 'package:due_kasir/utils/date_utils.dart';
+import 'package:pos/controller/user_controller.dart';
+import 'package:pos/model/user_model.dart';
+import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -73,7 +73,8 @@ class UserSheet extends StatelessWidget {
                                       const Icon(
                                           Icons.keyboard_arrow_right_outlined),
                                       onTap: () {
-                                        userController.userSelected.value = user;
+                                        userController.userSelected.value =
+                                            user;
                                         context.push('/users/form');
                                       },
                                     ),

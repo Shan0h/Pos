@@ -1,4 +1,4 @@
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/service/database.dart';
 import 'package:signals/signals_flutter.dart';
 
 class ExpensesController {

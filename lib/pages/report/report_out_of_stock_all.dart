@@ -1,5 +1,5 @@
-import 'package:due_kasir/model/item_model.dart';
-import 'package:due_kasir/utils/constant.dart';
+import 'package:pos/model/item_model.dart';
+import 'package:pos/utils/constant.dart';
 import 'package:flutter/material.dart';
 
 class ReportOutOfStock extends StatelessWidget {

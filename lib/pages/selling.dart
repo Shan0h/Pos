@@ -1,7 +1,7 @@
-import 'package:due_kasir/controller/auth_controller.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/pages/selling/selling_left.dart';
-import 'package:due_kasir/pages/selling/selling_right.dart';
+import 'package:pos/controller/auth_controller.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/pages/selling/selling_left.dart';
+import 'package:pos/pages/selling/selling_right.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';

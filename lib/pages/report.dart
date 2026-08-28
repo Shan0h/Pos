@@ -1,21 +1,21 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
-import 'package:due_kasir/controller/expenses_controller.dart';
-import 'package:due_kasir/controller/inventory_controller.dart';
-import 'package:due_kasir/controller/report_controller.dart';
-import 'package:due_kasir/model/penjualan_model.dart';
-import 'package:due_kasir/model/user_model.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/pages/report/report_bestseller.dart';
-import 'package:due_kasir/pages/report/report_delete_dialog.dart';
-import 'package:due_kasir/pages/report/report_out_of_stock_all.dart';
-import 'package:due_kasir/pages/report/report_revenue.dart';
-import 'package:due_kasir/pages/report/report_sync_dialog.dart';
-import 'package:due_kasir/pages/report/report_visitor_weekly.dart';
-import 'package:due_kasir/pages/report/report_visitors.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/constant.dart';
-import 'package:due_kasir/utils/date_utils.dart';
-import 'package:due_kasir/utils/extension.dart';
+import 'package:pos/controller/expenses_controller.dart';
+import 'package:pos/controller/inventory_controller.dart';
+import 'package:pos/controller/report_controller.dart';
+import 'package:pos/model/penjualan_model.dart';
+import 'package:pos/model/user_model.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/pages/report/report_bestseller.dart';
+import 'package:pos/pages/report/report_delete_dialog.dart';
+import 'package:pos/pages/report/report_out_of_stock_all.dart';
+import 'package:pos/pages/report/report_revenue.dart';
+import 'package:pos/pages/report/report_sync_dialog.dart';
+import 'package:pos/pages/report/report_visitor_weekly.dart';
+import 'package:pos/pages/report/report_visitors.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/constant.dart';
+import 'package:pos/utils/date_utils.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -46,9 +46,10 @@ class _ReportState extends State<Report> {
     final theme = ShadTheme.of(context);
     final screen = isMobile ? context.width : (context.width - 60) / 3;
     return Scaffold(
-      drawer: const NavDrawer(),
       appBar: AppBar(
-        title: const Text('Report'),
+        title: const Text('Reports & Analytics'),
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         centerTitle: false,
         actions: [
           ShadButton.ghost(
@@ -141,79 +142,25 @@ class _ReportState extends State<Report> {
                 // ReportPie(width: screenRevenue),
                 Column(
                   children: [
-                    ShadCard(
-                      width: screen,
-                      title: Text(
-                          currency.format(sumReport(reportToday.value ?? [])),
-                          style: theme.textTheme.h4),
-                      description: const Text('Total Sales Today'),
-                    ),
+                    _buildSummaryCard('Total Sales Today', currency.format(sumReport(reportToday.value ?? [])), Icons.today, Colors.green, screen),
                     const SizedBox(height: 10),
-                    ShadCard(
-                      width: screen,
-                      title: Text(
-                          currency
-                              .format(sumReport(reportYesteday.value ?? [])),
-                          style: theme.textTheme.h4),
-                      description: const Text('Total Sales Yesterday'),
-                    ),
+                    _buildSummaryCard('Total Sales Yesterday', currency.format(sumReport(reportYesteday.value ?? [])), Icons.history, Colors.blue, screen),
                   ],
                 ),
                 if (report.hasValue)
                   Column(
                     children: [
-                      ShadCard(
-                        width: screen,
-                        title: Text(
-                            currency.format(sumReport(report.value ?? [])),
-                            style: theme.textTheme.h4),
-                        description: const Text('Revenue'),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      ShadCard(
-                        width: screen,
-                        title: Text(
-                            currency.format(report.value!.fold(
-                                    0, (p, c) => p + c.totalHarga.toInt()) -
-                                report.value!.fold(
-                                    0,
-                                    (p, c) =>
-                                        p +
-                                        c.items.fold(
-                                            0,
-                                            (p, c) =>
-                                                p +
-                                                c.hargaDasar! * c.quantity!))),
-                            style: theme.textTheme.h4),
-                        description: const Text('Profit'),
-                      ),
+                      _buildSummaryCard('Total Revenue', currency.format(sumReport(report.value ?? [])), Icons.monetization_on, Colors.teal, screen),
+                      const SizedBox(height: 10),
+                      _buildSummaryCard('Estimated Profit', currency.format(report.value!.fold(0, (p, c) => p + c.totalHarga.toInt()) - report.value!.fold(0, (p, c) => p + c.items.fold(0, (p, c) => p + c.hargaDasar! * c.quantity!))), Icons.trending_up, Colors.indigo, screen),
                     ],
                   ),
                 Column(
                   children: [
-                    ShadCard(
-                      width: screen,
-                      title: Text(
-                          currency.format((rentRevenue.value ?? [])
-                              .fold(0, (p, c) => p + c.amount)),
-                          style: theme.textTheme.h4),
-                      description: const Text('Rent Revenue'),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    _buildSummaryCard('Rent Revenue', currency.format((rentRevenue.value ?? []).fold(0, (p, c) => p + c.amount)), Icons.shopping_bag, Colors.pink, screen),
+                    const SizedBox(height: 10),
                     if (expenses.hasValue)
-                      ShadCard(
-                        width: screen,
-                        title: Text(
-                            currency.format(expenses.value!
-                                .fold(0, (p, c) => p + c.amount)),
-                            style:
-                                theme.textTheme.h4.copyWith(color: Colors.red)),
-                        description: const Text('Expenses'),
-                      ),
+                      _buildSummaryCard('Total Expenses', currency.format(expenses.value!.fold(0, (p, c) => p + c.amount)), Icons.money_off, Colors.red, screen),
                   ],
                 ),
               ],
@@ -272,7 +219,7 @@ class _ReportState extends State<Report> {
                                           onPressed: () {
                                             inventoryController
                                                 .inventorySelected.value = n;
-                                            context.go('/inventory/form');
+                                            context.push('/inventory/form');
                                           },
                                           icon: const Icon(Icons.arrow_right))
                                     ],
@@ -453,6 +400,61 @@ class _ReportState extends State<Report> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(String title, String value, IconData icon, Color color, double width) {
+    return Container(
+      width: width,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ],
       ),
     );
   }

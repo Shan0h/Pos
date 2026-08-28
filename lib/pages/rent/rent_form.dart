@@ -1,10 +1,10 @@
-import 'package:due_kasir/controller/inventory_controller.dart';
-import 'package:due_kasir/controller/rent_controller.dart';
-import 'package:due_kasir/main.dart';
-import 'package:due_kasir/model/rent_item_model.dart';
-import 'package:due_kasir/model/rent_model.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/constant.dart';
+import 'package:pos/controller/inventory_controller.dart';
+import 'package:pos/controller/rent_controller.dart';
+import 'package:pos/main.dart';
+import 'package:pos/model/rent_item_model.dart';
+import 'package:pos/model/rent_model.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -31,8 +31,7 @@ class RentForm extends HookWidget {
     useState(() {
       if (rent != null) {
         if (!DateTime.now().difference(rent!.rentDate).inDays.isNegative) {
-          pinalty.value =
-              8 * DateTime.now().difference(rent!.rentDate).inDays;
+          pinalty.value = 8 * DateTime.now().difference(rent!.rentDate).inDays;
         }
       }
     });

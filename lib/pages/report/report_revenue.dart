@@ -1,6 +1,6 @@
-import 'package:due_kasir/controller/report_controller.dart';
-import 'package:due_kasir/model/penjualan_model.dart';
-import 'package:due_kasir/utils/constant.dart';
+import 'package:pos/controller/report_controller.dart';
+import 'package:pos/model/penjualan_model.dart';
+import 'package:pos/utils/constant.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:signals/signals_flutter.dart';
@@ -54,8 +54,10 @@ class ReportRevenue extends StatelessWidget {
       lineTouchData: LineTouchData(touchTooltipData:
           LineTouchTooltipData(getTooltipItems: (touchedSpots) {
         return touchedSpots.map((touchedSpot) {
-          return LineTooltipItem(currency.format(touchedSpot.y),
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white));
+          return LineTooltipItem(
+              currency.format(touchedSpot.y),
+              const TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.white));
         }).toList();
       })),
       lineBarsData: [

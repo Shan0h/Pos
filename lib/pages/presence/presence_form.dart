@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:due_kasir/controller/presence_controller.dart';
-import 'package:due_kasir/controller/user_controller.dart';
-import 'package:due_kasir/enum/absense_enum.dart';
-import 'package:due_kasir/model/presence_model.dart';
-import 'package:due_kasir/model/user_model.dart';
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/controller/presence_controller.dart';
+import 'package:pos/controller/user_controller.dart';
+import 'package:pos/enum/absense_enum.dart';
+import 'package:pos/model/presence_model.dart';
+import 'package:pos/model/user_model.dart';
+import 'package:pos/service/database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';

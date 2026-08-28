@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:due_kasir/controller/selling_controller.dart';
-import 'package:due_kasir/service/get_it.dart';
+import 'package:pos/controller/selling_controller.dart';
+import 'package:pos/service/get_it.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -232,8 +232,8 @@ class PrintSettingState extends State<PrintSetting> {
                   height: 200,
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    color:
-                        const Color.fromARGB(255, 69, 51, 51).withValues(alpha: 0.3),
+                    color: const Color.fromARGB(255, 69, 51, 51)
+                        .withValues(alpha: 0.3),
                   ),
                   child: ListView.builder(
                     itemCount: items.isNotEmpty ? items.length : 0,

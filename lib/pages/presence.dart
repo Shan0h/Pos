@@ -1,10 +1,10 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
-import 'package:due_kasir/controller/presence_controller.dart';
-import 'package:due_kasir/model/user_model.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/pages/presence/presence_form.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/date_utils.dart';
+import 'package:pos/controller/presence_controller.dart';
+import 'package:pos/model/user_model.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/pages/presence/presence_form.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:signals/signals_flutter.dart';
@@ -17,9 +17,10 @@ class Presence extends StatelessWidget {
     final dateRange = presenceController.dateRange.watch(context);
     final presense = presenceController.presence.watch(context);
     return Scaffold(
-      drawer: const NavDrawer(),
       appBar: AppBar(
-        title: const Text('Presence'),
+        title: const Text('Staff Presence'),
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         centerTitle: false,
         actions: [
           ShadButton.ghost(

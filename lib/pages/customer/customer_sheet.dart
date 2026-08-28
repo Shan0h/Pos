@@ -1,6 +1,6 @@
-import 'package:due_kasir/controller/customer_controller.dart';
-import 'package:due_kasir/controller/selling_controller.dart';
-import 'package:due_kasir/service/get_it.dart';
+import 'package:pos/controller/customer_controller.dart';
+import 'package:pos/controller/selling_controller.dart';
+import 'package:pos/service/get_it.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';

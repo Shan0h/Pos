@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 
-import 'package:due_kasir/model/item_model.dart';
+import 'package:pos/model/item_model.dart';
 
 class CartService {
   final _items = <ItemModel>[];
@@ -23,6 +23,18 @@ class CartService {
     if (isSame != null) {
       final data = _items.firstWhere((val) => val.id == item.id);
       data.quantity = data.quantity + 1;
+    }
+  }
+
+  void decrement(ItemModel item) {
+    final isSame = _items.firstWhereOrNull((val) => val.code == item.code);
+    if (isSame != null) {
+      final data = _items.firstWhere((val) => val.id == item.id);
+      if (data.quantity > 1) {
+        data.quantity = data.quantity - 1;
+      } else {
+        _items.remove(data);
+      }
     }
   }
 

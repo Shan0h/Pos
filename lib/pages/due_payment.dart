@@ -1,9 +1,9 @@
-import 'package:due_kasir/controller/due_payment_controller.dart';
-import 'package:due_kasir/pages/drawer.dart';
-import 'package:due_kasir/service/database.dart';
-import 'package:due_kasir/utils/constant.dart';
-import 'package:due_kasir/utils/date_utils.dart';
-import 'package:due_kasir/utils/extension.dart';
+import 'package:pos/controller/due_payment_controller.dart';
+import 'package:pos/pages/drawer.dart';
+import 'package:pos/service/database.dart';
+import 'package:pos/utils/constant.dart';
+import 'package:pos/utils/date_utils.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -21,9 +21,10 @@ class _DuePaymentState extends State<DuePayment> with SignalsMixin {
   Widget build(BuildContext context) {
     final payment = duePaymentController.payments.watch(context);
     return Scaffold(
-      drawer: const NavDrawer(),
       appBar: AppBar(
-        title: const Text('Due Payment'),
+        title: const Text('Due Payments'),
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         centerTitle: false,
         actions: [
           ShadButton.ghost(
@@ -72,35 +73,48 @@ class _DuePaymentState extends State<DuePayment> with SignalsMixin {
             if (PlatformExtension.isMobile) {
               return Column(
                 children: items
-                    .map((i) => ListTile(
-                          leading: Text(i.id.toString()),
-                          title: Text('${i.name}(${i.invoice ?? ''})'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              i.status == 'paid'
-                                  ? ShadBadge(
-                                      backgroundColor: Colors.green,
-                                      child: Text(i.status.toUpperCase()),
-                                    )
-                                  : ShadBadge.destructive(
-                                      child: Text(i.status.toUpperCase()),
-                                    ),
-                              Text(currency.format(i.amount)),
-                              Text(
-                                dateWithoutTime.format(i.dueDate),
-                                style: TextStyle(
-                                    color: i.status == 'paid'
-                                        ? Colors.green
-                                        : Colors.red),
-                              )
-                            ],
+                    .map((i) => Card(
+                          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 2,
+                          shadowColor: Colors.black12,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            leading: CircleAvatar(
+                              backgroundColor: (i.status == 'paid' ? Colors.green : Colors.red).withValues(alpha: 0.1),
+                              child: Icon(
+                                i.status == 'paid' ? Icons.check_circle : Icons.warning,
+                                color: i.status == 'paid' ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            title: Text('${i.name} ${i.invoice != null ? '(${i.invoice})' : ''}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 8),
+                                ShadBadge(
+                                  backgroundColor: i.status == 'paid' ? Colors.green : Colors.red,
+                                  child: Text(i.status.toUpperCase()),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  currency.format(i.amount),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                ),
+                                Text(
+                                  'Due: ${dateWithoutTime.format(i.dueDate)}',
+                                  style: TextStyle(
+                                      color: i.status == 'paid' ? Colors.green : Colors.red,
+                                      fontStyle: FontStyle.italic),
+                                )
+                              ],
+                            ),
+                            trailing: const Icon(Icons.edit, color: Colors.blue),
+                            onTap: () {
+                              duePaymentController.paymentSelected.value = i;
+                              context.push('/due-payment/form');
+                            },
                           ),
-                          trailing: const Icon(Icons.arrow_right_outlined),
-                          onTap: () {
-                            duePaymentController.paymentSelected.value = i;
-                            context.go('/due-payment/form');
-                          },
                         ))
                     .toList(),
               );
@@ -158,7 +172,7 @@ class _DuePaymentState extends State<DuePayment> with SignalsMixin {
                           const Icon(Icons.more_horiz),
                           onTap: () {
                             duePaymentController.paymentSelected.value = item;
-                            context.go('/due-payment/form');
+                            context.push('/due-payment/form');
                           },
                         ),
                       ]))
@@ -174,8 +188,10 @@ class _DuePaymentState extends State<DuePayment> with SignalsMixin {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/due-payment/form'),
-        tooltip: 'Add',
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
+        onPressed: () => context.push('/due-payment/form'),
+        tooltip: 'Add Due Payment',
         child: const Icon(Icons.add),
       ),
     );

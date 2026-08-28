@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
-import 'package:due_kasir/controller/inventory_controller.dart';
-import 'package:due_kasir/model/item_model.dart';
-import 'package:due_kasir/service/database.dart';
+import 'package:pos/controller/inventory_controller.dart';
+import 'package:pos/model/item_model.dart';
+import 'package:pos/service/database.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';

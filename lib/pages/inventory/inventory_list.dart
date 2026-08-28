@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:csv/csv.dart';
-import 'package:due_kasir/controller/inventory_controller.dart';
-import 'package:due_kasir/model/item_model.dart';
-import 'package:due_kasir/utils/constant.dart';
-import 'package:due_kasir/utils/extension.dart';
+import 'package:pos/controller/inventory_controller.dart';
+import 'package:pos/model/item_model.dart';
+import 'package:pos/utils/constant.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
@@ -163,53 +163,49 @@ class InventoryList extends HookWidget {
                 if (PlatformExtension.isMobile) {
                   return Column(
                     children: items
-                        .map((item) => ListTile(
-                              leading: Text(item.id.toString()),
-                              title: Text('${item.nama} (${item.jumlahBarang} Stock)'),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    currency.format(item.hargaJual),
-                                    style: TextStyle(
-                                        color: item.diskonPersen != null &&
-                                                item.diskonPersen != 0
-                                            ? Colors.red
-                                            : null,
-                                        decoration: item.diskonPersen != null &&
-                                                item.diskonPersen != 0
-                                            ? TextDecoration.lineThrough
-                                            : null),
-                                  ),
-                                  if (item.diskonPersen != null &&
-                                      item.diskonPersen != 0) ...[
+                        .map((item) => Card(
+                              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 2,
+                              shadowColor: Colors.black12,
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.brown[800]?.withValues(alpha: 0.1),
+                                  child: Text(item.id.toString(), style: TextStyle(color: Colors.brown[800], fontWeight: FontWeight.bold)),
+                                ),
+                                title: Text(item.nama, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 4),
+                                    Text('Stock: ${item.jumlahBarang} • Code: ${item.code}'),
+                                    const SizedBox(height: 4),
                                     Text(
-                                      'Dasar: ${currency.format(item.hargaDasar)}',
-                                      style: const TextStyle(fontSize: 10),
+                                      currency.format(item.hargaJual),
+                                      style: TextStyle(
+                                          color: item.diskonPersen != null && item.diskonPersen != 0 ? Colors.red : Colors.green[700],
+                                          fontWeight: FontWeight.bold,
+                                          decoration: item.diskonPersen != null && item.diskonPersen != 0 ? TextDecoration.lineThrough : null),
                                     ),
-                                    Text(
-                                      'Disc: ${item.diskonPersen}',
-                                      style: const TextStyle(fontSize: 10),
-                                    ),
-                                    Text(
-                                      currency.format(item.hargaJual -
-                                          item.hargaJual *
-                                              (item.diskonPersen! / 100)),
-                                      style: const TextStyle(
-                                          fontSize: 12, color: Colors.green),
-                                    )
-                                  ]
-                                ],
+                                    if (item.diskonPersen != null && item.diskonPersen != 0) ...[
+                                      Text(
+                                        'Discount: ${item.diskonPersen}%',
+                                        style: const TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                      ),
+                                      Text(
+                                        currency.format(item.hargaJual - item.hargaJual * (item.diskonPersen! / 100)),
+                                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green[700]),
+                                      ),
+                                    ]
+                                  ],
+                                ),
+                                trailing: const Icon(Icons.edit, color: Colors.blue),
+                                onTap: () {
+                                  inventoryController.inventorySelected.value = item;
+                                  context.push('/inventory/form');
+                                },
                               ),
-                              // subtitle: Text(
-                              //     '${i.diskonPersen == null || i.diskonPersen == 0 ? currency.format(i.hargaJual) : currency.format(i.hargaJual - i.hargaJual * (i.diskonPersen! / 100))} - ${i.code} (${i.jumlahBarang} Stock)'),
-                              trailing: const Icon(Icons.arrow_right_outlined),
-                              onTap: () {
-                                inventoryController.inventorySelected.value =
-                                    item;
-                                context.go('/inventory/form');
-                              },
                             ))
                         .toList(),
                   );
@@ -227,7 +223,8 @@ class InventoryList extends HookWidget {
                   dataRowMaxHeight: 80.0,
                   rows: items
                       .map((item) => DataRow(cells: [
-                            DataCell(Text((items.indexOf(item) + 1).toString())),
+                            DataCell(
+                                Text((items.indexOf(item) + 1).toString())),
                             DataCell(Text(item.nama)),
                             DataCell(Text(item.code)),
                             DataCell(Text(item.jumlahBarang.toString())),
@@ -276,7 +273,7 @@ class InventoryList extends HookWidget {
                               onTap: () {
                                 inventoryController.inventorySelected.value =
                                     item;
-                                context.go('/inventory/form');
+                                context.push('/inventory/form');
                               },
                             ),
                           ]))
