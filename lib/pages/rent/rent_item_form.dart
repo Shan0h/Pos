@@ -67,8 +67,8 @@ class RentItemForm extends HookWidget {
                   controller: editingName,
                   validator: (val) =>
                       val.isEmpty == true ? 'Name is required' : null,
-                  label: const Text('Nama Barang'),
-                  placeholder: const Text('Baju'),
+                  label: const Text('Item Name'),
+                  placeholder: const Text('Clothes'),
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -139,7 +139,7 @@ class RentItemForm extends HookWidget {
                           FilteringTextInputFormatter.digitsOnly
                         ],
                         label: const Text('Rent 3 Days'),
-                        placeholder: const Text('ex. 30000'),
+                        placeholder: const Text('ex. 30'),
                       ),
                     ),
                     Expanded(
@@ -148,7 +148,7 @@ class RentItemForm extends HookWidget {
                         validator: (val) =>
                             val.isEmpty == true ? 'Amount is required' : null,
                         label: const Text('Rent One Week'),
-                        placeholder: const Text('ex. 80000'),
+                        placeholder: const Text('ex. 80'),
                       ),
                     ),
                     Expanded(
@@ -157,12 +157,12 @@ class RentItemForm extends HookWidget {
                         validator: (val) =>
                             val.isEmpty == true ? 'Amount is required' : null,
                         label: const Text('Rent One Month'),
-                        placeholder: const Text('ex. 1200000'),
+                        placeholder: const Text('ex. 1200'),
                       ),
                     ),
                   ],
                 ),
-                const Text('Catatan'),
+                const Text('Note'),
                 ShadInput(
                   controller: note,
                   maxLines: 3,

@@ -71,7 +71,7 @@ class DuePaymentForm extends HookWidget {
                   controller: editingName,
                   validator: (val) =>
                       val.isEmpty == true ? 'Name is required' : null,
-                  label: const Text('Nama PT'),
+                  label: const Text('Company Name'),
                   placeholder: const Text('PT Keluarga Langit'),
                 ),
                 ShadInputFormField(
@@ -87,7 +87,7 @@ class DuePaymentForm extends HookWidget {
                         validator: (val) => val.isEmpty == true
                             ? 'Nama Barang is required'
                             : null,
-                        label: const Text('Nama Barang'),
+                        label: const Text('Item Name'),
                         placeholder: const Text('ex. Bambi'),
                       ),
                     ),
@@ -95,7 +95,7 @@ class DuePaymentForm extends HookWidget {
                       child: Container(
                         margin: const EdgeInsets.only(top: 25),
                         child: ShadSelect<int>(
-                          placeholder: const Text('Jumlah Barang'),
+                          placeholder: const Text('Amount of Item'),
                           initialValue: item?.itemAmount,
                           options: List.generate(
                               200,
@@ -148,7 +148,7 @@ class DuePaymentForm extends HookWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Barang Masuk'),
+                        const Text('Incoming Goods'),
                         const SizedBox(height: 10),
                         ShadButton.outline(
                             child: Text(dateWithoutTime.format(dateIn.value)),

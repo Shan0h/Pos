@@ -217,10 +217,10 @@ class InventoryList extends HookWidget {
                 return DataTable(
                   columns: const [
                     DataColumn(label: Text('ID')),
-                    DataColumn(label: Text('Nama')),
+                    DataColumn(label: Text('Name')),
                     DataColumn(label: Text('Code')),
                     DataColumn(label: Text('Stock')),
-                    DataColumn(label: Text('Harga')),
+                    DataColumn(label: Text('Price')),
                     DataColumn(label: Text('Ukuran')),
                     DataColumn(label: Text('More')),
                   ],

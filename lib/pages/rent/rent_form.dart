@@ -32,7 +32,7 @@ class RentForm extends HookWidget {
       if (rent != null) {
         if (!DateTime.now().difference(rent!.rentDate).inDays.isNegative) {
           pinalty.value =
-              8000 * DateTime.now().difference(rent!.rentDate).inDays;
+              8 * DateTime.now().difference(rent!.rentDate).inDays;
         }
       }
     });
@@ -68,12 +68,12 @@ class RentForm extends HookWidget {
                   readOnly: true,
                   validator: (val) =>
                       val.isEmpty == true ? 'Name is required' : null,
-                  label: const Text('Nama Barang'),
-                  placeholder: const Text('Baju'),
+                  label: const Text('Item Name'),
+                  placeholder: const Text('Clothes'),
                 ),
                 ShadInputFormField(
                   controller: editingName,
-                  label: const Text('Peminjam'),
+                  label: const Text('Borrower'),
                   validator: (val) =>
                       val.isEmpty == true ? 'Customer is required' : null,
                   placeholder: const Text('ex: Jhon Mayer'),
@@ -105,7 +105,7 @@ class RentForm extends HookWidget {
                     ),
                   ],
                 ),
-                const Text('Penalti kelewatan RM 8.00 sehari'),
+                const Text('Late penalty RM 8.00 per day'),
                 const SizedBox(height: 20),
                 ShadCheckbox(
                   value: identity.value,
@@ -137,7 +137,7 @@ class RentForm extends HookWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 5),
-                          const Text('Harga'),
+                          const Text('Price'),
                           const SizedBox(height: 20),
                           Text(currency.format(amount.value)),
                           const SizedBox(height: 15),
@@ -149,7 +149,7 @@ class RentForm extends HookWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 5),
-                          const Text('Pinalty'),
+                          const Text('Penalty'),
                           const SizedBox(height: 20),
                           if (rent != null)
                             Text(currency.format(pinalty.value))
@@ -164,7 +164,7 @@ class RentForm extends HookWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 5),
-                          const Text('Harga Total'),
+                          const Text('Total Price'),
                           const SizedBox(height: 20),
                           Text(currency.format(amount.value + pinalty.value)),
                           const SizedBox(height: 15),

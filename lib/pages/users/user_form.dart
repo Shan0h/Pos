@@ -52,7 +52,7 @@ class UserForm extends HookWidget {
                   controller: editingName,
                   validator: (val) =>
                       val.isEmpty == true ? 'Name is required' : null,
-                  label: const Text('Nama'),
+                  label: const Text('Name'),
                   placeholder: const Text('Jhon Doe'),
                 ),
                 Row(

@@ -151,8 +151,8 @@ class _SalariesFormState extends State<SalariesForm> {
                         child: ShadInputFormField(
                           controller: periode,
                           id: 'periode',
-                          label: const Text('Periode'),
-                          placeholder: const Text('Ex: Mei 2024'),
+                          label: const Text('Period'),
+                          placeholder: const Text('Ex: May 2024'),
                           validator: (v) {
                             if (v.length < 2) {
                               return 'Must be at least 2 characters.';
@@ -189,7 +189,7 @@ class _SalariesFormState extends State<SalariesForm> {
                       reportBonus.map(
                         data: (data) {
                           return Text(
-                              'Hitungan ${currency.format(data.fold(0, (p, c) => p + c.totalHarga.toInt()))} >> Bonus : ${currency.format(data.fold(0, (p, c) => p + c.totalHarga.toInt()) * 1 / 100)}');
+                              'Calculation ${currency.format(data.fold(0, (p, c) => p + c.totalHarga.toInt()))} >> Bonus : ${currency.format(data.fold(0, (p, c) => p + c.totalHarga.toInt()) * 1 / 100)}');
                         },
                         error: (error, __) => const Text('Error'),
                         loading: () => const CircularProgressIndicator(),

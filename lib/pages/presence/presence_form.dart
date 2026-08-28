@@ -124,10 +124,10 @@ class _PresenceFormState extends State<PresenceForm> {
                     return null;
                   },
                 ),
-                const Text('Catatan'),
+                const Text('Note'),
                 ShadInput(
                   controller: note,
-                  placeholder: const Text('Telat karena...'),
+                  placeholder: const Text('Late because...'),
                   maxLines: 3,
                 ),
               ],

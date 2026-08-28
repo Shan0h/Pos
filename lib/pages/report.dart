@@ -146,7 +146,7 @@ class _ReportState extends State<Report> {
                       title: Text(
                           currency.format(sumReport(reportToday.value ?? [])),
                           style: theme.textTheme.h4),
-                      description: const Text('Total Penjualan Hari ini'),
+                      description: const Text('Total Sales Today'),
                     ),
                     const SizedBox(height: 10),
                     ShadCard(
@@ -155,7 +155,7 @@ class _ReportState extends State<Report> {
                           currency
                               .format(sumReport(reportYesteday.value ?? [])),
                           style: theme.textTheme.h4),
-                      description: const Text('Total Penjualan Kemarin'),
+                      description: const Text('Total Sales Yesterday'),
                     ),
                   ],
                 ),

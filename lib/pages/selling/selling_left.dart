@@ -228,7 +228,7 @@ class SellingLeft extends HookWidget {
                                 padding:
                                     const EdgeInsets.only(left: 8.0, top: 8.0),
                                 child: Text(
-                                  'Melebihi Stok! Tersedia ${val.jumlahBarang}',
+                                  'Exceeds Stock! Available ${val.jumlahBarang}',
                                   style: ShadTheme.of(context)
                                       .textTheme
                                       .small
@@ -263,22 +263,22 @@ class SellingLeft extends HookWidget {
                                         context: context,
                                         builder: (context) => ShadDialog.alert(
                                           title: const Text(
-                                              'Apakah kamu yakin akan menghapusnya?'),
+                                              'Are you sure you want to delete this?'),
                                           description: const Padding(
                                             padding: EdgeInsets.only(bottom: 8),
                                             child: Text(
-                                              'Tindakan ini tidak dapat di kembalikan, data akan di hapus dari list',
+                                              'This action cannot be undone, the data will be removed from the list.',
                                             ),
                                           ),
                                           actions: [
                                             ShadButton.outline(
-                                              child: const Text('Batal'),
+                                              child: const Text('Cancel'),
                                               onPressed: () =>
                                                   Navigator.of(context)
                                                       .pop(false),
                                             ),
                                             ShadButton(
-                                                child: const Text('Lanjutkan'),
+                                                child: const Text('Continue'),
                                                 onPressed: () {
                                                   getIt
                                                       .get<SellingController>()

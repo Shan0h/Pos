@@ -93,7 +93,7 @@ class _CsvPreviewState extends State<CsvPreview> {
                           },
                         ),
                       ),
-                      const DataColumn(label: Text('Nama')),
+                      const DataColumn(label: Text('Name')),
                       const DataColumn(label: Text('Code')),
                       const DataColumn(label: Text('Description')),
                       const DataColumn(label: Text('Total Item')),

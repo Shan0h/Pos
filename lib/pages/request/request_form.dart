@@ -110,7 +110,7 @@ class _RequestFormState extends State<RequestForm> {
                 size: 16,
               ),
             ),
-            child: const Text('Simpan'),
+            child: const Text('Save'),
           ),
           if (widget.request != null)
             ShadButton.destructive(

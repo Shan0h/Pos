@@ -20,7 +20,7 @@
 
 ## 📌 Overview
 
-**POS** is a cross-platform Point of Sale and store management application designed with an **offline-first architecture**. It allows retail and rental businesses to manage sales, track inventory, handle barcode scanning, print receipts via thermal printers, and sync data seamlessly with cloud backends (Supabase).
+**POS** is a cross-platform Point of Sale and store management application designed with an **offline-first architecture**. It allows retail and rental businesses to manage sales, track inventory, handle barcode scanning, print receipts via thermal printers, and sync data seamlessly with cloud backends (Supabase). The application features a fully English user interface and is configured for Malaysian Ringgit (RM) by default.
 
 ---
 

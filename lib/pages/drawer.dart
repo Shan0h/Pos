@@ -29,7 +29,7 @@ class NavDrawer extends StatelessWidget {
                       ? const Color(0xff164863)
                       : const Color(0xffF6F6F6)),
               accountName: Text(
-                  '${auth.value?.user.value?.nama ?? "Kasir"} - ${auth.value?.user.value?.keterangan ?? "Role"}',
+                  '${auth.value?.user.value?.nama ?? "Cashier"} - ${auth.value?.user.value?.keterangan ?? "Role"}',
                   style: ShadTheme.of(context).textTheme.h3),
               accountEmail: Text(user?.email ?? '',
                   style: ShadTheme.of(context).textTheme.muted),

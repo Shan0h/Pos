@@ -72,7 +72,7 @@ class SellingRightState extends State<SellingRight> {
         key: sellingFormKey,
         child: ShadCard(
           title: Text('Payment', style: ShadTheme.of(context).textTheme.h4),
-          description: Text('Rangkuman belanja ${store.value?.title ?? ''}'),
+          description: Text('Shopping summary ${store.value?.title ?? ''}'),
           footer: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -80,10 +80,10 @@ class SellingRightState extends State<SellingRight> {
                 child: ShadCheckboxFormField(
                   id: 'terms',
                   initialValue: false,
-                  inputLabel: const Text('Saya Bertanggun Jawab'),
+                  inputLabel: const Text('I Take Responsibility'),
                   onChanged: (v) {},
                   inputSublabel: const Text(
-                      'Barang sudah saya cek dan sudah di bayar pelanggan dengan nominal yg benar'),
+                      'I have checked the items and the customer has paid the correct amount'),
                   validator: (v) {
                     if (!v) {
                       return 'You must accept the terms and conditions';
@@ -149,7 +149,7 @@ class SellingRightState extends State<SellingRight> {
                     size: 16,
                   ),
                 ),
-                child: const Text('Simpan'),
+                child: const Text('Save'),
               ),
               ShadButton(
                 onPressed: () {
@@ -243,14 +243,14 @@ class SellingRightState extends State<SellingRight> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(kasir?.nama ?? 'Admin'),
-                  subtitle: const Text('Kasir'),
+                  subtitle: const Text('Cashier'),
                   trailing: const Icon(Icons.arrow_right),
                   onTap: () => context.push('/home'),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(pelanggan?.nama ?? 'Mommy'),
-                  subtitle: const Text('Pelanggan'),
+                  subtitle: const Text('Customer'),
                   trailing: const Icon(Icons.arrow_right),
                   onTap: () {
                     showShadSheet(
@@ -269,7 +269,7 @@ class SellingRightState extends State<SellingRight> {
                   ),
                 ),
                 ShadRadioGroupFormField<TypePayment>(
-                  label: const Text('Tipe pembayaran'),
+                  label: const Text('Payment Type'),
                   initialValue: tipeBayar,
                   onChanged: (TypePayment? val) {
                     getIt.get<SellingController>().tipeBayar.value = val!;
@@ -294,7 +294,7 @@ class SellingRightState extends State<SellingRight> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Nominal Cash'),
+                            const Text('Cash Nominal'),
                             ShadInput(
                               controller: cashEditing,
                               inputFormatters: [
@@ -310,7 +310,7 @@ class SellingRightState extends State<SellingRight> {
                           child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Kembalian'),
+                          const Text('Change'),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Text(currency.format((double.parse(
@@ -324,7 +324,7 @@ class SellingRightState extends State<SellingRight> {
                       ))
                     ],
                   ),
-                const Text('Catatan'),
+                const Text('Note'),
                 ShadInput(
                   controller: note,
                   maxLines: 3,
@@ -556,7 +556,7 @@ class SellingRightState extends State<SellingRight> {
     bytes += generator.text('*****************************************');
     bytes += generator.row([
       PosColumn(
-        text: 'Bayar',
+        text: 'Pay',
         width: 6,
         styles: const PosStyles(align: PosAlign.left),
       ),
@@ -569,7 +569,7 @@ class SellingRightState extends State<SellingRight> {
     if (tipe == TypePayment.cash) {
       bytes += generator.row([
         PosColumn(
-          text: 'Kembali',
+          text: 'Change',
           width: 6,
           styles: const PosStyles(align: PosAlign.left),
         ),
