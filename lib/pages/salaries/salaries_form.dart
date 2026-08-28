@@ -353,7 +353,7 @@ class _SalariesFormState extends State<SalariesForm> {
           child: ShadInputFormField(
             label: const Text('Amount'),
             initialValue: item?.amount,
-            placeholder: const Text('ex: Rp 10.000.000,-'),
+            placeholder: const Text('ex: RM 10,000.00'),
             onChanged: (data) => storeValue(i: i + 1, amount: data),
             validator: (v) {
               if (v.length < 2) {
@@ -403,7 +403,7 @@ class _SalariesFormState extends State<SalariesForm> {
         Expanded(
           child: ShadInputFormField(
             label: const Text('Amount'),
-            placeholder: const Text('ex: Rp 10.000.000,-'),
+            placeholder: const Text('ex: RM 10,000.00'),
             onChanged: (data) => storeDeducton(i: i + 1, amount: data),
             validator: (v) {
               if (v.length < 2) {

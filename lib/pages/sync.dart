@@ -78,7 +78,7 @@ class Sync extends StatelessWidget {
               if (context.mounted) {
                 ShadToaster.of(context).show(
                   const ShadToast(
-                    description: Text('Sync Done, Enjoy Due Kasir!'),
+                    description: Text('Sync Done, Enjoy POS!'),
                   ),
                 );
               }

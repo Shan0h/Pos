@@ -105,7 +105,7 @@ class RentForm extends HookWidget {
                     ),
                   ],
                 ),
-                const Text('Pinalti keterlambatan Rp. 8.000,- perhari'),
+                const Text('Penalti kelewatan RM 8.00 sehari'),
                 const SizedBox(height: 20),
                 ShadCheckbox(
                   value: identity.value,

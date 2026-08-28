@@ -89,7 +89,7 @@ class _RegisterState extends State<Register> {
                               ShadToast(
                                 title: const Text('Register Success'),
                                 description:
-                                    const Text('Login and Enjoy Due Kasir!'),
+                                    const Text('Login and Enjoy POS!'),
                                 action: ShadButton.outline(
                                   child: const Text('Back!'),
                                   onPressed: () =>

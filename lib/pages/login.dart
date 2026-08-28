@@ -95,7 +95,7 @@ class _LoginState extends State<Login> {
                             ShadToaster.of(context).show(
                               ShadToast(
                                 title: const Text('Login Success'),
-                                description: const Text('Enjoy Due Kasir!'),
+                                description: const Text('Enjoy POS!'),
                                 action: ShadButton.outline(
                                   child: const Text('Back!'),
                                   onPressed: () =>

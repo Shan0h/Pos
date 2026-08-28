@@ -1,89 +1,135 @@
-<img width="150" src="assets/logo.png" alt="Due Kasir Logo">
-# PosOffline
+<div align="center">
+  <img width="150" src="assets/logo.png" alt="POS Logo">
+  
+  # POS (Point of Sale)
 
-Is Open source for POS app focus on offline first
+  **An open-source, offline-first Point of Sale (POS) application built with Flutter.**
 
-[<img src="https://github.com/hifiaz/duekasir/assets/20653803/b0af666a-99c3-414a-b9e0-0558e8bee10b" width="250">](https://play.google.com/store/apps/details?id=com.devindo.due_kasir)
+  [![Flutter](https://img.shields.io/badge/Flutter-3.47+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+  [![Dart](https://img.shields.io/badge/Dart-3.13+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+  [![Platform](https://img.shields.io/badge/Platform-Android%20|%20Windows%20|%20macOS%20|%20iOS-lightgrey)]()
+  [![Database](https://img.shields.io/badge/Database-Isar%20Offline%20%2B%20Supabase-blue)]()
 
+  <br />
 
-https://github.com/hifiaz/duekasir/assets/20653803/e7ca2400-6e45-411a-9189-7cda4f30fddc
+  [<img src="https://github.com/Shan0h/Pos/assets/20653803/b0af666a-99c3-414a-b9e0-0558e8bee10b" width="250" alt="Get it on Google Play">](https://play.google.com/store/apps/details?id=com.shan0h.pos)
 
+</div>
 
+---
 
-## Getting Started
+## 📌 Overview
 
-To get a local copy up and running follow these simple example steps.
+**POS** is a cross-platform Point of Sale and store management application designed with an **offline-first architecture**. It allows retail and rental businesses to manage sales, track inventory, handle barcode scanning, print receipts via thermal printers, and sync data seamlessly with cloud backends (Supabase).
 
-Prerequisite: https://flutter.dev/docs/get-started/install
+---
 
-1. To get started, fork this repository to your GitHub account.
+## ✨ Features
 
-2. Clone the repo.
-    ```sh
-     git clone https://github.com/Shan0h/Pos
-    ```
-3. Install packages.
-    ```sh
-     flutter pub get
-    ```
-4. Run project.
-    ```sh
-     flutter run
-    ```
+### 📦 1. Inventory Management
+- **Full CRUD Operations**: Add, edit, view, and delete inventory items.
+- **Search & Filter**: Real-time item lookup by name, category, or SKU.
+- **Barcode Scanning**: Integrated support for hardware barcode scanners and mobile cameras.
+- **CSV Data Import/Export**: Bulk import inventory data and export stock reports to CSV.
+- **Low Stock Alerts**: Out-of-stock and low-stock indicators.
 
-## Features
+### 💳 2. Sales & Checkout
+- **Cart & Order Processing**: Fast product addition, discount handling, and order summary.
+- **Thermal Printing**: Direct ESC/POS thermal receipt printing via Bluetooth and USB (Windows & Android).
+- **Cash Drawer Integration**: Automatically triggers cash drawer kick-out on transaction completion.
+- **Multi-currency Support**: Default currency formatted in Malaysian Ringgit (`RM`).
 
-1. Inventory
-    - [x] Search item
-    - [x] list item
-    - [x] CRUD item
-    - [x] Export and Import CSV Inventory
-    - [x] Scan Barcode with external device to add item
-    - [x] Scan barcode with mobile phone to add item
-2. Selling
-    - [x] Print to Thermal Printer (windows)
-    - [x] Print to open cash drawer (windows)
-    - [x] Scan Barcode with external device
-    - [x] Scan barcode with mobile phone
-3. Report
-    - [x] Filter by Date
-    - [x] Total Sales Today
-    - [x] Total Sales Yesterday
-    - [x] Revenue
-    - [x] Profit
-    - [x] Rent Revenue
-    - [x] Expenses
-    - [x] Total Visitor
-    - [x] Out of Stock
-    - [x] Best Seller
-    - [x] Revenue by Day
-    - [x] List Sales
-4. Customer
-    - [x] list customer
-    - [x] CRUD customer
-    - [x] Search customer
-5. User
-    - [x] List user
-    - [x] CRUD user
-    - [x] Search user
-6. Backup & Restore Isar
-7. Sync with supabase
-8. Presence / Absense
-9. Rent feature
-10. Salaries (Password: 111111)
-* MacOS Support
-* Windows Support
-* IOS Support
-* Android Support
+### 📊 3. Analytics & Reporting
+- **Sales Insights**: Real-time sales comparison (Today vs. Yesterday).
+- **Revenue & Profit Breakdown**: Gross revenue, net profit, rent income, and expense tracking.
+- **Best Sellers**: Automatic ranking of top-performing items.
+- **Visual Charts**: Interactive revenue and visitor traffic charts by date range.
+- **Export & Receipts**: PDF receipt and report generation.
 
-## Original Author
+### 👥 4. Customer & User Management
+- **Customer Directory**: Store contact information, transaction history, and purchase logs.
+- **Role-Based Access**: Multi-user support with role-based permissions and admin controls.
 
-👤 **Luthfi**
+### 🔄 5. Offline-First & Cloud Sync
+- **Local Database (Isar)**: Lightning-fast, ACID-compliant offline database for zero-latency local operations.
+- **Cloud Synchronization**: Optional two-way background sync with **Supabase**.
+- **Backup & Restore**: Export local database backups and restore on any device.
 
-* Twitter: [@hifiaz](https://twitter.com/hifiaz)
-* LinkedIn: [@luthfiazhari](https://linkedin.com/in/luthfiazhari)
+### 🏢 6. Additional Modules
+- **Rental Tracking**: Flexible rental durations (3-day, weekly, monthly) with overdue penalty calculation.
+- **Staff Attendance (Presence)**: Check-in/check-out tracking for staff and cashiers.
+- **Payroll Management**: Salary calculations, custom bonus/deduction line items, and PDF payslip generation.
 
-## Modified Author
-👤 **Shan0h**
-* Twitter: [@shan0h](https://twitter.com/shan0h)
-* LinkedIn: [@akmalfauzi34](https://linkedin.com/in/akmalfauzi34)
+---
+
+## 🛠️ Tech Stack & Architecture
+
+- **Framework**: [Flutter](https://flutter.dev/) (Channel Stable)
+- **Language**: [Dart](https://dart.dev/)
+- **Local Database**: [Isar Database](https://isar.dev/)
+- **Cloud Backend**: [Supabase](https://supabase.com/)
+- **State Management**: [Signals for Flutter](https://pub.dev/packages/signals)
+- **UI Components**: [Shadcn UI for Flutter](https://shadcn-ui.com/)
+- **Hardware Integration**: ESC/POS Thermal Printing (`print_bluetooth_thermal`, `esc_pos_utils`), Camera Barcode Scanner
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Ensure you have the following installed on your development machine:
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) (`>= 3.24.0` / recommended `3.47+`)
+- [Java JDK 21](https://adoptium.net/) or Android Studio JBR
+- [Android Studio](https://developer.android.com/studio) (with Android SDK Command-line tools & NDK)
+- [Git](https://git-scm.com/)
+
+### Installation
+
+1. **Clone the repository**:
+   ```sh
+   git clone https://github.com/Shan0h/Pos.git
+   cd Pos
+   ```
+
+2. **Install dependencies**:
+   ```sh
+   flutter pub get
+   ```
+
+3. **Configure Environment Variables**:
+   Create or verify your Supabase configuration in `lib/utils/env.dart`.
+
+4. **Run the application**:
+   ```sh
+   # Run on connected device (Android / Windows / Web)
+   flutter run
+   ```
+
+---
+
+## 📦 Building for Production
+
+### Android (APK)
+```sh
+flutter build apk --release
+```
+The release APK will be generated at `build/app/outputs/flutter-apk/app-release.apk`.
+
+### Windows (Desktop)
+```sh
+flutter build windows --release
+```
+
+---
+
+## 👥 Authors & Acknowledgments
+
+- **Original Author**: [Luthfi](https://github.com/hifiaz) • [LinkedIn](https://linkedin.com/in/luthfiazhari)
+- **Maintainer & Contributor**: [Shan0h](https://github.com/Shan0h) • [LinkedIn](https://linkedin.com/in/akmalfauzi34)
+
+---
+
+## 📄 License
+
+This project is licensed under the terms of the MIT License.

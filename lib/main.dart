@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return ShadApp.materialRouter(
       debugShowCheckedModeBanner: false,
-      title: 'Due Kasir',
+      title: 'POS',
       routerConfig: _router,
     );
   }

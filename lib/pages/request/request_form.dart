@@ -176,6 +176,7 @@ class _RequestFormState extends State<RequestForm> {
                       // build appflowy editor
                       Expanded(
                         child: MobileFloatingToolbar(
+                          floatingToolbarHeight: 48.0,
                           editorState: editorState!,
                           editorScrollController: editorScrollController,
                           toolbarBuilder: (context, anchor, closeToolbar) {

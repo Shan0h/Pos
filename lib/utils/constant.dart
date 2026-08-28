@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 final currency =
-    NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 2);
+    NumberFormat.currency(locale: 'ms_MY', symbol: 'RM ', decimalDigits: 2);
 
 ButtonStyle active = ElevatedButton.styleFrom(
   minimumSize: const Size.fromHeight(50),

@@ -38,7 +38,7 @@ class NavDrawer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Due Kasir',
+                    'POS',
                     style: ShadTheme.of(context).textTheme.h1,
                   ),
                   Text(
