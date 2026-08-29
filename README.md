@@ -18,7 +18,7 @@
 
 ## 📌 Overview
 
-**POS** is a cross-platform Point of Sale and store management application designed with an **offline-first architecture**. It allows retail and rental businesses to manage sales, track inventory, handle barcode scanning, print receipts via thermal printers, and sync data seamlessly with cloud backends (Supabase). The application features a fully English user interface and is configured for Malaysian Ringgit (RM) by default.
+**POS** is a cross-platform Point of Sale and store management application designed with an **offline-first architecture** and a brand new **Modern POS (Beta)** user interface. It allows retail and rental businesses to manage sales, track inventory, handle barcode scanning, print receipts via thermal printers, and sync data seamlessly with cloud backends (Supabase). The application features a fully English user interface, Dark Mode compatibility, and is configured for Malaysian Ringgit (RM) by default.
 
 ---
 
@@ -51,12 +51,13 @@
 ### 🔄 5. Offline-First & Cloud Sync
 - **Local Database (Isar)**: Lightning-fast, ACID-compliant offline database for zero-latency local operations.
 - **Cloud Synchronization**: Optional two-way background sync with **Supabase**.
-- **Backup & Restore**: Export local database backups and restore on any device.
+- **Backup & Restore**: Export local database backups and restore on any device directly from the **Owner Dashboard** settings.
 
 ### 🏢 6. Additional Modules
 - **Rental Tracking**: Flexible rental durations (3-day, weekly, monthly) with overdue penalty calculation.
 - **Staff Attendance (Presence)**: Check-in/check-out tracking for staff and cashiers.
 - **Payroll Management**: Salary calculations, custom bonus/deduction line items, and PDF payslip generation.
+- **Modern POS UI**: A completely revamped tablet-optimized and Dark Mode compatible Cashier and Owner Dashboard.
 
 ---
 
