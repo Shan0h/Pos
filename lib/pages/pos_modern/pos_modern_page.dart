@@ -181,10 +181,10 @@ class _PosModernPageState extends State<PosModernPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${cartItems.length} items', style: const TextStyle(color: Colors.grey)),
+                        Text('${cartItems.length} items', style: const TextStyle(color: Colors.black54)),
                         Text(
                           'Total RM ${(cartState.value?.totalPrice ?? 0).toStringAsFixed(2)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18),
                         ),
                       ],
                     ),
@@ -221,7 +221,7 @@ class _PosModernPageState extends State<PosModernPage> {
                         );
                       },
                       icon: const Icon(Icons.shopping_cart),
-                      label: const Text('View Cart', style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: const Text('View Cart', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),

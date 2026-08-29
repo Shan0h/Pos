@@ -111,6 +111,7 @@ class TicketPanel extends StatelessWidget {
                                   Text(
                                     '${item.quantity}',
                                     style: const TextStyle(
+                                        color: Colors.black87,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16),
                                   ),
@@ -133,7 +134,7 @@ class TicketPanel extends StatelessWidget {
                                 children: [
                                   Text(
                                     item.nama,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 14),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -150,7 +151,7 @@ class TicketPanel extends StatelessWidget {
                             Text(
                               'RM ${(item.quantity * item.hargaJual).toStringAsFixed(2)}',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
+                                  color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                           ],
                         ),
@@ -183,7 +184,7 @@ class TicketPanel extends StatelessWidget {
                     const Text(
                       'Total',
                       style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'RM ${grandTotal.toStringAsFixed(2)}',
@@ -234,7 +235,7 @@ class TicketPanel extends StatelessWidget {
         ),
         Text(
           'RM ${amount.toStringAsFixed(2)}',
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 14),
         ),
       ],
     );

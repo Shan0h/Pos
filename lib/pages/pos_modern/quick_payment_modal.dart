@@ -44,6 +44,7 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: 600,
@@ -57,7 +58,7 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
               children: [
                 const Text(
                   'Payment',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.black87, fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -82,7 +83,7 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
             const SizedBox(height: 32),
 
             // Payment Methods
-            const Text('Payment Method', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Payment Method', style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -97,7 +98,7 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
 
             // Cash Options (Only if Cash is selected)
             if (_selectedType == TypePayment.cash) ...[
-              const Text('Quick Cash', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text('Quick Cash', style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -141,7 +142,7 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Change', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Change', style: TextStyle(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.bold)),
                     Text(
                       'RM ${(_tenderedAmount >= widget.totalAmount ? (_tenderedAmount - widget.totalAmount) : 0.0).toStringAsFixed(2)}',
                       style: TextStyle(

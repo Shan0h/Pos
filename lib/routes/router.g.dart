@@ -10,6 +10,7 @@ List<RouteBase> get $appRoutes => [
       $posModernRoute,
       $sellingRoute,
       $homeRoute,
+      $storeRoute,
       $inventoryRoute,
       $reportRoute,
       $userRoute,
@@ -76,12 +77,6 @@ extension $SellingRouteExtension on SellingRoute {
 RouteBase get $homeRoute => GoRouteData.$route(
       path: '/home',
       factory: $HomeRouteExtension._fromState,
-      routes: [
-        GoRouteData.$route(
-          path: 'store',
-          factory: $StoreRouteExtension._fromState,
-        ),
-      ],
     );
 
 extension $HomeRouteExtension on HomeRoute {
@@ -101,11 +96,16 @@ extension $HomeRouteExtension on HomeRoute {
   void replace(BuildContext context) => context.replace(location);
 }
 
+RouteBase get $storeRoute => GoRouteData.$route(
+      path: '/store',
+      factory: $StoreRouteExtension._fromState,
+    );
+
 extension $StoreRouteExtension on StoreRoute {
   static StoreRoute _fromState(GoRouterState state) => const StoreRoute();
 
   String get location => GoRouteData.$location(
-        '/home/store',
+        '/store',
       );
 
   void go(BuildContext context) => context.go(location);

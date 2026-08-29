@@ -48,11 +48,6 @@ class SellingRoute extends GoRouteData {
 
 @TypedGoRoute<HomeRoute>(
   path: '/home',
-  routes: <TypedGoRoute<GoRouteData>>[
-    TypedGoRoute<StoreRoute>(
-      path: 'store',
-    )
-  ],
 )
 class HomeRoute extends GoRouteData {
   const HomeRoute();
@@ -61,6 +56,7 @@ class HomeRoute extends GoRouteData {
   Widget build(BuildContext context, GoRouterState state) => const Home();
 }
 
+@TypedGoRoute<StoreRoute>(path: '/store')
 class StoreRoute extends GoRouteData {
   const StoreRoute();
 

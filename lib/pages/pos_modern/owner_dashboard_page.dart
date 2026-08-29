@@ -100,7 +100,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Today\'s Overview', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const Text('Today\'s Overview', style: TextStyle(color: Colors.black87, fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 24),
                 
                 // Stat Cards
@@ -145,7 +145,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                   ),
                 
                 const SizedBox(height: 32),
-                const Text('Management Modules', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const Text('Management Modules', style: TextStyle(color: Colors.black87, fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 24),
                 _buildModulesGrid(context),
               ],
@@ -156,6 +156,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Widget _buildModulesGrid(BuildContext context) {
     final modules = [
+      {'title': 'Store Info', 'icon': Icons.store, 'route': '/store', 'color': Colors.deepOrange},
       {'title': 'Report', 'icon': Icons.home_repair_service_outlined, 'route': '/report', 'color': Colors.indigo},
       {'title': 'Inventory', 'icon': Icons.inventory, 'route': '/inventory', 'color': Colors.orange},
       {'title': 'Rent', 'icon': Icons.shopping_bag, 'route': '/rent', 'color': Colors.pink},
@@ -211,6 +212,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Widget _buildTopItemsCard() {
     return Card(
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -218,7 +220,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Top Selling Coffee/Items', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text('Top Selling Coffee/Items', style: TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.bold)),
             const Divider(height: 32),
             if (_topItems.isEmpty)
               const Text('No sales yet today.', style: TextStyle(color: Colors.grey)),
@@ -227,8 +229,8 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(child: Text(e.key, style: const TextStyle(fontSize: 16))),
-                  Text('${e.value} sold', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Expanded(child: Text(e.key, style: const TextStyle(color: Colors.black87, fontSize: 16))),
+                  Text('${e.value} sold', style: const TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
                 ],
               ),
             )),
@@ -240,6 +242,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Widget _buildPaymentCard() {
     return Card(
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -247,7 +250,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Payment Methods', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text('Payment Methods', style: TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.bold)),
             const Divider(height: 32),
             _buildPaymentRow('Cash', _paymentMethods[TypePayment.cash] ?? 0, _receiptCount, Colors.green),
             const SizedBox(height: 16),
@@ -262,6 +265,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Card(
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -276,8 +280,8 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 16, color: Colors.grey)),
-                Text(value, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+                Text(title, style: const TextStyle(fontSize: 16, color: Colors.black54)),
+                Text(value, style: const TextStyle(color: Colors.black87, fontSize: 32, fontWeight: FontWeight.bold)),
               ],
             ),
           ],
@@ -294,8 +298,8 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(name, style: const TextStyle(fontSize: 16)),
-            Text('$count (${(percentage * 100).toStringAsFixed(1)}%)', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(name, style: const TextStyle(color: Colors.black87, fontSize: 16)),
+            Text('$count (${(percentage * 100).toStringAsFixed(1)}%)', style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
           ],
         ),
         const SizedBox(height: 8),

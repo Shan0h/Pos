@@ -50,8 +50,10 @@ class CatalogPanel extends StatelessWidget {
                     onSubmitted: (value) {
                       onBarcodeScanned(value);
                     },
+                    style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
                       hintText: 'Search or Scan Barcode...',
+                      hintStyle: const TextStyle(color: Colors.black54),
                       prefixIcon: const Icon(Icons.qr_code_scanner, color: Colors.teal),
                       filled: true,
                       fillColor: Colors.grey[200],

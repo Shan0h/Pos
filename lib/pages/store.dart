@@ -23,13 +23,25 @@ class _StoreState extends State<Store> {
   TextEditingController subFooter = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    final t = storeController.store.value.value;
+    title.text = t?.title ?? '';
+    description.text = t?.description ?? '';
+    phone.text = t?.phone ?? '';
+    footer.text = t?.footer ?? '';
+    subFooter.text = t?.subFooter ?? '';
+  }
+
+  @override
   Widget build(BuildContext context) {
     final store = storeController.store.watch(context);
     final theme = ShadTheme.of(context);
     return Scaffold(
-      drawer: const NavDrawer(),
       appBar: AppBar(
-        title: const Text('Store'),
+        title: const Text('Store Information'),
+        backgroundColor: Colors.brown[800],
+        foregroundColor: Colors.white,
         centerTitle: false,
         actions: [
           PopupMenuButton<String>(
@@ -58,11 +70,7 @@ class _StoreState extends State<Store> {
         key: _storeFormKey,
         child: store.map(
           data: (t) {
-            title = TextEditingController(text: t?.title ?? '');
-            description = TextEditingController(text: t?.description ?? '');
-            phone = TextEditingController(text: t?.phone ?? '');
-            footer = TextEditingController(text: t?.footer ?? '');
-            subFooter = TextEditingController(text: t?.subFooter ?? '');
+
 
             return SingleChildScrollView(
               child: Center(
@@ -70,11 +78,11 @@ class _StoreState extends State<Store> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ShadCard(
-                      width: 350,
-                      title: Text('Account Login', style: theme.textTheme.h4),
+                      ShadCard(
+                      width: 500,
+                      title: Text('Store Settings', style: theme.textTheme.h4),
                       description: const Text(
-                          'Make sure you have login with your account'),
+                          'Configure your store receipt details and contact info'),
                       footer: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -149,7 +157,6 @@ class _StoreState extends State<Store> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             ShadInputFormField(
-                              initialValue: t?.title,
                               label: const Text('Title Store'),
                               placeholder: const Text('Store'),
                               controller: title,
@@ -162,7 +169,7 @@ class _StoreState extends State<Store> {
                             ),
                             ShadInputFormField(
                               label: const Text('Description/Location'),
-                              placeholder: const Text('Texas, US'),
+                              placeholder: const Text('Batu Pahat, Johor'),
                               controller: description,
                               maxLines: 2,
                               validator: (v) {
@@ -175,7 +182,7 @@ class _StoreState extends State<Store> {
                             ShadInputFormField(
                               label: const Text('Phone'),
                               placeholder:
-                                  const Text('Whatsapp/Phone: +6285111222333'),
+                                  const Text('Whatsapp/Phone: +60123456789'),
                               controller: phone,
                               validator: (v) {
                                 if (v.length < 2) {
