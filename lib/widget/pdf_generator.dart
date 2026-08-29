@@ -4,7 +4,7 @@ import 'package:pos/model/store_model.dart';
 import 'package:pos/model/user_model.dart';
 import 'package:pos/utils/constant.dart';
 import 'package:pos/utils/date_utils.dart';
-import 'package:file_saver/file_saver.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -252,16 +252,18 @@ Future<dynamic> pdfGenerator(
   final file = File("${output.path}/example.pdf");
   // print(output.path);
   await file.writeAsBytes(await pdf.save());
-  if (Platform.isWindows) {
-    FileSaver.instance.saveFile(
-        name: 'salary-kasir-${DateTime.now().millisecondsSinceEpoch}.csv',
-        file: file);
-  } else {
-    await FileSaver.instance.saveAs(
-        name:
-            'salary-kasir-${user.nama.trim()}-${DateTime.now().millisecondsSinceEpoch}',
-        file: file,
-        ext: 'pdf',
-        mimeType: MimeType.pdf);
+  String defaultFileName = 'salary-staff-${user.nama.trim()}-${DateTime.now().millisecondsSinceEpoch}.pdf';
+  String? outputFile = await FilePicker.platform.saveFile(
+    dialogTitle: 'Save PDF',
+    fileName: defaultFileName,
+    type: FileType.custom,
+    allowedExtensions: ['pdf'],
+  );
+  
+  if (outputFile != null) {
+    if (!outputFile.endsWith('.pdf')) {
+      outputFile += '.pdf';
+    }
+    await file.copy(outputFile);
   }
 }

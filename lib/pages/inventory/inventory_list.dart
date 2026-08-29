@@ -6,7 +6,6 @@ import 'package:pos/model/item_model.dart';
 import 'package:pos/utils/constant.dart';
 import 'package:pos/utils/extension.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -26,7 +25,7 @@ class InventoryList extends HookWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
               children: [
                 Expanded(
@@ -94,32 +93,31 @@ class InventoryList extends HookWidget {
                         final directory =
                             await getApplicationDocumentsDirectory();
                         String csv = const ListToCsvConverter().convert(rows);
-                        String filePath = "${directory.path}/due-kasir.csv";
+                        String filePath = "${directory.path}/inventory-export.csv";
 
                         File file = File(filePath);
                         File fileCsv = await file.writeAsString(csv);
                         if (!fileCsv.existsSync()) {
                           fileCsv.create(recursive: true);
                         }
-                        if (Platform.isWindows) {
-                          FileSaver.instance
-                              .saveFile(
-                                  name:
-                                      'due-kasir-${DateTime.now().millisecondsSinceEpoch}.csv',
-                                  file: fileCsv)
-                              .then(
-                                (_) => const ShadToast(
-                                  title: Text('Export CSV Success!'),
-                                  description: Text(
-                                      'CSV File already on your download folder'),
-                                ),
-                              );
-                        } else {
-                          await FileSaver.instance.saveAs(
-                              name: 'due-kasir',
-                              file: fileCsv,
-                              ext: 'csv',
-                              mimeType: MimeType.csv);
+                        String defaultFileName = 'inventory-${DateTime.now().millisecondsSinceEpoch}.csv';
+                        String? outputFile = await FilePicker.platform.saveFile(
+                          dialogTitle: 'Save Inventory CSV',
+                          fileName: defaultFileName,
+                          type: FileType.custom,
+                          allowedExtensions: ['csv'],
+                        );
+
+                        if (outputFile != null) {
+                          if (!outputFile.endsWith('.csv')) {
+                            outputFile += '.csv';
+                          }
+                          await fileCsv.copy(outputFile);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Export CSV Success!')),
+                            );
+                          }
                         }
                       }
                     }

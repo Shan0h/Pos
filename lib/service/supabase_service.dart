@@ -157,7 +157,7 @@ class SupabaseHelper {
             id: val['id'],
             pembeli: val['pembeli'],
             diskon: val['diskon'].toDouble(),
-            kasir: val['kasir'],
+            staffId: val['staffId'],
             keterangan: val['keterangan'],
             totalItem: val['totalItem'],
             totalHarga: val['totalHarga'].toDouble(),

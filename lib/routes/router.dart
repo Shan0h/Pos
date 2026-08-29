@@ -8,17 +8,14 @@ import 'package:pos/pages/inventory.dart';
 import 'package:pos/pages/inventory/csv_preview.dart';
 import 'package:pos/pages/inventory/inventory_form.dart';
 import 'package:pos/pages/login.dart';
-import 'package:pos/pages/presence.dart';
 import 'package:pos/pages/register.dart';
-import 'package:pos/pages/rent.dart';
-import 'package:pos/pages/rent/rent_item_form.dart';
 import 'package:pos/pages/report.dart';
 import 'package:pos/pages/request.dart';
 import 'package:pos/pages/request/request_form.dart';
 import 'package:pos/pages/salaries.dart';
 import 'package:pos/pages/salaries/salaries_form.dart';
-import 'package:pos/pages/selling.dart';
-import 'package:pos/pages/selling/print_setting.dart';
+
+import 'package:pos/pages/pos_modern/modern_print_setting.dart';
 import 'package:pos/pages/store.dart';
 import 'package:pos/pages/sync.dart';
 import 'package:pos/pages/testing.dart';
@@ -38,13 +35,6 @@ class PosModernRoute extends GoRouteData {
   Widget build(BuildContext context, GoRouterState state) => const PosModernPage();
 }
 
-@TypedGoRoute<SellingRoute>(path: '/legacy-pos')
-class SellingRoute extends GoRouteData {
-  const SellingRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const Selling();
-}
 
 @TypedGoRoute<HomeRoute>(
   path: '/home',
@@ -152,7 +142,7 @@ class PrintSettingRoute extends GoRouteData {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const PrintSetting();
+      const ModernPrintSetting();
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')
@@ -171,35 +161,6 @@ class RegisterRoute extends GoRouteData {
   Widget build(BuildContext context, GoRouterState state) => const Register();
 }
 
-@TypedGoRoute<RentRoute>(
-  path: '/rent',
-  routes: <TypedGoRoute<GoRouteData>>[
-    TypedGoRoute<RentItemFormRoute>(
-      path: 'form',
-    )
-  ],
-)
-class RentRoute extends GoRouteData {
-  const RentRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const Rent();
-}
-
-class RentItemFormRoute extends GoRouteData {
-  const RentItemFormRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => RentItemForm();
-}
-
-@TypedGoRoute<PresenceRoute>(path: '/presence')
-class PresenceRoute extends GoRouteData {
-  const PresenceRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const Presence();
-}
 
 @TypedGoRoute<ExpensesRoute>(path: '/expenses')
 class ExpensesRoute extends GoRouteData {

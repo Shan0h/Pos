@@ -11,7 +11,7 @@ class PenjualanModel {
   late int totalItem;
   late double totalHarga;
   late double diskon;
-  late int kasir;
+  late int staffId;
   int? pembeli;
   String? keterangan;
   DateTime createdAt = DateTime.now();
@@ -22,7 +22,7 @@ class PenjualanModel {
     required this.totalItem,
     required this.totalHarga,
     required this.diskon,
-    required this.kasir,
+    required this.staffId,
     this.pembeli,
     this.keterangan,
     required this.createdAt,
@@ -35,7 +35,7 @@ class PenjualanModel {
       totalItem: json['totalItem'],
       totalHarga: json['totalHarga'],
       diskon: json['diskon'],
-      kasir: json['kasir'],
+      staffId: json['staffId'],
       pembeli: json['pembeli'],
       keterangan: json['keterangan'],
       createdAt: DateTime.parse(json['createdAt']),
@@ -49,7 +49,7 @@ class PenjualanModel {
       'totalItem': totalItem,
       'totalHarga': totalHarga,
       'diskon': diskon,
-      'kasir': kasir,
+      'staffId': staffId,
       'pembeli': pembeli,
       'keterangan': keterangan,
       'createdAt': createdAt.toIso8601String()

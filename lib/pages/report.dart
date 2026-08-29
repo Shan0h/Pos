@@ -98,7 +98,7 @@ class _ReportState extends State<Report> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -139,7 +139,6 @@ class _ReportState extends State<Report> {
               runSpacing: 10,
               spacing: 10,
               children: [
-                // ReportPie(width: screenRevenue),
                 Column(
                   children: [
                     _buildSummaryCard('Total Sales Today', currency.format(sumReport(reportToday.value ?? [])), Icons.today, Colors.green, screen),
@@ -157,7 +156,7 @@ class _ReportState extends State<Report> {
                   ),
                 Column(
                   children: [
-                    _buildSummaryCard('Rent Revenue', currency.format((rentRevenue.value ?? []).fold(0, (p, c) => p + c.amount)), Icons.shopping_bag, Colors.pink, screen),
+                    _buildSummaryCard('Total Orders Today', '${reportToday.value?.length ?? 0} Orders', Icons.receipt_long, Colors.orange, screen),
                     const SizedBox(height: 10),
                     if (expenses.hasValue)
                       _buildSummaryCard('Total Expenses', currency.format(expenses.value!.fold(0, (p, c) => p + c.amount)), Icons.money_off, Colors.red, screen),
@@ -285,7 +284,7 @@ class _ReportState extends State<Report> {
                                       ),
                                       FutureBuilder<UserModel?>(
                                         future: Database()
-                                            .getUserById(detail.kasir),
+                                            .getUserById(detail.staffId),
                                         builder: (context, snapshot) {
                                           if (snapshot.hasData) {
                                             return Text(

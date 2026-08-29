@@ -78,7 +78,7 @@ class _PosModernPageState extends State<PosModernPage> {
   Widget build(BuildContext context) {
     // Watch inventory
     // The inventoryController is a global variable from its file, not registered in getIt.
-    final inventoryState = inventoryController.inventorys.watch(context);
+    final inventoryState = inventoryController.menuItems.watch(context);
     final allProducts = inventoryState.value ?? [];
 
     // Extract Pseudo-Categories
@@ -207,16 +207,22 @@ class _PosModernPageState extends State<PosModernPage> {
                               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                             ),
                             clipBehavior: Clip.antiAlias,
-                            child: TicketPanel(
-                              cartItems: cartItems,
-                              onClear: _handleClear,
-                              onIncrement: _handleIncrement,
-                              onDecrement: _handleDecrement,
-                              onPay: () {
-                                Navigator.pop(context); // Close bottom sheet
-                                _handlePay(cartItems); // Proceed to pay
-                              },
-                            ),
+                            child: Watch((context) {
+                              final currentCart = getIt.get<SellingController>().cart.value.value?.items ?? [];
+                              return TicketPanel(
+                                cartItems: currentCart,
+                                onClear: () {
+                                  _handleClear();
+                                  Navigator.pop(context); // Close bottom sheet when cleared
+                                },
+                                onIncrement: _handleIncrement,
+                                onDecrement: _handleDecrement,
+                                onPay: () {
+                                  Navigator.pop(context); // Close bottom sheet
+                                  _handlePay(currentCart); // Proceed to pay
+                                },
+                              );
+                            }),
                           ),
                         );
                       },
@@ -247,7 +253,7 @@ class _PosModernPageState extends State<PosModernPage> {
       itemPrice = enteredPrice;
     } else {
       // It's a standard priced item (like a coffee), show customization dialog
-      final customResult = await CoffeeCustomDialog.show(context, itemName: product.nama, basePrice: itemPrice);
+      final customResult = await CoffeeCustomDialog.show(context, item: product);
       if (customResult != null) {
         itemPrice += customResult.extraPrice;
         newName = '${product.nama} ${customResult.appendedName}';
@@ -302,7 +308,7 @@ class _PosModernPageState extends State<PosModernPage> {
     final paymentResult = await QuickPaymentModal.show(context, totalPrice);
     if (paymentResult == null) return; // User cancelled
 
-    final kasir = sellingController.kasir.value;
+    final staffId = sellingController.staffId.value;
     final pelanggan = sellingController.pelanggan.value;
     final tipeBayar = paymentResult.type;
     final printName = sellingController.selectedPrint.value;
@@ -330,7 +336,7 @@ class _PosModernPageState extends State<PosModernPage> {
     final newItem = PenjualanModel(
       id: DateTime.now().microsecondsSinceEpoch,
       items: products,
-      kasir: kasir?.id ?? 1,
+      staffId: staffId?.id ?? 1,
       keterangan: 'Modern POS Checkout',
       diskon: 0,
       totalHarga: totalPrice,
@@ -345,7 +351,7 @@ class _PosModernPageState extends State<PosModernPage> {
       letsPrint(
         store: store,
         model: newItem,
-        kasir: kasir?.nama ?? 'Umum',
+        staffId: staffId?.nama ?? 'Umum',
         tipe: tipeBayar,
         total: paymentResult.cashAmount.toStringAsFixed(2),
         kembalian: (paymentResult.cashAmount - totalPrice).toStringAsFixed(2),
@@ -371,7 +377,7 @@ class _PosModernPageState extends State<PosModernPage> {
   Future<void> letsPrint({
     required StoreModel store,
     required PenjualanModel model,
-    required String kasir,
+    required String staffId,
     required TypePayment tipe,
     String? total,
     String? kembalian,
@@ -397,7 +403,7 @@ class _PosModernPageState extends State<PosModernPage> {
     bytes += generator.feed(1);
     bytes += generator.hr();
     bytes += generator.text('Date/Time : ${DateFormat.yMd().add_jm().format(DateTime.now())}');
-    bytes += generator.text('Cashier   : $kasir');
+    bytes += generator.text('Staff   : $staffId');
     bytes += generator.feed(1);
 
     bytes += [27, 97, 0];

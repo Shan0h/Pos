@@ -21,49 +21,15 @@ class InventoryForm extends HookWidget {
     final editingName = useTextEditingController(text: item?.nama ?? '');
     final editingCode = useTextEditingController(text: item?.code ?? '');
     final editingUkuran = useTextEditingController(text: item?.ukuran ?? '');
-    final editingDiscount =
-        useTextEditingController(text: (item?.diskonPersen ?? '').toString());
-    final editingHargaDasar =
-        useTextEditingController(text: (item?.hargaDasar ?? '0').toString());
-    final editingHargaJualPersen = useTextEditingController(
-        text: (item?.hargaJualPersen?.toInt() ?? '20').toString());
+
     final stock = useState(item?.jumlahBarang ?? 0);
-    final hargaJual = useState(0.0);
-    final hargaJualDiscount = useState(0.0);
+    // Base Price as Cost for Raw Materials
+    final editingHargaDasar = useTextEditingController(text: (item?.hargaDasar ?? '0').toString());
 
-    useListenableSelector(editingHargaDasar, () {
-      if (editingHargaDasar.text.isNotEmpty) {
-        hargaJual.value = int.parse(
-                editingHargaDasar.text.isEmpty ? '0' : editingHargaDasar.text) +
-            int.parse(editingHargaDasar.text.isEmpty
-                    ? '0'
-                    : editingHargaDasar.text) *
-                ((int.parse(editingHargaJualPersen.text.isEmpty
-                        ? '0'
-                        : editingHargaJualPersen.text)) /
-                    100);
-      }
-    });
-    useListenableSelector(editingDiscount, () {
-      if (editingHargaDasar.text.isNotEmpty &&
-          editingDiscount.text.isNotEmpty &&
-          hargaJual.value != 0.0) {
-        hargaJualDiscount.value = hargaJual.value -
-            hargaJual.value *
-                ((double.parse(editingDiscount.text.isEmpty
-                        ? '0'
-                        : editingDiscount.text)) /
-                    100);
-      }
-    });
-
-    useListenable(editingHargaJualPersen);
-    useListenable(hargaJual);
     useListenable(editingName);
     useListenable(editingCode);
     useListenable(editingUkuran);
-    useListenable(editingDiscount);
-    useListenable(hargaJualDiscount);
+    useListenable(editingHargaDasar);
 
     final isConnected = isDeviceConnected.watch(context);
     return Scaffold(
@@ -71,7 +37,7 @@ class InventoryForm extends HookWidget {
         child: Form(
           key: inventoryFormKey,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,9 +109,9 @@ class InventoryForm extends HookWidget {
                       child: ShadInputFormField(
                         controller: editingUkuran,
                         validator: (val) =>
-                            val.isEmpty == true ? 'Size is required' : null,
-                        label: const Text('Item Size'),
-                        placeholder: const Text('ex. S/M/L 50ml/100ml'),
+                            val.isEmpty == true ? 'Unit is required' : null,
+                        label: const Text('Unit'),
+                        placeholder: const Text('ex. kg/pcs/ml'),
                       ),
                     ),
                     Expanded(
@@ -177,57 +143,9 @@ class InventoryForm extends HookWidget {
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly
                         ],
-                        label: const Text('Base Price'),
+                        label: const Text('Cost Price (RM)'),
                       ),
                     ),
-                    Expanded(
-                      child: ShadInputFormField(
-                        controller: editingHargaJualPersen,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        label: const Text('Selling Price Percent'),
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 5),
-                          const Text('Selling Price'),
-                          const SizedBox(height: 20),
-                          Text('${hargaJual.value.toInt()}'),
-                          const SizedBox(height: 15),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ShadInputFormField(
-                        controller: editingDiscount,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        label: const Text('Discount Percent'),
-                        placeholder: const Text('ex. 5'),
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Price after Discount'),
-                          const SizedBox(height: 20),
-                          Text(editingDiscount.text.isEmpty
-                              ? '-'
-                              : '${hargaJualDiscount.value.toInt()}'),
-                          const SizedBox(height: 15),
-                        ],
-                      ),
-                    )
                   ],
                 ),
                 Align(
@@ -272,16 +190,15 @@ class InventoryForm extends HookWidget {
                                 nama: editingName.text.replaceAll(',', ' '),
                                 code: editingCode.text,
                                 quantity: 1,
-                                hargaJual: hargaJual.value.toInt(),
+                                hargaJual: 0,
                                 ukuran: editingUkuran.text,
-                                isHargaJualPersen: true,
-                                hargaJualPersen:
-                                    double.parse(editingHargaJualPersen.text),
-                                hargaDasar: int.parse(editingHargaDasar.text),
-                                diskonPersen:
-                                    double.tryParse(editingDiscount.text),
+                                isHargaJualPersen: false,
+                                hargaJualPersen: 0.0,
+                                hargaDasar: int.tryParse(editingHargaDasar.text) ?? 0,
+                                diskonPersen: 0.0,
                                 jumlahBarang: stock.value,
                                 createdAt: item.createdAt,
+                                category: 'Raw Material',
                               );
 
                               Database()
@@ -300,16 +217,16 @@ class InventoryForm extends HookWidget {
                                   nama: editingName.text.replaceAll(',', ' '),
                                   code: editingCode.text,
                                   quantity: 1,
-                                  hargaJual: hargaJual.value.toInt(),
+                                  hargaJual: 0,
                                   ukuran: editingUkuran.text,
-                                  isHargaJualPersen: true,
-                                  hargaJualPersen:
-                                      double.parse(editingHargaJualPersen.text),
-                                  hargaDasar: int.parse(editingHargaDasar.text),
-                                  diskonPersen:
-                                      double.tryParse(editingDiscount.text),
+                                  isHargaJualPersen: false,
+                                  hargaJualPersen: 0.0,
+                                  hargaDasar: int.tryParse(editingHargaDasar.text) ?? 0,
+                                  diskonPersen: 0.0,
                                   jumlahBarang: stock.value,
-                                  createdAt: DateTime.now());
+                                  createdAt: DateTime.now(),
+                                  category: 'Raw Material',
+                              );
 
                               Database().addInventory(newItem).whenComplete(() {
                                 inventoryController.inventorys.refresh();

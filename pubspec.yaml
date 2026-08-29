@@ -53,7 +53,6 @@ dependencies:
   file_picker: any
   visibility_detector: ^0.4.0+2
   flutter_barcode_listener: ^0.1.4
-  file_saver: ^0.2.14
   esc_pos_utils: #^1.1.0
     git:
       url: https://github.com/ES-fooshen/esc_pos_utils.git

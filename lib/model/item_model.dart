@@ -20,6 +20,8 @@ class ItemModel {
   DateTime? barangKeluar;
   DateTime? createdAt;
   bool isSynced;
+  String? category; // 'Menu' or 'Raw Material'
+  String? customizationsJson; // JSON string for dynamic customizations (Size, Sugar, Add-ons)
 
   ItemModel({
     this.id,
@@ -38,6 +40,8 @@ class ItemModel {
     this.barangKeluar,
     this.createdAt,
     this.isSynced = true,
+    this.category,
+    this.customizationsJson,
   });
 
   Map<String, dynamic> toJson() {
@@ -56,7 +60,9 @@ class ItemModel {
       'isHargaJualPersen': isHargaJualPersen,
       'barangMasuk': barangMasuk?.toIso8601String(),
       'barangKeluar': barangKeluar?.toIso8601String(),
-      'createdAt': createdAt?.toIso8601String()
+      'createdAt': createdAt?.toIso8601String(),
+      'category': category,
+      'customizationsJson': customizationsJson,
     };
   }
 
@@ -82,6 +88,8 @@ class ItemModel {
           : null,
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      category: json['category'],
+      customizationsJson: json['customizationsJson'],
     );
   }
 }

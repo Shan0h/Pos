@@ -13,7 +13,7 @@ class CustomerList extends HookWidget {
   Widget build(BuildContext context) {
     final customers = customerController.customer.watch(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

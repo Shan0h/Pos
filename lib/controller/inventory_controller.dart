@@ -7,7 +7,9 @@ import 'package:signals/signals_flutter.dart';
 class InventoryController {
   final searchInventory = signal<String?>(null);
   final inventorys = futureSignal(() async => Database()
-      .getInventorys(value: inventoryController.searchInventory.value));
+      .getInventorys(value: inventoryController.searchInventory.value, category: 'Raw Material'));
+  final menuItems = futureSignal(() async => Database()
+      .getInventorys(value: inventoryController.searchInventory.value, category: 'Menu'));
   final deleteItemList = Signal<List<ItemModel>>([]);
   final inventorySelected = signal<ItemModel?>(null);
   final csvFile = signal<File?>(null);

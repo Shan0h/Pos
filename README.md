@@ -27,7 +27,6 @@
 ### 📦 1. Inventory Management
 - **Full CRUD Operations**: Add, edit, view, and delete inventory items.
 - **Search & Filter**: Real-time item lookup by name, category, or SKU.
-- **Barcode Scanning**: Integrated support for hardware barcode scanners and mobile cameras.
 - **CSV Data Import/Export**: Bulk import inventory data and export stock reports to CSV.
 - **Low Stock Alerts**: Out-of-stock and low-stock indicators.
 
@@ -39,7 +38,7 @@
 
 ### 📊 3. Analytics & Reporting
 - **Sales Insights**: Real-time sales comparison (Today vs. Yesterday).
-- **Revenue & Profit Breakdown**: Gross revenue, net profit, rent income, and expense tracking.
+- **Revenue & Profit Breakdown**: Gross revenue, estimated profit, and expense tracking.
 - **Best Sellers**: Automatic ranking of top-performing items.
 - **Visual Charts**: Interactive revenue and visitor traffic charts by date range.
 - **Export & Receipts**: PDF receipt and report generation.
@@ -54,10 +53,8 @@
 - **Backup & Restore**: Export local database backups and restore on any device directly from the **Owner Dashboard** settings.
 
 ### 🏢 6. Additional Modules
-- **Rental Tracking**: Flexible rental durations (3-day, weekly, monthly) with overdue penalty calculation.
-- **Staff Attendance (Presence)**: Check-in/check-out tracking for staff and cashiers.
 - **Payroll Management**: Salary calculations, custom bonus/deduction line items, and PDF payslip generation.
-- **Modern POS UI**: A completely revamped tablet-optimized and Dark Mode compatible Cashier and Owner Dashboard.
+- **Modern POS UI**: A completely revamped tablet-optimized and Dark Mode compatible Staff and Owner Dashboard.
 
 ---
 

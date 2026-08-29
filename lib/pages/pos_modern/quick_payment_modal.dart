@@ -49,10 +49,11 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
       child: Container(
         width: 600,
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -118,9 +119,12 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
               TextField(
                 controller: _customAmountController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: Colors.black87),
                 decoration: InputDecoration(
                   labelText: 'Custom Cash Amount',
+                  labelStyle: const TextStyle(color: Colors.black54),
                   prefixText: 'RM ',
+                  prefixStyle: const TextStyle(color: Colors.black87),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 onChanged: (val) {
@@ -179,6 +183,7 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -219,7 +224,7 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
 
   Widget _buildQuickCashButton(double amount, String label) {
     return ActionChip(
-      label: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      label: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
       backgroundColor: Colors.grey[200],
       onPressed: () {
         setState(() {

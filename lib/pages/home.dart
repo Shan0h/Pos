@@ -70,7 +70,7 @@ class Home extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text('Name', style: theme.textTheme.large),
-                  Text(auth.value?.user.value?.nama ?? 'Kasir'),
+                  Text(auth.value?.user.value?.nama ?? 'Staff'),
                   const SizedBox(height: 6),
                   Text('Role', style: theme.textTheme.large),
                   Text(auth.value?.user.value?.keterangan ?? 'Super User'),

@@ -85,6 +85,65 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
               ).then((_) => _loadData());
             },
           ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Database Settings',
+            onSelected: (item) async {
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              if (item == 'backup') {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(
+                    child: Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Backing up database...'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+                
+                bool success = await Database().createBackUp();
+                
+                if (context.mounted) Navigator.pop(context); // close dialog
+                
+                if (success) {
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(content: Text('Backup Success! Data saved to selected folder.'), backgroundColor: Colors.green),
+                  );
+                }
+              } else if (item == 'restore') {
+                bool success = await Database().restoreDB();
+                if (success) {
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(content: Text('Restore Success! Restart app to see changes.'), backgroundColor: Colors.green),
+                  );
+                }
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'backup',
+                child: Row(
+                  children: [Icon(Icons.save, color: Colors.black54), SizedBox(width: 8), Text('Backup Config / DB')],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'restore',
+                child: Row(
+                  children: [Icon(Icons.restore, color: Colors.black54), SizedBox(width: 8), Text('Restore Config / DB')],
+                ),
+              ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.exit_to_app),
             tooltip: 'Back to Cashier Mode',
@@ -159,9 +218,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
       {'title': 'Store Info', 'icon': Icons.store, 'route': '/store', 'color': Colors.deepOrange},
       {'title': 'Report', 'icon': Icons.home_repair_service_outlined, 'route': '/report', 'color': Colors.indigo},
       {'title': 'Inventory', 'icon': Icons.inventory, 'route': '/inventory', 'color': Colors.orange},
-      {'title': 'Rent', 'icon': Icons.shopping_bag, 'route': '/rent', 'color': Colors.pink},
-      {'title': 'Due Payment', 'icon': Icons.payment, 'route': '/due-payment', 'color': Colors.red},
-      {'title': 'Presence', 'icon': Icons.adobe_sharp, 'route': '/presence', 'color': Colors.teal},
       {'title': 'Expenses', 'icon': Icons.monetization_on, 'route': '/expenses', 'color': Colors.green},
       {'title': 'Users', 'icon': Icons.person_2, 'route': '/users', 'color': Colors.blue},
       {'title': 'Customer', 'icon': Icons.people, 'route': '/customer', 'color': Colors.purple},

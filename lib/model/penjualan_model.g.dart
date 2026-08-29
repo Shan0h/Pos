@@ -33,19 +33,19 @@ const PenjualanModelSchema = CollectionSchema(
       type: IsarType.objectList,
       target: r'ProductItemModel',
     ),
-    r'kasir': PropertySchema(
-      id: 3,
-      name: r'kasir',
-      type: IsarType.long,
-    ),
     r'keterangan': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'keterangan',
       type: IsarType.string,
     ),
     r'pembeli': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'pembeli',
+      type: IsarType.long,
+    ),
+    r'staffId': PropertySchema(
+      id: 5,
+      name: r'staffId',
       type: IsarType.long,
     ),
     r'totalHarga': PropertySchema(
@@ -111,9 +111,9 @@ void _penjualanModelSerialize(
     ProductItemModelSchema.serialize,
     object.items,
   );
-  writer.writeLong(offsets[3], object.kasir);
-  writer.writeString(offsets[4], object.keterangan);
-  writer.writeLong(offsets[5], object.pembeli);
+  writer.writeString(offsets[3], object.keterangan);
+  writer.writeLong(offsets[4], object.pembeli);
+  writer.writeLong(offsets[5], object.staffId);
   writer.writeDouble(offsets[6], object.totalHarga);
   writer.writeLong(offsets[7], object.totalItem);
 }
@@ -135,9 +135,9 @@ PenjualanModel _penjualanModelDeserialize(
           ProductItemModel(),
         ) ??
         [],
-    kasir: reader.readLong(offsets[3]),
-    keterangan: reader.readStringOrNull(offsets[4]),
-    pembeli: reader.readLongOrNull(offsets[5]),
+    keterangan: reader.readStringOrNull(offsets[3]),
+    pembeli: reader.readLongOrNull(offsets[4]),
+    staffId: reader.readLong(offsets[5]),
     totalHarga: reader.readDouble(offsets[6]),
     totalItem: reader.readLong(offsets[7]),
   );
@@ -164,11 +164,11 @@ P _penjualanModelDeserializeProp<P>(
           ) ??
           []) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
-    case 4:
       return (reader.readStringOrNull(offset)) as P;
-    case 5:
+    case 4:
       return (reader.readLongOrNull(offset)) as P;
+    case 5:
+      return (reader.readLong(offset)) as P;
     case 6:
       return (reader.readDouble(offset)) as P;
     case 7:
@@ -559,62 +559,6 @@ extension PenjualanModelQueryFilter
   }
 
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
-      kasirEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'kasir',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
-      kasirGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'kasir',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
-      kasirLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'kasir',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
-      kasirBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'kasir',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
       keteranganIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -843,6 +787,62 @@ extension PenjualanModelQueryFilter
   }
 
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      staffIdEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'staffId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      staffIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'staffId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      staffIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'staffId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      staffIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'staffId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
       totalHargaEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -1006,18 +1006,6 @@ extension PenjualanModelQuerySortBy
     });
   }
 
-  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> sortByKasir() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'kasir', Sort.asc);
-    });
-  }
-
-  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> sortByKasirDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'kasir', Sort.desc);
-    });
-  }
-
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
       sortByKeterangan() {
     return QueryBuilder.apply(this, (query) {
@@ -1042,6 +1030,19 @@ extension PenjualanModelQuerySortBy
       sortByPembeliDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pembeli', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> sortByStaffId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'staffId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByStaffIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'staffId', Sort.desc);
     });
   }
 
@@ -1113,18 +1114,6 @@ extension PenjualanModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> thenByKasir() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'kasir', Sort.asc);
-    });
-  }
-
-  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> thenByKasirDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'kasir', Sort.desc);
-    });
-  }
-
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
       thenByKeterangan() {
     return QueryBuilder.apply(this, (query) {
@@ -1149,6 +1138,19 @@ extension PenjualanModelQuerySortThenBy
       thenByPembeliDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pembeli', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> thenByStaffId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'staffId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByStaffIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'staffId', Sort.desc);
     });
   }
 
@@ -1195,12 +1197,6 @@ extension PenjualanModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<PenjualanModel, PenjualanModel, QDistinct> distinctByKasir() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'kasir');
-    });
-  }
-
   QueryBuilder<PenjualanModel, PenjualanModel, QDistinct> distinctByKeterangan(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1211,6 +1207,12 @@ extension PenjualanModelQueryWhereDistinct
   QueryBuilder<PenjualanModel, PenjualanModel, QDistinct> distinctByPembeli() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pembeli');
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QDistinct> distinctByStaffId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'staffId');
     });
   }
 
@@ -1256,12 +1258,6 @@ extension PenjualanModelQueryProperty
     });
   }
 
-  QueryBuilder<PenjualanModel, int, QQueryOperations> kasirProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'kasir');
-    });
-  }
-
   QueryBuilder<PenjualanModel, String?, QQueryOperations> keteranganProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'keterangan');
@@ -1271,6 +1267,12 @@ extension PenjualanModelQueryProperty
   QueryBuilder<PenjualanModel, int?, QQueryOperations> pembeliProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pembeli');
+    });
+  }
+
+  QueryBuilder<PenjualanModel, int, QQueryOperations> staffIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'staffId');
     });
   }
 

@@ -27,68 +27,78 @@ const ItemModelSchema = CollectionSchema(
       name: r'barangMasuk',
       type: IsarType.dateTime,
     ),
-    r'code': PropertySchema(
+    r'category': PropertySchema(
       id: 2,
+      name: r'category',
+      type: IsarType.string,
+    ),
+    r'code': PropertySchema(
+      id: 3,
       name: r'code',
       type: IsarType.string,
     ),
     r'createdAt': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
+    r'customizationsJson': PropertySchema(
+      id: 5,
+      name: r'customizationsJson',
+      type: IsarType.string,
+    ),
     r'deskripsi': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'deskripsi',
       type: IsarType.string,
     ),
     r'diskonPersen': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'diskonPersen',
       type: IsarType.double,
     ),
     r'hargaDasar': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'hargaDasar',
       type: IsarType.long,
     ),
     r'hargaJual': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'hargaJual',
       type: IsarType.long,
     ),
     r'hargaJualPersen': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'hargaJualPersen',
       type: IsarType.double,
     ),
     r'isHargaJualPersen': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'isHargaJualPersen',
       type: IsarType.bool,
     ),
     r'isSynced': PropertySchema(
-      id: 10,
+      id: 12,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'jumlahBarang': PropertySchema(
-      id: 11,
+      id: 13,
       name: r'jumlahBarang',
       type: IsarType.long,
     ),
     r'nama': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'nama',
       type: IsarType.string,
     ),
     r'quantity': PropertySchema(
-      id: 13,
+      id: 15,
       name: r'quantity',
       type: IsarType.long,
     ),
     r'ukuran': PropertySchema(
-      id: 14,
+      id: 16,
       name: r'ukuran',
       type: IsarType.string,
     )
@@ -113,7 +123,19 @@ int _itemModelEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.category;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.code.length * 3;
+  {
+    final value = object.customizationsJson;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   {
     final value = object.deskripsi;
     if (value != null) {
@@ -133,19 +155,21 @@ void _itemModelSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.barangKeluar);
   writer.writeDateTime(offsets[1], object.barangMasuk);
-  writer.writeString(offsets[2], object.code);
-  writer.writeDateTime(offsets[3], object.createdAt);
-  writer.writeString(offsets[4], object.deskripsi);
-  writer.writeDouble(offsets[5], object.diskonPersen);
-  writer.writeLong(offsets[6], object.hargaDasar);
-  writer.writeLong(offsets[7], object.hargaJual);
-  writer.writeDouble(offsets[8], object.hargaJualPersen);
-  writer.writeBool(offsets[9], object.isHargaJualPersen);
-  writer.writeBool(offsets[10], object.isSynced);
-  writer.writeLong(offsets[11], object.jumlahBarang);
-  writer.writeString(offsets[12], object.nama);
-  writer.writeLong(offsets[13], object.quantity);
-  writer.writeString(offsets[14], object.ukuran);
+  writer.writeString(offsets[2], object.category);
+  writer.writeString(offsets[3], object.code);
+  writer.writeDateTime(offsets[4], object.createdAt);
+  writer.writeString(offsets[5], object.customizationsJson);
+  writer.writeString(offsets[6], object.deskripsi);
+  writer.writeDouble(offsets[7], object.diskonPersen);
+  writer.writeLong(offsets[8], object.hargaDasar);
+  writer.writeLong(offsets[9], object.hargaJual);
+  writer.writeDouble(offsets[10], object.hargaJualPersen);
+  writer.writeBool(offsets[11], object.isHargaJualPersen);
+  writer.writeBool(offsets[12], object.isSynced);
+  writer.writeLong(offsets[13], object.jumlahBarang);
+  writer.writeString(offsets[14], object.nama);
+  writer.writeLong(offsets[15], object.quantity);
+  writer.writeString(offsets[16], object.ukuran);
 }
 
 ItemModel _itemModelDeserialize(
@@ -157,20 +181,22 @@ ItemModel _itemModelDeserialize(
   final object = ItemModel(
     barangKeluar: reader.readDateTimeOrNull(offsets[0]),
     barangMasuk: reader.readDateTimeOrNull(offsets[1]),
-    code: reader.readString(offsets[2]),
-    createdAt: reader.readDateTimeOrNull(offsets[3]),
-    deskripsi: reader.readStringOrNull(offsets[4]),
-    diskonPersen: reader.readDoubleOrNull(offsets[5]),
-    hargaDasar: reader.readLong(offsets[6]),
-    hargaJual: reader.readLong(offsets[7]),
-    hargaJualPersen: reader.readDoubleOrNull(offsets[8]),
+    category: reader.readStringOrNull(offsets[2]),
+    code: reader.readString(offsets[3]),
+    createdAt: reader.readDateTimeOrNull(offsets[4]),
+    customizationsJson: reader.readStringOrNull(offsets[5]),
+    deskripsi: reader.readStringOrNull(offsets[6]),
+    diskonPersen: reader.readDoubleOrNull(offsets[7]),
+    hargaDasar: reader.readLong(offsets[8]),
+    hargaJual: reader.readLong(offsets[9]),
+    hargaJualPersen: reader.readDoubleOrNull(offsets[10]),
     id: id,
-    isHargaJualPersen: reader.readBool(offsets[9]),
-    isSynced: reader.readBoolOrNull(offsets[10]) ?? true,
-    jumlahBarang: reader.readLong(offsets[11]),
-    nama: reader.readString(offsets[12]),
-    quantity: reader.readLong(offsets[13]),
-    ukuran: reader.readString(offsets[14]),
+    isHargaJualPersen: reader.readBool(offsets[11]),
+    isSynced: reader.readBoolOrNull(offsets[12]) ?? true,
+    jumlahBarang: reader.readLong(offsets[13]),
+    nama: reader.readString(offsets[14]),
+    quantity: reader.readLong(offsets[15]),
+    ukuran: reader.readString(offsets[16]),
   );
   return object;
 }
@@ -187,30 +213,34 @@ P _itemModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 4:
       return (reader.readStringOrNull(offset)) as P;
-    case 5:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 6:
-      return (reader.readLong(offset)) as P;
-    case 7:
-      return (reader.readLong(offset)) as P;
-    case 8:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 9:
-      return (reader.readBool(offset)) as P;
-    case 10:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 11:
-      return (reader.readLong(offset)) as P;
-    case 12:
+    case 3:
       return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 5:
+      return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 8:
+      return (reader.readLong(offset)) as P;
+    case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 11:
+      return (reader.readBool(offset)) as P;
+    case 12:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 13:
       return (reader.readLong(offset)) as P;
     case 14:
+      return (reader.readString(offset)) as P;
+    case 15:
+      return (reader.readLong(offset)) as P;
+    case 16:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -453,6 +483,154 @@ extension ItemModelQueryFilter
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'category',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      categoryIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'category',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'category',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'category',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> categoryIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'category',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      categoryIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'category',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> codeEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -650,6 +828,160 @@ extension ItemModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'customizationsJson',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'customizationsJson',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'customizationsJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'customizationsJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'customizationsJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'customizationsJson',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'customizationsJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'customizationsJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'customizationsJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'customizationsJson',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'customizationsJson',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      customizationsJsonIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'customizationsJson',
+        value: '',
       ));
     });
   }
@@ -1566,6 +1898,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByCategory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByCategoryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByCode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'code', Sort.asc);
@@ -1587,6 +1931,19 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByCustomizationsJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'customizationsJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy>
+      sortByCustomizationsJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'customizationsJson', Sort.desc);
     });
   }
 
@@ -1750,6 +2107,18 @@ extension ItemModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByCategory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByCategoryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByCode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'code', Sort.asc);
@@ -1771,6 +2140,19 @@ extension ItemModelQuerySortThenBy
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByCustomizationsJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'customizationsJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy>
+      thenByCustomizationsJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'customizationsJson', Sort.desc);
     });
   }
 
@@ -1934,6 +2316,13 @@ extension ItemModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByCategory(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'category', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByCode(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1944,6 +2333,14 @@ extension ItemModelQueryWhereDistinct
   QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByCustomizationsJson(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'customizationsJson',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -2037,6 +2434,12 @@ extension ItemModelQueryProperty
     });
   }
 
+  QueryBuilder<ItemModel, String?, QQueryOperations> categoryProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'category');
+    });
+  }
+
   QueryBuilder<ItemModel, String, QQueryOperations> codeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'code');
@@ -2046,6 +2449,13 @@ extension ItemModelQueryProperty
   QueryBuilder<ItemModel, DateTime?, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<ItemModel, String?, QQueryOperations>
+      customizationsJsonProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'customizationsJson');
     });
   }
 

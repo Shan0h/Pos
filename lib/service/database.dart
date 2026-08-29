@@ -22,6 +22,7 @@ import 'package:pos/service/supabase_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Database {
@@ -53,7 +54,7 @@ class Database {
     final isar = await db;
     IsarCollection<AuthModel> authCollection = isar.collection<AuthModel>();
     final users = await authCollection.where().findAll();
-    getIt.get<SellingController>().kasir.value = users.first.user.value;
+    getIt.get<SellingController>().staffId.value = users.first.user.value;
     return users.first;
   }
 
@@ -275,17 +276,20 @@ class Database {
     }
   }
 
-  Future<List<ItemModel>> getInventorys({String? value}) async {
+  Future<List<ItemModel>> getInventorys({String? value, String? category}) async {
     final isar = await db;
     IsarCollection<ItemModel> inventoryCollection =
         isar.collection<ItemModel>();
-    return await inventoryCollection
-        .filter()
-        .group((q) => q
+        
+    var query = inventoryCollection.filter().group((q) => q
             .namaContains(value ?? '', caseSensitive: false)
             .or()
-            .codeContains(value ?? '', caseSensitive: false))
-        .findAll();
+            .codeContains(value ?? '', caseSensitive: false));
+            
+    if (category != null) {
+      return await query.categoryEqualTo(category).findAll();
+    }
+    return await query.findAll();
   }
 
   insertInventoryFresh(List<ItemModel> inventoryList) async {
@@ -478,7 +482,7 @@ class Database {
           start.copyWith(hour: 0, minute: 0, second: 0),
           end.copyWith(hour: 23, minute: 59, second: 59),
         )
-        .kasirEqualTo(userId ?? 0)
+        .staffIdEqualTo(userId ?? 0)
         .findAll();
 
     return items;
@@ -521,7 +525,7 @@ class Database {
     final items = await inventoryCollection.where().findAll();
 
     final Map<int, List<PenjualanModel>> listOfOrders =
-        items.groupListsBy((i) => i.kasir);
+        items.groupListsBy((i) => i.staffId);
 
     return listOfOrders;
   }
@@ -1071,28 +1075,54 @@ class Database {
     }
   }
 
-  Future<void> createBackUp() async {
-    final isar = await db;
-    final backUpDir = await getDownloadsDirectory();
+  Future<bool> createBackUp() async {
+    try {
+      final isar = await db;
+      final tempDir = await getTemporaryDirectory();
+      final File tempFile = File('${tempDir.path}/backup_db.isar');
+      
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+      
+      await isar.copyToFile(tempFile.path);
+      
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Database Backup',
+        fileName: 'pos_backup_db_${DateTime.now().millisecondsSinceEpoch}.isar',
+        type: FileType.any,
+      );
 
-    final File backUpFile = File('${backUpDir?.path}/backup_db.isar');
-    if (await backUpFile.exists()) {
-      // if already we have another backup file, delete it here.
-      await backUpFile.delete();
+      if (outputFile == null) {
+        return false; // User cancelled
+      }
+      
+      // Some Android devices omit the extension in saveFile
+      if (!outputFile.endsWith('.isar')) {
+        outputFile += '.isar';
+      }
+
+      await tempFile.copy(outputFile);
+      return true;
+    } catch (e) {
+      log('Backup finished with exception: $e');
+      return false;
     }
-    await isar.copyToFile('${backUpDir?.path}/backup_db.isar');
   }
 
-  Future<void> restoreDB() async {
-    final dbDirectory = await getApplicationDocumentsDirectory();
-    final isar = await db;
+  Future<bool> restoreDB() async {
+    try {
+      final dbDirectory = await getApplicationDocumentsDirectory();
+      final isar = await db;
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
-      File file = File(result.files.single.path!);
-      await isar.close(deleteFromDisk: true).then((_) async {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
+      if (result != null && result.files.single.path != null) {
+        File file = File(result.files.single.path!);
+        await isar.close(deleteFromDisk: true);
+        
         File targetFile = await file.copy("${dbDirectory.path}/default.isar");
         log("Correctly copied to ${targetFile.path}");
+        
         await Isar.open(
           [
             ItemModelSchema,
@@ -1110,7 +1140,12 @@ class Database {
           ],
           directory: dbDirectory.path,
         );
-      });
+        return true;
+      }
+      return false;
+    } catch (e) {
+      log('Restore failed: $e');
+      return false;
     }
   }
 

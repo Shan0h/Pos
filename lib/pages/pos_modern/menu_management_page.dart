@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pos/model/item_model.dart';
 import 'package:pos/service/database.dart';
 import 'package:pos/controller/inventory_controller.dart';
+import 'package:pos/pages/pos_modern/menu_item_editor_dialog.dart';
 
 class MenuManagementPage extends StatefulWidget {
   const MenuManagementPage({super.key});
@@ -23,8 +24,8 @@ class _MenuManagementPageState extends State<MenuManagementPage> {
 
   Future<void> _loadItems() async {
     setState(() => _isLoading = true);
-    final items = await Database().getInventorys();
-    inventoryController.inventorys.reload(); // Trigger refresh for POS page
+    final items = await Database().getInventorys(category: 'Menu');
+    inventoryController.menuItems.reload(); // Trigger refresh for POS page
     setState(() {
       _items = items;
       _isLoading = false;
@@ -44,6 +45,8 @@ class _MenuManagementPageState extends State<MenuManagementPage> {
       hargaJual: item.hargaJual,
       isHargaJualPersen: item.isHargaJualPersen,
       deskripsi: item.deskripsi,
+      category: item.category,
+      customizationsJson: item.customizationsJson,
     )..isSynced = false;
     
     await Database().updateInventory(updatedItem);
@@ -51,53 +54,12 @@ class _MenuManagementPageState extends State<MenuManagementPage> {
   }
 
   Future<void> _editItemDialog(ItemModel item) async {
-    final nameController = TextEditingController(text: item.nama);
-    final priceController = TextEditingController(text: item.hargaJual.toString());
-
-    final bool? result = await showDialog(
+    final updatedItem = await showDialog<ItemModel>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Menu Item'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Item Name (Category = First Word)'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: priceController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Price (RM)'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      builder: (context) => MenuItemEditorDialog(item: item),
     );
 
-    if (result == true) {
-      final newPrice = int.tryParse(priceController.text) ?? item.hargaJual;
-      final updatedItem = ItemModel(
-        id: item.id,
-        nama: nameController.text,
-        code: item.code,
-        jumlahBarang: item.jumlahBarang,
-        quantity: item.quantity,
-        ukuran: item.ukuran,
-        hargaDasar: item.hargaDasar,
-        hargaJual: newPrice,
-        isHargaJualPersen: item.isHargaJualPersen,
-        deskripsi: item.deskripsi,
-      )..isSynced = false;
-      
+    if (updatedItem != null) {
       await Database().updateInventory(updatedItem);
       _loadItems();
     }
@@ -107,10 +69,11 @@ class _MenuManagementPageState extends State<MenuManagementPage> {
     final bool? confirm = await showDialog(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Delete Item?'),
-        content: Text('Are you sure you want to delete ${item.nama}?'),
+        backgroundColor: Colors.white,
+        title: const Text('Delete Item?', style: TextStyle(color: Colors.black87)),
+        content: Text('Are you sure you want to delete ${item.nama}?', style: const TextStyle(color: Colors.black87)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel', style: TextStyle(color: Colors.brown))),
           TextButton(
             onPressed: () => Navigator.pop(c, true),
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
@@ -125,67 +88,12 @@ class _MenuManagementPageState extends State<MenuManagementPage> {
   }
 
   Future<void> _addItemDialog() async {
-    final nameController = TextEditingController();
-    final priceController = TextEditingController();
-    final codeController = TextEditingController();
-
-    final bool? result = await showDialog(
+    final newItem = await showDialog<ItemModel>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add New Menu Item'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Item Name (Category = First Word)'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: priceController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Price (RM)'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: codeController,
-              decoration: const InputDecoration(labelText: 'Item Code (e.g. COFFEE01, optional)'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.trim().isEmpty || priceController.text.trim().isEmpty) {
-                return;
-              }
-              Navigator.pop(context, true);
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
+      builder: (context) => const MenuItemEditorDialog(),
     );
 
-    if (result == true) {
-      final newPrice = int.tryParse(priceController.text) ?? 0;
-      final newCode = codeController.text.trim().isEmpty
-          ? 'MENU${DateTime.now().millisecondsSinceEpoch}'
-          : codeController.text.trim();
-
-      final newItem = ItemModel(
-        nama: nameController.text.trim(),
-        code: newCode,
-        jumlahBarang: 999, // By default available
-        quantity: 1,
-        ukuran: '',
-        hargaDasar: 0,
-        hargaJual: newPrice,
-        isHargaJualPersen: false,
-        createdAt: DateTime.now(),
-      )..isSynced = false;
-
+    if (newItem != null) {
       await Database().addInventory(newItem);
       _loadItems();
     }

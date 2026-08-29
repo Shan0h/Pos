@@ -8,7 +8,6 @@ part of 'router.dart';
 
 List<RouteBase> get $appRoutes => [
       $posModernRoute,
-      $sellingRoute,
       $homeRoute,
       $storeRoute,
       $inventoryRoute,
@@ -19,8 +18,6 @@ List<RouteBase> get $appRoutes => [
       $printSettingRoute,
       $loginRoute,
       $registerRoute,
-      $rentRoute,
-      $presenceRoute,
       $expensesRoute,
       $syncRoute,
       $salariesRoute,
@@ -40,28 +37,6 @@ extension $PosModernRouteExtension on PosModernRoute {
 
   String get location => GoRouteData.$location(
         '/',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $sellingRoute => GoRouteData.$route(
-      path: '/legacy-pos',
-      factory: $SellingRouteExtension._fromState,
-    );
-
-extension $SellingRouteExtension on SellingRoute {
-  static SellingRoute _fromState(GoRouterState state) => const SellingRoute();
-
-  String get location => GoRouteData.$location(
-        '/legacy-pos',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -356,74 +331,6 @@ extension $RegisterRouteExtension on RegisterRoute {
 
   String get location => GoRouteData.$location(
         '/register',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $rentRoute => GoRouteData.$route(
-      path: '/rent',
-      factory: $RentRouteExtension._fromState,
-      routes: [
-        GoRouteData.$route(
-          path: 'form',
-          factory: $RentItemFormRouteExtension._fromState,
-        ),
-      ],
-    );
-
-extension $RentRouteExtension on RentRoute {
-  static RentRoute _fromState(GoRouterState state) => const RentRoute();
-
-  String get location => GoRouteData.$location(
-        '/rent',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-extension $RentItemFormRouteExtension on RentItemFormRoute {
-  static RentItemFormRoute _fromState(GoRouterState state) =>
-      const RentItemFormRoute();
-
-  String get location => GoRouteData.$location(
-        '/rent/form',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $presenceRoute => GoRouteData.$route(
-      path: '/presence',
-      factory: $PresenceRouteExtension._fromState,
-    );
-
-extension $PresenceRouteExtension on PresenceRoute {
-  static PresenceRoute _fromState(GoRouterState state) => const PresenceRoute();
-
-  String get location => GoRouteData.$location(
-        '/presence',
       );
 
   void go(BuildContext context) => context.go(location);

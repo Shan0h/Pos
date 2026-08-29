@@ -196,8 +196,10 @@ class _SalariesState extends State<Salaries> {
                 }
                 if (PlatformExtension.isMobile) {
                   return SingleChildScrollView(
-                    child: Column(
-                      children: salary.map((item) {
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: salary.map((item) {
                         final status = ['Draf', 'Paid'];
                         return ListTile(
                           title: FutureBuilder<UserModel?>(
@@ -247,6 +249,7 @@ class _SalariesState extends State<Salaries> {
                           ),
                         );
                       }).toList(),
+                    ),
                     ),
                   );
                 }

@@ -52,16 +52,9 @@ class NavDrawer extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: const Text('Legacy POS'),
-              leading: const Icon(Icons.sell_outlined),
-              onTap: () => context.go('/legacy-pos'),
-            ),
-            ListTile(
-              title: const Text('Modern POS (Beta)'),
-              leading: const Icon(Icons.tablet_mac),
-              onTap: () {
-                context.go('/');
-              },
+              title: const Text('Point of Sale (POS)'),
+              leading: const Icon(Icons.point_of_sale),
+              onTap: () => context.go('/'),
             ),
             const Divider(),
             if (!isOwnerUnlocked.watch(context))
@@ -101,24 +94,10 @@ class NavDrawer extends StatelessWidget {
                 onTap: () => context.push('/request'),
               ),
               ListTile(
-                title: const Text('Rent'),
-                leading: const Icon(Icons.shopping_bag),
-                onTap: () {
-                  context.push('/rent');
-                },
-              ),
-              ListTile(
                 title: const Text('Due Payment'),
                 leading: const Icon(Icons.payment),
                 onTap: () {
                   context.push('/due-payment');
-                },
-              ),
-              ListTile(
-                title: const Text('Presence'),
-                leading: const Icon(Icons.adobe_sharp),
-                onTap: () {
-                  context.push('/presence');
                 },
               ),
               ListTile(
@@ -161,19 +140,18 @@ class NavDrawer extends StatelessWidget {
                               const Text('Please pick isar file to restore'),
                           action: ShadButton.outline(
                             child: const Text('Select'),
-                            onPressed: () => Database().restoreDB().whenComplete(
-                              () {
-                                if (context.mounted) {
-                                  ShadToaster.of(context).show(
-                                    const ShadToast(
-                                      title: Text('Restore Database Success!'),
-                                      description: Text(
-                                          'Please make sure all data is imported'),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
+                            onPressed: () async {
+                              final toaster = ShadToaster.of(context);
+                              bool success = await Database().restoreDB();
+                              if (success) {
+                                toaster.show(
+                                  const ShadToast(
+                                    title: Text('Restore Database Success!'),
+                                    description: Text('Please make sure all data is imported'),
+                                  ),
+                                );
+                              }
+                            },
                           ),
                         ),
                       );
@@ -181,11 +159,41 @@ class NavDrawer extends StatelessWidget {
                       context.pop();
                       context.push('/login');
                     } else if (item == 'backup') {
+                      final toaster = ShadToaster.of(context);
                       context.pop();
-                      Database().createBackUp().then((_) => const ShadToast(
+                      
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(
+                          child: Card(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircularProgressIndicator(),
+                                  SizedBox(height: 16),
+                                  Text('Backing up database...'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                      
+                      bool success = await Database().createBackUp();
+                      
+                      if (context.mounted) Navigator.pop(context); // close dialog
+                      
+                      if (success) {
+                        toaster.show(
+                          const ShadToast(
                             title: Text('Backup Database Success!'),
-                            description: Text('All your data on download folder'),
-                          ));
+                            description: Text('All your data on selected folder'),
+                          ),
+                        );
+                      }
                     } else if (item == 'clear') {
                       context.pop();
                       showShadDialog(

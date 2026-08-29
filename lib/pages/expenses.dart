@@ -61,8 +61,10 @@ class Expanses extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -190,6 +192,7 @@ class Expanses extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
