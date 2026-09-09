@@ -1,6 +1,6 @@
 import 'package:pos/controller/user_controller.dart';
 import 'package:pos/model/user_model.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -131,10 +131,10 @@ class UserForm extends HookWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (user != null)
-                        ShadButton.destructive(
-                          child: const Text('Delete'),
-                          onPressed: () {
-                            Database().deleteUser(user.id!).whenComplete(() {
+                          ShadButton.destructive(
+                            child: const Text('Delete'),
+                            onPressed: () {
+                            userService.deleteUser(user.id!).whenComplete(() {
                               userController.users.refresh();
                               if (context.mounted) Navigator.pop(context);
                             });
@@ -155,8 +155,11 @@ class UserForm extends HookWidget {
                                 keterangan: role.value,
                                 masuk: DateTime.now(),
                                 createdAt: user.createdAt,
+                                updatedAt: user.updatedAt,
+                                isDeleted: user.isDeleted,
+                                isSynced: user.isSynced,
                               );
-                              Database()
+                              userService
                                   .updateUser(updateUser)
                                   .whenComplete(() {
                                 Future.delayed(Durations.short1).then((_) {
@@ -175,7 +178,7 @@ class UserForm extends HookWidget {
                                 createdAt: DateTime.now(),
                               );
 
-                              Database().addNewUser(newUser).whenComplete(() {
+                              userService.addNewUser(newUser).whenComplete(() {
                                 userController.users.refresh();
                                 if (context.mounted) context.pop();
                               });

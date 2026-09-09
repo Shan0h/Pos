@@ -11,15 +11,12 @@ class Cart extends Equatable {
   }
 
   double get totalPrice {
-    return items.fold(
-        0,
-        (total, current) =>
-            total +
-            (current.diskonPersen == null
-                ? (current.quantity * current.hargaJual)
-                : (current.quantity *
-                    (current.hargaJual -
-                        current.hargaJual * (current.diskonPersen! / 100)))));
+    return items.fold<double>(0, (total, current) {
+      final double unitPrice = current.diskonPersen == null || current.diskonPersen == 0
+          ? current.price
+          : current.price - current.price * (current.diskonPersen! / 100);
+      return total + current.quantity * unitPrice;
+    });
   }
 
   @override

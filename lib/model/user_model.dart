@@ -11,6 +11,9 @@ class UserModel {
   late bool status;
   DateTime? masuk;
   DateTime createdAt = DateTime.now();
+  DateTime? updatedAt;
+  bool isDeleted;
+  bool isSynced;
 
   UserModel({
     this.id,
@@ -20,6 +23,9 @@ class UserModel {
     required this.status,
     this.masuk,
     required this.createdAt,
+    this.updatedAt,
+    this.isDeleted = false,
+    this.isSynced = true,
   });
 
   Map<String, dynamic> toJson() {
@@ -31,6 +37,9 @@ class UserModel {
       'status': status,
       'masuk': masuk?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'isDeleted': isDeleted,
+      'isSynced': isSynced,
     };
   }
 
@@ -44,6 +53,10 @@ class UserModel {
       status: json['status'],
       masuk: json['masuk'] != null ? DateTime.parse(json['masuk']) : null,
       createdAt: DateTime.parse(json['createdAt']),
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      isDeleted: json['isDeleted'] ?? false,
+      isSynced: json['isSynced'] ?? true,
     );
   }
 }

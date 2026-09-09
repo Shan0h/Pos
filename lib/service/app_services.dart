@@ -1,0 +1,18 @@
+import 'package:pos/service/database.dart';
+import 'package:pos/service/get_it.dart';
+import 'package:pos/service/user_service.dart';
+import 'package:pos/service/customer_service.dart';
+import 'package:pos/service/inventory_service.dart';
+import 'package:pos/service/report_service.dart';
+import 'package:pos/service/expenses_service.dart';
+import 'package:pos/service/salary_service.dart';
+import 'package:pos/service/store_service.dart';
+
+Database get database => getIt.get<Database>();
+UserService get userService => getIt.get<UserService>();
+CustomerService get customerService => getIt.get<CustomerService>();
+InventoryService get inventoryService => getIt.get<InventoryService>();
+ReportService get reportService => getIt.get<ReportService>();
+ExpensesService get expensesService => getIt.get<ExpensesService>();
+SalaryService get salaryService => getIt.get<SalaryService>();
+StoreService get storeService => getIt.get<StoreService>();

@@ -9,6 +9,8 @@ class ExpensesModel {
   String? note;
   int amount;
   DateTime? createdAt;
+  DateTime? updatedAt;
+  bool isDeleted;
   bool isSynced;
 
   ExpensesModel({
@@ -17,6 +19,8 @@ class ExpensesModel {
     this.note,
     required this.amount,
     this.createdAt,
+    this.updatedAt,
+    this.isDeleted = false,
     this.isSynced = true,
   });
 
@@ -26,7 +30,10 @@ class ExpensesModel {
       'title': title,
       'note': note,
       'amount': amount,
-      'createdAt': createdAt?.toIso8601String()
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'isDeleted': isDeleted,
+      'isSynced': isSynced,
     };
   }
 
@@ -38,6 +45,10 @@ class ExpensesModel {
       amount: json['amount'],
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      isDeleted: json['isDeleted'] ?? false,
+      isSynced: json['isSynced'] ?? true,
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:pos/controller/auth_controller.dart';
 import 'package:pos/controller/user_controller.dart';
 import 'package:pos/model/auth_model.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -45,7 +45,7 @@ class UsersSheet extends StatelessWidget {
                                     final user = AuthModel()
                                       ..id = auth.value!.id
                                       ..user.value = p;
-                                    await Database()
+                                    await database
                                         .changeUser(user)
                                         .whenComplete(
                                           () =>
@@ -55,7 +55,7 @@ class UsersSheet extends StatelessWidget {
                                     final user = AuthModel()
                                       ..user.value = p
                                       ..createdAt = DateTime.now();
-                                    await Database().loginUser(user);
+                                    await database.loginUser(user);
                                   }
                                   authController.customer.refresh();
                                   if (context.mounted) context.pop();

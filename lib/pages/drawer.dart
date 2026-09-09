@@ -1,5 +1,6 @@
 import 'package:pos/controller/auth_controller.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/controller/theme_controller.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:pos/utils/date_utils.dart';
 import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class NavDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     User? user = Supabase.instance.client.auth.currentUser;
     final auth = authController.customer.watch(context);
+    final themeMode = themeController.mode.watch(context);
     return Drawer(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -29,8 +31,8 @@ class NavDrawer extends StatelessWidget {
             UserAccountsDrawerHeader(
               decoration: BoxDecoration(
                   color: context.isDarkMode
-                      ? const Color(0xff164863)
-                      : const Color(0xffF6F6F6)),
+                      ? const Color(0xFF3E2723)
+                      : const Color(0xFF8B5E3C)),
               accountName: Text(
                   '${auth.value?.user.value?.nama ?? "Cashier"} - ${auth.value?.user.value?.keterangan ?? "Role"}',
                   style: ShadTheme.of(context).textTheme.h3),
@@ -79,6 +81,29 @@ class NavDrawer extends StatelessWidget {
                 },
               ),
               ListTile(
+                title: const Text('Theme Mode'),
+                subtitle: Text(themeController.labelFor(themeMode)),
+                leading: const Icon(Icons.dark_mode),
+                trailing: PopupMenuButton<ThemeMode>(
+                  initialValue: themeMode,
+                  onSelected: themeController.setMode,
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(
+                      value: ThemeMode.system,
+                      child: Text('System'),
+                    ),
+                    PopupMenuItem(
+                      value: ThemeMode.light,
+                      child: Text('Light'),
+                    ),
+                    PopupMenuItem(
+                      value: ThemeMode.dark,
+                      child: Text('Dark'),
+                    ),
+                  ],
+                ),
+              ),
+              ListTile(
                 title: const Text('Report'),
                 leading: const Icon(Icons.home_repair_service_outlined),
                 onTap: () => context.push('/report'),
@@ -87,18 +112,6 @@ class NavDrawer extends StatelessWidget {
                 title: const Text('Inventory'),
                 leading: const Icon(Icons.inventory),
                 onTap: () => context.push('/inventory'),
-              ),
-              ListTile(
-                title: const Text('Request'),
-                leading: const Icon(Icons.edit_note),
-                onTap: () => context.push('/request'),
-              ),
-              ListTile(
-                title: const Text('Due Payment'),
-                leading: const Icon(Icons.payment),
-                onTap: () {
-                  context.push('/due-payment');
-                },
               ),
               ListTile(
                 title: const Text('Expenses'),
@@ -138,12 +151,12 @@ class NavDrawer extends StatelessWidget {
                           title: const Text('Restore Backup?'),
                           description:
                               const Text('Please pick isar file to restore'),
-                          action: ShadButton.outline(
-                            child: const Text('Select'),
-                            onPressed: () async {
-                              final toaster = ShadToaster.of(context);
-                              bool success = await Database().restoreDB();
-                              if (success) {
+                           action: ShadButton.outline(
+                             child: const Text('Select'),
+                             onPressed: () async {
+                               final toaster = ShadToaster.of(context);
+                               bool success = await database.restoreDB();
+                               if (success) {
                                 toaster.show(
                                   const ShadToast(
                                     title: Text('Restore Database Success!'),
@@ -182,7 +195,7 @@ class NavDrawer extends StatelessWidget {
                         ),
                       );
                       
-                      bool success = await Database().createBackUp();
+                      bool success = await database.createBackUp();
                       
                       if (context.mounted) Navigator.pop(context); // close dialog
                       
@@ -214,7 +227,7 @@ class NavDrawer extends StatelessWidget {
                             ShadButton(
                               child: const Text('Continue'),
                               onPressed: () async {
-                                await Database().clearAllData().whenComplete(() {
+                                await database.clearAllData().whenComplete(() {
                                   if (context.mounted) {
                                     Navigator.of(context).pop(true);
                                     context.go('/');
@@ -228,9 +241,6 @@ class NavDrawer extends StatelessWidget {
                     } else if (item == 'logout') {
                       context.pop();
                       await Supabase.instance.client.auth.signOut();
-                    } else if (item == 'sync') {
-                      context.pop();
-                      context.go('/sync');
                     }
                   },
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -256,10 +266,6 @@ class NavDrawer extends StatelessWidget {
                         child: Text('Login'),
                       )
                     else ...[
-                      const PopupMenuItem<String>(
-                        value: 'sync',
-                        child: Text('Sync'),
-                      ),
                       const PopupMenuItem<String>(
                         value: 'logout',
                         child: Text('Logout'),

@@ -14,6 +14,8 @@ class CustomerModel {
   late bool status;
   DateTime? masuk;
   DateTime? createdAt;
+  DateTime? updatedAt;
+  bool isDeleted;
   bool isSynced;
 
   CustomerModel({
@@ -26,6 +28,8 @@ class CustomerModel {
     required this.status,
     this.masuk,
     this.createdAt,
+    this.updatedAt,
+    this.isDeleted = false,
     this.isSynced = true,
   });
 
@@ -40,6 +44,9 @@ class CustomerModel {
       'status': status,
       'masuk': masuk?.toIso8601String(),
       'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'isDeleted': isDeleted,
+      'isSynced': isSynced,
     };
   }
 
@@ -56,6 +63,10 @@ class CustomerModel {
       masuk: json['masuk'] != null ? DateTime.parse(json['masuk']) : null,
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      isDeleted: json['isDeleted'] ?? false,
+      isSynced: json['isSynced'] ?? true,
     );
   }
 }

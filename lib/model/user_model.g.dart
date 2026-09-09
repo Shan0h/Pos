@@ -27,25 +27,40 @@ const UserModelSchema = CollectionSchema(
       name: r'dob',
       type: IsarType.dateTime,
     ),
-    r'keterangan': PropertySchema(
+    r'isDeleted': PropertySchema(
       id: 2,
+      name: r'isDeleted',
+      type: IsarType.bool,
+    ),
+    r'isSynced': PropertySchema(
+      id: 3,
+      name: r'isSynced',
+      type: IsarType.bool,
+    ),
+    r'keterangan': PropertySchema(
+      id: 4,
       name: r'keterangan',
       type: IsarType.string,
     ),
     r'masuk': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'masuk',
       type: IsarType.dateTime,
     ),
     r'nama': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'nama',
       type: IsarType.string,
     ),
     r'status': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'status',
       type: IsarType.bool,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 8,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _userModelEstimateSize,
@@ -86,10 +101,13 @@ void _userModelSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.createdAt);
   writer.writeDateTime(offsets[1], object.dob);
-  writer.writeString(offsets[2], object.keterangan);
-  writer.writeDateTime(offsets[3], object.masuk);
-  writer.writeString(offsets[4], object.nama);
-  writer.writeBool(offsets[5], object.status);
+  writer.writeBool(offsets[2], object.isDeleted);
+  writer.writeBool(offsets[3], object.isSynced);
+  writer.writeString(offsets[4], object.keterangan);
+  writer.writeDateTime(offsets[5], object.masuk);
+  writer.writeString(offsets[6], object.nama);
+  writer.writeBool(offsets[7], object.status);
+  writer.writeDateTime(offsets[8], object.updatedAt);
 }
 
 UserModel _userModelDeserialize(
@@ -102,10 +120,13 @@ UserModel _userModelDeserialize(
     createdAt: reader.readDateTime(offsets[0]),
     dob: reader.readDateTimeOrNull(offsets[1]),
     id: id,
-    keterangan: reader.readStringOrNull(offsets[2]),
-    masuk: reader.readDateTimeOrNull(offsets[3]),
-    nama: reader.readString(offsets[4]),
-    status: reader.readBool(offsets[5]),
+    isDeleted: reader.readBoolOrNull(offsets[2]) ?? false,
+    isSynced: reader.readBoolOrNull(offsets[3]) ?? true,
+    keterangan: reader.readStringOrNull(offsets[4]),
+    masuk: reader.readDateTimeOrNull(offsets[5]),
+    nama: reader.readString(offsets[6]),
+    status: reader.readBool(offsets[7]),
+    updatedAt: reader.readDateTimeOrNull(offsets[8]),
   );
   return object;
 }
@@ -122,13 +143,19 @@ P _userModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 3:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 5:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
       return (reader.readBool(offset)) as P;
+    case 8:
+      return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -413,6 +440,26 @@ extension UserModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> isDeletedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDeleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> isSyncedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isSynced',
+        value: value,
       ));
     });
   }
@@ -776,6 +823,77 @@ extension UserModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> updatedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition>
+      updatedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> updatedAtEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition>
+      updatedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> updatedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> updatedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension UserModelQueryObject
@@ -806,6 +924,30 @@ extension UserModelQuerySortBy on QueryBuilder<UserModel, UserModel, QSortBy> {
   QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByDobDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dob', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
     });
   }
 
@@ -856,6 +998,18 @@ extension UserModelQuerySortBy on QueryBuilder<UserModel, UserModel, QSortBy> {
       return query.addSortBy(r'status', Sort.desc);
     });
   }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension UserModelQuerySortThenBy
@@ -893,6 +1047,30 @@ extension UserModelQuerySortThenBy
   QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
     });
   }
 
@@ -943,6 +1121,18 @@ extension UserModelQuerySortThenBy
       return query.addSortBy(r'status', Sort.desc);
     });
   }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension UserModelQueryWhereDistinct
@@ -956,6 +1146,18 @@ extension UserModelQueryWhereDistinct
   QueryBuilder<UserModel, UserModel, QDistinct> distinctByDob() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'dob');
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QDistinct> distinctByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDeleted');
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QDistinct> distinctByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isSynced');
     });
   }
 
@@ -984,6 +1186,12 @@ extension UserModelQueryWhereDistinct
       return query.addDistinctBy(r'status');
     });
   }
+
+  QueryBuilder<UserModel, UserModel, QDistinct> distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
+    });
+  }
 }
 
 extension UserModelQueryProperty
@@ -1003,6 +1211,18 @@ extension UserModelQueryProperty
   QueryBuilder<UserModel, DateTime?, QQueryOperations> dobProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'dob');
+    });
+  }
+
+  QueryBuilder<UserModel, bool, QQueryOperations> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDeleted');
+    });
+  }
+
+  QueryBuilder<UserModel, bool, QQueryOperations> isSyncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isSynced');
     });
   }
 
@@ -1027,6 +1247,12 @@ extension UserModelQueryProperty
   QueryBuilder<UserModel, bool, QQueryOperations> statusProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'status');
+    });
+  }
+
+  QueryBuilder<UserModel, DateTime?, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 }

@@ -4,8 +4,7 @@ import 'package:pos/controller/salary_controller.dart';
 import 'package:pos/controller/store_controller.dart';
 import 'package:pos/model/salary_model.dart';
 import 'package:pos/model/user_model.dart';
-import 'package:pos/pages/drawer.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:pos/utils/constant.dart';
 import 'package:pos/utils/extension.dart';
 import 'package:pos/widget/pdf_generator.dart';
@@ -36,8 +35,8 @@ class _SalariesState extends State<Salaries> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Salaries'),
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
+        backgroundColor: context.panelBackground,
+        foregroundColor: context.appTextColor,
         centerTitle: false,
         actions: [
           if (password != null)
@@ -68,7 +67,7 @@ class _SalariesState extends State<Salaries> {
           PopupMenuButton<String>(
             onSelected: (item) async {
               if (item == 'sync') {
-                await Database().salariesSync();
+                await salaryService.salariesSync();
                 await salaryController.salaries.refresh();
               }
             },
@@ -116,7 +115,7 @@ class _SalariesState extends State<Salaries> {
                             if (context.mounted) {
                               ShadToaster.of(context).show(
                                 const ShadToast(
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: Color(0xFF8B5E3C),
                                   description: Text('OTP has been sent'),
                                 ),
                               );
@@ -203,7 +202,7 @@ class _SalariesState extends State<Salaries> {
                         final status = ['Draf', 'Paid'];
                         return ListTile(
                           title: FutureBuilder<UserModel?>(
-                            future: Database().getUserById(item.userId),
+                                future: userService.getUserById(item.userId),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
                                 return Text(
@@ -229,7 +228,7 @@ class _SalariesState extends State<Salaries> {
                                 total: item.total,
                                 createdAt: item.createdAt,
                               );
-                              await Database().updateSalary(salary);
+                                        await salaryService.updateSalary(salary);
                               Future.delayed(Durations.medium1).then(
                                   (_) => salaryController.salaries.refresh());
                             },
@@ -281,7 +280,7 @@ class _SalariesState extends State<Salaries> {
                             DataCell(Text(item.status)),
                             DataCell(
                               FutureBuilder<UserModel?>(
-                                future: Database().getUserById(item.userId),
+                            future: userService.getUserById(item.userId),
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
                                     return Text(snapshot.data?.nama ?? 'Admin');
@@ -315,7 +314,7 @@ class _SalariesState extends State<Salaries> {
                                           total: item.total,
                                           createdAt: item.createdAt,
                                         );
-                                        await Database().updateSalary(salary);
+                              await salaryService.updateSalary(salary);
                                         Future.delayed(Durations.medium1).then(
                                             (_) => salaryController.salaries
                                                 .refresh());
@@ -335,25 +334,26 @@ class _SalariesState extends State<Salaries> {
                                       },
                                     ),
                                   ),
-                                  ShadButton(
-                                    child: const Text('PDF'),
-                                    onPressed: () async {
-                                      var user = await Database()
-                                          .getUserById(item.userId);
-                                      if (user != null) {
-                                        log('hello ${item.items.first.toJson()}');
-                                        pdfGenerator(
-                                          user: user,
-                                          store: store.value!,
-                                          salary: item,
-                                        );
-                                      }
+                                    ShadButton(
+                                        child: const Text('PDF'),
+                                        onPressed: () async {
+                                        var user = await userService
+                                            .getUserById(item.userId);
+                                        final currentStore = store.value;
+                                        if (user != null && currentStore != null) {
+                                          log('hello ${item.items.first.toJson()}');
+                                          pdfGenerator(
+                                           user: user,
+                                           store: currentStore,
+                                           salary: item,
+                                         );
+                                       }
                                     },
                                   ),
                                   ShadButton.destructive(
                                     icon: const Icon(Icons.delete),
                                     onPressed: () async {
-                                      await Database().deleteSalary(item.id!);
+                                      await salaryService.deleteSalary(item.id!);
                                       Future.delayed(Durations.medium1).then(
                                           (_) => salaryController.salaries
                                               .refresh());

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:pos/enum/payment_enum.dart';
+import 'package:pos/utils/extension.dart';
 import 'menu_management_page.dart';
 
 class OwnerDashboardPage extends StatefulWidget {
@@ -26,7 +27,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    final reports = await Database().getReportToday();
+    final reports = await reportService.getReportToday();
     
     double total = 0;
     int receipts = reports.length;
@@ -39,13 +40,12 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
     for (var report in reports) {
       total += report.totalHarga;
-      
-      // I don't have TypePayment in PenjualanModel stored? Wait, PenjualanModel doesn't store TypePayment.
-      // We will just mock the payment methods split based on total logic or skip it if it's not saved.
-      // Actually, since we can't change the schema, we'll just say we assume Cash for everything or skip it.
-      // But let's check if there is an indicator. No. So we will just show a static or derived placeholder.
-      // Wait, is there a diskon or something? Let's just mock the split for UI purposes since it's not in DB.
-      payments[TypePayment.cash] = (payments[TypePayment.cash] ?? 0) + 1;
+
+      final method = TypePayment.values.firstWhere(
+        (value) => value.name == report.paymentMethod,
+        orElse: () => TypePayment.cash,
+      );
+      payments[method] = (payments[method] ?? 0) + 1;
 
       for (var item in report.items) {
         itemCounts[item.nama!] = (itemCounts[item.nama!] ?? 0) + item.quantity!;
@@ -68,11 +68,12 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width >= 800;
+    final textColor = context.appTextColor;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Owner Dashboard'),
-        backgroundColor: Colors.brown[800],
+        backgroundColor: const Color(0xFF5D3A1A),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -111,7 +112,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                   ),
                 );
                 
-                bool success = await Database().createBackUp();
+                bool success = await database.createBackUp();
                 
                 if (context.mounted) Navigator.pop(context); // close dialog
                 
@@ -121,7 +122,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                   );
                 }
               } else if (item == 'restore') {
-                bool success = await Database().restoreDB();
+                bool success = await database.restoreDB();
                 if (success) {
                   scaffoldMessenger.showSnackBar(
                     const SnackBar(content: Text('Restore Success! Restart app to see changes.'), backgroundColor: Colors.green),
@@ -151,7 +152,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
           ),
         ],
       ),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: context.pageBackground,
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(
@@ -159,24 +160,24 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Today\'s Overview', style: TextStyle(color: Colors.black87, fontSize: 24, fontWeight: FontWeight.bold)),
+                Text('Today\'s Overview', style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 24),
                 
                 // Stat Cards
                 if (isDesktop)
                   Row(
                     children: [
-                      Expanded(child: _buildStatCard('Total Sales', 'RM ${_totalSales.toStringAsFixed(2)}', Icons.monetization_on, Colors.green)),
+                      Expanded(child: _buildStatCard('Total Sales', 'RM ${_totalSales.toStringAsFixed(2)}', Icons.monetization_on, const Color(0xFF8B5E3C))),
                       const SizedBox(width: 16),
-                      Expanded(child: _buildStatCard('Total Receipts', '$_receiptCount', Icons.receipt_long, Colors.blue)),
+                      Expanded(child: _buildStatCard('Total Receipts', '$_receiptCount', Icons.receipt_long, const Color(0xFF6B4226))),
                     ],
                   )
                 else
                   Column(
                     children: [
-                      _buildStatCard('Total Sales', 'RM ${_totalSales.toStringAsFixed(2)}', Icons.monetization_on, Colors.green),
+                      _buildStatCard('Total Sales', 'RM ${_totalSales.toStringAsFixed(2)}', Icons.monetization_on, const Color(0xFF8B5E3C)),
                       const SizedBox(height: 16),
-                      _buildStatCard('Total Receipts', '$_receiptCount', Icons.receipt_long, Colors.blue),
+                      _buildStatCard('Total Receipts', '$_receiptCount', Icons.receipt_long, const Color(0xFF6B4226)),
                     ],
                   ),
                 
@@ -204,7 +205,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                   ),
                 
                 const SizedBox(height: 32),
-                const Text('Management Modules', style: TextStyle(color: Colors.black87, fontSize: 24, fontWeight: FontWeight.bold)),
+                Text('Management Modules', style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 24),
                 _buildModulesGrid(context),
               ],
@@ -215,13 +216,13 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Widget _buildModulesGrid(BuildContext context) {
     final modules = [
-      {'title': 'Store Info', 'icon': Icons.store, 'route': '/store', 'color': Colors.deepOrange},
-      {'title': 'Report', 'icon': Icons.home_repair_service_outlined, 'route': '/report', 'color': Colors.indigo},
-      {'title': 'Inventory', 'icon': Icons.inventory, 'route': '/inventory', 'color': Colors.orange},
-      {'title': 'Expenses', 'icon': Icons.monetization_on, 'route': '/expenses', 'color': Colors.green},
-      {'title': 'Users', 'icon': Icons.person_2, 'route': '/users', 'color': Colors.blue},
-      {'title': 'Customer', 'icon': Icons.people, 'route': '/customer', 'color': Colors.purple},
-      {'title': 'Salaries', 'icon': Icons.account_balance, 'route': '/salaries', 'color': Colors.cyan},
+      {'title': 'Store Info', 'icon': Icons.store, 'route': '/store', 'color': const Color(0xFF8B5E3C)},
+      {'title': 'Report', 'icon': Icons.home_repair_service_outlined, 'route': '/report', 'color': const Color(0xFF6B4226)},
+      {'title': 'Inventory', 'icon': Icons.inventory, 'route': '/inventory', 'color': const Color(0xFFA0522D)},
+      {'title': 'Expenses', 'icon': Icons.monetization_on, 'route': '/expenses', 'color': const Color(0xFF5D3A1A)},
+      {'title': 'Users', 'icon': Icons.person_2, 'route': '/users', 'color': const Color(0xFF7B5B3A)},
+      {'title': 'Customer', 'icon': Icons.people, 'route': '/customer', 'color': const Color(0xFF9C6634)},
+      {'title': 'Salaries', 'icon': Icons.account_balance, 'route': '/salaries', 'color': const Color(0xFF6B4226)},
     ];
 
     return GridView.builder(
@@ -242,12 +243,12 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             context.push(mod['route'] as String);
           },
           borderRadius: BorderRadius.circular(16),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
+            child: Container(
+              decoration: BoxDecoration(
+              color: context.panelBackground,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
-            ),
+              boxShadow: [BoxShadow(color: context.appShadowColor, blurRadius: 10, offset: const Offset(0, 4))],
+             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -257,7 +258,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                   child: Icon(mod['icon'] as IconData, size: 32, color: color),
                 ),
                 const SizedBox(height: 12),
-                Text(mod['title'] as String, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+                Text(mod['title'] as String, style: TextStyle(fontWeight: FontWeight.bold, color: context.appTextColor)),
               ],
             ),
           ),
@@ -268,7 +269,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Widget _buildTopItemsCard() {
     return Card(
-      color: Colors.white,
+      color: context.panelBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -276,17 +277,17 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Top Selling Coffee/Items', style: TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('Top Selling Coffee/Items', style: TextStyle(color: context.appTextColor, fontSize: 20, fontWeight: FontWeight.bold)),
             const Divider(height: 32),
             if (_topItems.isEmpty)
-              const Text('No sales yet today.', style: TextStyle(color: Colors.grey)),
+              Text('No sales yet today.', style: TextStyle(color: context.secondaryTextColor)),
             ..._topItems.entries.map((e) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(child: Text(e.key, style: const TextStyle(color: Colors.black87, fontSize: 16))),
-                  Text('${e.value} sold', style: const TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
+                  Expanded(child: Text(e.key, style: TextStyle(color: context.appTextColor, fontSize: 16))),
+                  Text('${e.value} sold', style: TextStyle(color: context.appTextColor, fontSize: 16, fontWeight: FontWeight.bold)),
                 ],
               ),
             )),
@@ -298,7 +299,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Widget _buildPaymentCard() {
     return Card(
-      color: Colors.white,
+      color: context.panelBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -306,13 +307,13 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Payment Methods', style: TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('Payment Methods', style: TextStyle(color: context.appTextColor, fontSize: 20, fontWeight: FontWeight.bold)),
             const Divider(height: 32),
-            _buildPaymentRow('Cash', _paymentMethods[TypePayment.cash] ?? 0, _receiptCount, Colors.green),
+            _buildPaymentRow('Cash', _paymentMethods[TypePayment.cash] ?? 0, _receiptCount, const Color(0xFF8B5E3C)),
             const SizedBox(height: 16),
-            _buildPaymentRow('QR DuitNow', _paymentMethods[TypePayment.qris] ?? 0, _receiptCount, Colors.blue),
+            _buildPaymentRow('QR DuitNow', _paymentMethods[TypePayment.qris] ?? 0, _receiptCount, const Color(0xFF6B4226)),
             const SizedBox(height: 16),
-            _buildPaymentRow('Card', _paymentMethods[TypePayment.transfer] ?? 0, _receiptCount, Colors.orange),
+            _buildPaymentRow('Card', _paymentMethods[TypePayment.transfer] ?? 0, _receiptCount, const Color(0xFFA0522D)),
           ],
         ),
       ),
@@ -321,7 +322,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Card(
-      color: Colors.white,
+      color: context.panelBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -336,8 +337,14 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 16, color: Colors.black54)),
-                Text(value, style: const TextStyle(color: Colors.black87, fontSize: 32, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: context.secondaryTextColor,
+                  ),
+                ),
+                Text(value, style: TextStyle(color: context.appTextColor, fontSize: 32, fontWeight: FontWeight.bold)),
               ],
             ),
           ],
@@ -354,14 +361,14 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(name, style: const TextStyle(color: Colors.black87, fontSize: 16)),
-            Text('$count (${(percentage * 100).toStringAsFixed(1)}%)', style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+            Text(name, style: TextStyle(color: context.appTextColor, fontSize: 16)),
+            Text('$count (${(percentage * 100).toStringAsFixed(1)}%)', style: TextStyle(color: context.appTextColor, fontWeight: FontWeight.bold)),
           ],
         ),
         const SizedBox(height: 8),
         LinearProgressIndicator(
           value: percentage,
-          backgroundColor: Colors.grey[200],
+          backgroundColor: context.mutedBackground,
           valueColor: AlwaysStoppedAnimation<Color>(color),
           minHeight: 8,
           borderRadius: BorderRadius.circular(4),

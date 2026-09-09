@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:pos/controller/inventory_controller.dart';
 import 'package:pos/controller/selling/events.dart';
 import 'package:pos/controller/selling/service.dart';
@@ -7,7 +6,7 @@ import 'package:pos/model/card_model.dart';
 import 'package:pos/model/item_model.dart';
 import 'package:pos/model/customer_model.dart';
 import 'package:pos/model/user_model.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:flutter/material.dart';
 import 'package:signals/signals_flutter.dart';
 
@@ -34,66 +33,36 @@ class SellingController {
             .catchError((e, s) => _cart.set(AsyncError(e, s)));
 
       case CartItemAdded(:final item):
-        if (_cart.value case AsyncData<Cart>(:final value)) {
+        if (_cart.value case AsyncData<Cart>()) {
           try {
-            final isSame = _cart.value.value?.items
-                .firstWhereOrNull((val) => val.code == item.code);
             _cartService.add(item);
-            if (isSame != null) {
-              _cart.value = AsyncData(Cart(items: [...value.items, item]));
-              _cart.value = AsyncData(
-                Cart(
-                  items: [...value.items]..remove(event.item),
-                ),
-              );
-            } else {
-              _cart.value = AsyncData(Cart(items: [...value.items, item]));
-            }
+            _cart.value = AsyncData(Cart(items: _cartService.items));
           } catch (e, s) {
             _cart.value = AsyncError(e, s);
           }
         }
 
       case CartItemRemoved(:final item):
-        if (_cart.value case AsyncData<Cart>(:final value)) {
+        if (_cart.value case AsyncData<Cart>()) {
           try {
             _cartService.remove(item);
-            _cart.value = AsyncData(
-              Cart(
-                items: [...value.items]..remove(event.item),
-              ),
-            );
+            _cart.value = AsyncData(Cart(items: _cartService.items));
           } catch (e, s) {
             _cart.value = AsyncError(e, s);
           }
         }
 
       case CartItemDecremented(:final item):
-        if (_cart.value case AsyncData<Cart>(:final value)) {
+        if (_cart.value case AsyncData<Cart>()) {
           try {
-            final isSame = value.items.firstWhereOrNull((val) => val.code == item.code);
-            if (isSame != null) {
-              if (isSame.quantity > 1) {
-                _cartService.decrement(item);
-                // Force rebuild
-                _cart.value = AsyncData(Cart(items: [...value.items, item]));
-                _cart.value = AsyncData(Cart(items: [...value.items]..remove(item)));
-              } else {
-                _cartService.decrement(item);
-                _cart.value = AsyncData(
-                  Cart(
-                    items: [...value.items]..remove(isSame),
-                  ),
-                );
-              }
-            }
+            _cartService.decrement(item);
+            _cart.value = AsyncData(Cart(items: _cartService.items));
           } catch (e, s) {
             _cart.value = AsyncError(e, s);
           }
         }
 
       case CartPaid():
-        _cart.value = const AsyncLoading();
         _cartService.clear();
         _cart.value = const AsyncData(Cart());
     }
@@ -101,13 +70,11 @@ class SellingController {
 
   Future<void> updateBatch(List<ItemModel> items) async {
     await Future.forEach<ItemModel>(items, (i) async {
-      final item = i
-        ..jumlahBarang = i.jumlahBarang - i.quantity
-        ..quantity = 1;
-      await Database().updateInventory(item);
+      await inventoryService.decrementStock(i.id!, i.quantity);
     });
     Future.delayed(Durations.short1).then((_) {
       inventoryController.inventorys.refresh();
+      inventoryController.menuItems.refresh();
     });
   }
 }

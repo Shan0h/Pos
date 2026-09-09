@@ -19,11 +19,7 @@ List<RouteBase> get $appRoutes => [
       $loginRoute,
       $registerRoute,
       $expensesRoute,
-      $syncRoute,
       $salariesRoute,
-      $duePaymentRoute,
-      $requestRoute,
-      $testingRoute,
     ];
 
 RouteBase get $posModernRoute => GoRouteData.$route(
@@ -365,28 +361,6 @@ extension $ExpensesRouteExtension on ExpensesRoute {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $syncRoute => GoRouteData.$route(
-      path: '/sync',
-      factory: $SyncRouteExtension._fromState,
-    );
-
-extension $SyncRouteExtension on SyncRoute {
-  static SyncRoute _fromState(GoRouterState state) => const SyncRoute();
-
-  String get location => GoRouteData.$location(
-        '/sync',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
 RouteBase get $salariesRoute => GoRouteData.$route(
       path: '/salaries',
       factory: $SalariesRouteExtension._fromState,
@@ -421,121 +395,6 @@ extension $SalariesFormRouteExtension on SalariesFormRoute {
 
   String get location => GoRouteData.$location(
         '/salaries/form',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $duePaymentRoute => GoRouteData.$route(
-      path: '/due-payment',
-      factory: $DuePaymentRouteExtension._fromState,
-      routes: [
-        GoRouteData.$route(
-          path: 'form',
-          factory: $DuePaymentFormRouteExtension._fromState,
-        ),
-      ],
-    );
-
-extension $DuePaymentRouteExtension on DuePaymentRoute {
-  static DuePaymentRoute _fromState(GoRouterState state) =>
-      const DuePaymentRoute();
-
-  String get location => GoRouteData.$location(
-        '/due-payment',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-extension $DuePaymentFormRouteExtension on DuePaymentFormRoute {
-  static DuePaymentFormRoute _fromState(GoRouterState state) =>
-      const DuePaymentFormRoute();
-
-  String get location => GoRouteData.$location(
-        '/due-payment/form',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $requestRoute => GoRouteData.$route(
-      path: '/request',
-      factory: $RequestRouteExtension._fromState,
-      routes: [
-        GoRouteData.$route(
-          path: 'form',
-          factory: $RequestFormRouteExtension._fromState,
-        ),
-      ],
-    );
-
-extension $RequestRouteExtension on RequestRoute {
-  static RequestRoute _fromState(GoRouterState state) => const RequestRoute();
-
-  String get location => GoRouteData.$location(
-        '/request',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-extension $RequestFormRouteExtension on RequestFormRoute {
-  static RequestFormRoute _fromState(GoRouterState state) =>
-      const RequestFormRoute();
-
-  String get location => GoRouteData.$location(
-        '/request/form',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $testingRoute => GoRouteData.$route(
-      path: '/testing',
-      factory: $TestingRouteExtension._fromState,
-    );
-
-extension $TestingRouteExtension on TestingRoute {
-  static TestingRoute _fromState(GoRouterState state) => const TestingRoute();
-
-  String get location => GoRouteData.$location(
-        '/testing',
       );
 
   void go(BuildContext context) => context.go(location);

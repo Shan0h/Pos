@@ -14,6 +14,8 @@ class SalaryModel {
   String? note;
   String? management;
   DateTime? createdAt;
+  DateTime? updatedAt;
+  bool isDeleted;
   bool isSynced;
 
   SalaryModel({
@@ -27,6 +29,8 @@ class SalaryModel {
     this.note,
     this.management,
     this.createdAt,
+    this.updatedAt,
+    this.isDeleted = false,
     this.isSynced = true,
   });
 
@@ -41,7 +45,10 @@ class SalaryModel {
       'total': total,
       'note': note,
       'management': management,
-      'createdAt': createdAt?.toIso8601String()
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'isDeleted': isDeleted,
+      'isSynced': isSynced,
     };
   }
 
@@ -58,6 +65,10 @@ class SalaryModel {
       management: json['management'],
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      isDeleted: json['isDeleted'] ?? false,
+      isSynced: json['isSynced'] ?? true,
     );
   }
 }

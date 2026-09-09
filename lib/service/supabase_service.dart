@@ -2,19 +2,13 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:pos/model/customer_model.dart';
-import 'package:pos/model/due_payment_model.dart';
 import 'package:pos/model/expenses_model.dart';
 import 'package:pos/model/item_model.dart';
 import 'package:pos/model/penjualan_model.dart';
-import 'package:pos/model/presence_model.dart';
-import 'package:pos/model/rent_item_model.dart';
-import 'package:pos/model/request_model.dart';
 import 'package:pos/model/salary_model.dart';
 import 'package:pos/model/store_model.dart';
 import 'package:pos/model/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../model/rent_model.dart';
 
 class SupabaseHelper {
   static final SupabaseClient supabase = Supabase.instance.client;
@@ -50,6 +44,11 @@ class SupabaseHelper {
     await supabase.from('inventory').select().eq("id", id).then((value) async {
       await supabase.from('inventory').delete().eq('id', id);
     });
+  }
+
+  Future<bool> getInventoryById(int id) async {
+    final res = await supabase.from('inventory').select().eq('id', id);
+    return res.isNotEmpty;
   }
 
   updateInventory(ItemModel item) async {
@@ -112,10 +111,10 @@ class SupabaseHelper {
     await supabase
         .from('customer')
         .select()
-        .eq("id", item.id!)
+      .eq("id", item.id!)
         .then((value) async {
       if (value.isEmpty) {
-        addInventory(item.toJson());
+        addCustomer(item.toJson());
       } else {
         await supabase
             .from('customer')
@@ -174,9 +173,9 @@ class SupabaseHelper {
   addReport(Map data) async {
     data.putIfAbsent('user', () => supabase.auth.currentUser!.id);
     await supabase.from('report').insert(data).then((value) {
-      log('success add inventory $value');
+      log('success add report $value');
     }).catchError((error) {
-      log('error add inventory $error');
+      log('error add report $error');
     });
   }
 
@@ -195,142 +194,13 @@ class SupabaseHelper {
     await supabase
         .from('report')
         .select()
-        .eq("id", item.id!)
+      .eq("id", item.id!)
         .then((value) async {
       if (value.isEmpty) {
-        addInventory(item.toJson());
+        addReport(item.toJson());
       } else {
         await supabase
             .from('report')
-            .update(item.toJson())
-            .match({'id': item.id!});
-      }
-    });
-  }
-
-  // presense
-  addPresense(Map data) async {
-    data.putIfAbsent('belong', () => supabase.auth.currentUser!.id);
-    await supabase.from('presense').insert(data).then((value) {
-      log('success add presense $value');
-    }).catchError((error) {
-      log('error add presense $error');
-    });
-  }
-
-  Future<bool> getPresenseById(int id) async {
-    final res = await supabase.from('presense').select().eq("id", id);
-    return res.isNotEmpty;
-  }
-
-  Future<List<PresenceModel>> getPresense() async {
-    List<PresenceModel> allPresense = [];
-
-    final result = await supabase
-        .from('presense')
-        .select()
-        .eq('belong', supabase.auth.currentUser!.id);
-
-    if (result.isNotEmpty) {
-      await Future.forEach(result, (val) async {
-        allPresense.add(PresenceModel.fromJson(val));
-      });
-    }
-    return allPresense;
-  }
-
-  // rent item
-  addRentItem(Map data) async {
-    data.putIfAbsent('user', () => supabase.auth.currentUser!.id);
-    await supabase.from('rent_items').insert(data).then((value) {
-      log('success add presense $value');
-    }).catchError((error) {
-      log('error add presense $error');
-    });
-  }
-
-  Future<bool> getRentItemById(int id) async {
-    final res = await supabase.from('rent_items').select().eq("id", id);
-    return res.isNotEmpty;
-  }
-
-  Future<List<RentItemModel>> getRentItems() async {
-    List<RentItemModel> rentItems = [];
-
-    final result = await supabase
-        .from('rent_items')
-        .select()
-        .eq('user', supabase.auth.currentUser!.id);
-
-    if (result.isNotEmpty) {
-      await Future.forEach(result, (val) async {
-        rentItems.add(RentItemModel.fromJson(val));
-      });
-    }
-    return rentItems;
-  }
-
-  removeRentItem(int id) async {
-    await supabase.from('rent_items').select().eq("id", id).then((value) async {
-      await supabase.from('rent_items').delete().eq('id', id);
-    });
-  }
-
-  updateRentItem(RentItemModel item) async {
-    await supabase
-        .from('rent_items')
-        .select()
-        .eq("id", item.id!)
-        .then((value) async {
-      if (value.isEmpty) {
-        addRentItem(item.toJson());
-      } else {
-        await supabase
-            .from('rent_items')
-            .update(item.toJson())
-            .match({'id': item.id!});
-      }
-    });
-  }
-
-  // rent
-  addRent(Map data) async {
-    data.putIfAbsent('user', () => supabase.auth.currentUser!.id);
-    await supabase.from('rent').insert(data).then((value) {
-      log('success add presense $value');
-    }).catchError((error) {
-      log('error add presense $error');
-    });
-  }
-
-  Future<List<RentModel>> getRent() async {
-    List<RentModel> rentItems = [];
-
-    final result = await supabase
-        .from('rent')
-        .select()
-        .eq('user', supabase.auth.currentUser!.id);
-
-    if (result.isNotEmpty) {
-      await Future.forEach(result, (val) async {
-        rentItems.add(RentModel.fromJson(val));
-      });
-    }
-    return rentItems;
-  }
-
-  Future<bool> getRentById(int id) async {
-    final res = await supabase.from('rent').select().eq("id", id);
-    return res.isNotEmpty;
-  }
-
-  updateRent(RentModel item) async {
-    await supabase.from('rent').select().eq("id", item.id!).then((value) async {
-      if (value.isEmpty) {
-        addRent(item.toJson());
-      } else {
-        await supabase
-            .from('rent')
             .update(item.toJson())
             .match({'id': item.id!});
       }
@@ -370,8 +240,25 @@ class SupabaseHelper {
   }
 
   Future<bool> getExpensesById(int id) async {
-    final res = await supabase.from('rent').select().eq("id", id);
+    final res = await supabase.from('expenses').select().eq("id", id);
     return res.isNotEmpty;
+  }
+
+  updateExpenses(ExpensesModel item) async {
+    await supabase
+        .from('expenses')
+        .select()
+        .eq("id", item.id!)
+        .then((value) async {
+      if (value.isEmpty) {
+        addExpenses(item.toJson());
+      } else {
+        await supabase
+            .from('expenses')
+            .update(item.toJson())
+            .match({'id': item.id!});
+      }
+    });
   }
 
   // store
@@ -530,10 +417,10 @@ class SupabaseHelper {
     await supabase
         .from('salary')
         .select()
-        .eq("id", item.id!)
+      .eq("id", item.id!)
         .then((value) async {
       if (value.isEmpty) {
-        addRent(item.toJson());
+        addSalary(item.toJson());
       } else {
         await supabase
             .from('salary')
@@ -543,116 +430,4 @@ class SupabaseHelper {
     });
   }
 
-  // due payment
-  Future<List<DuePaymentModel>> getDuePayment() async {
-    List data = [];
-    List<DuePaymentModel> duePayments = [];
-
-    final result = await supabase
-        .from('due_payment')
-        .select()
-        .eq('user', supabase.auth.currentUser!.id);
-    if (result.isNotEmpty) {
-      await Future.forEach(result, (val) async => data.add(val));
-    }
-    await Future.forEach(data, (val) async {
-      duePayments.add(DuePaymentModel.fromJson(val));
-    });
-
-    return duePayments;
-  }
-
-  addDuePayment(Map data) async {
-    data.putIfAbsent('user', () => supabase.auth.currentUser!.id);
-    await supabase.from('due_payment').insert(data).then((value) {
-      log('success add due payment $value');
-    }).catchError((error) {
-      log('error add due payment $error');
-    });
-  }
-
-  Future<bool> getDuePaymentById(int id) async {
-    final res = await supabase.from('due_payment').select().eq("id", id);
-    return res.isNotEmpty;
-  }
-
-  removeDuePayment(int id) async {
-    await supabase
-        .from('due_payment')
-        .select()
-        .eq("id", id)
-        .then((value) async {
-      await supabase.from('due_payment').delete().eq('id', id);
-    });
-  }
-
-  updateDuePayment(DuePaymentModel item) async {
-    await supabase
-        .from('due_payment')
-        .select()
-        .eq("id", item.id!)
-        .then((value) async {
-      if (value.isEmpty) {
-        addDuePayment(item.toJson());
-      } else {
-        await supabase
-            .from('due_payment')
-            .update(item.toJson())
-            .match({'id': item.id!});
-      }
-    });
-  }
-
-  // request
-  addRequest(Map data) async {
-    data.putIfAbsent('user', () => supabase.auth.currentUser!.id);
-    await supabase.from('request').insert(data).then((value) {
-      log('success add request $value');
-    }).catchError((error) {
-      log('error add request $error');
-    });
-  }
-
-  removeRequest(int id) async {
-    await supabase.from('request').select().eq("id", id).then((value) async {
-      await supabase.from('request').delete().eq('id', id);
-    });
-  }
-
-  Future<bool> getRequestId(int id) async {
-    final res = await supabase.from('request').select().eq("id", id);
-    return res.isNotEmpty;
-  }
-
-  Future<List<RequestModel>> getRequests() async {
-    List<RequestModel> requestItems = [];
-
-    final result = await supabase
-        .from('request')
-        .select()
-        .eq('user', supabase.auth.currentUser!.id);
-
-    await Future.forEach(result, (val) async {
-      requestItems.add(RequestModel.fromJson(val));
-    });
-
-    return requestItems;
-  }
-
-  updateRequest(RequestModel item) async {
-    await supabase
-        .from('request')
-        .select()
-        .eq("id", item.id!)
-        .then((value) async {
-      if (value.isEmpty) {
-        addRent(item.toJson());
-      } else {
-        await supabase
-            .from('request')
-            .update(item.toJson())
-            .match({'id': item.id!});
-      }
-    });
-  }
 }

@@ -1,7 +1,7 @@
 import 'package:pos/controller/user_controller.dart';
-import 'package:pos/pages/drawer.dart';
 import 'package:pos/pages/users/user_list.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -13,9 +13,9 @@ class Users extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Users Management'),
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
+        title: const Text('Users'),
+        backgroundColor: context.panelBackground,
+        foregroundColor: context.appTextColor,
         centerTitle: false,
         actions: [
           ShadButton.ghost(
@@ -34,7 +34,7 @@ class Users extends StatelessWidget {
           PopupMenuButton<String>(
             onSelected: (item) async {
               if (item == 'sync') {
-                Database()
+                userService
                     .syncUsers()
                     .whenComplete(() => userController.users.refresh());
               }
@@ -57,8 +57,8 @@ class Users extends StatelessWidget {
       ),
       body: const UserList(),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
+        backgroundColor: context.panelBackground,
+        foregroundColor: context.appTextColor,
         onPressed: () => context.push('/users/form'),
         tooltip: 'Add User',
         child: const Icon(Icons.add),

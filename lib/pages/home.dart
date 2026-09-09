@@ -1,6 +1,7 @@
 import 'package:pos/controller/auth_controller.dart';
 import 'package:pos/pages/drawer.dart';
 import 'package:pos/pages/home/users_sheet.dart';
+import 'package:pos/widget/responsive_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -26,16 +27,16 @@ class Home extends StatelessWidget {
                 padding: EdgeInsets.only(right: 8), child: Icon(Icons.store)),
             child: const Text('Store'),
             onPressed: () {
-              context.push('/home/store');
+              context.push('/store');
             },
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Center(
-          child: ShadCard(
-            width: 350,
-            title: Row(
+          child: ResponsiveConstrainedBox(
+            child: ShadCard(
+              title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Account Login', style: theme.textTheme.h4),
@@ -80,6 +81,7 @@ class Home extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

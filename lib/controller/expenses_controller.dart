@@ -1,11 +1,11 @@
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:signals/signals_flutter.dart';
 
 class ExpensesController {
   final dateRange = listSignal(
       [DateTime.now().subtract(const Duration(days: 31)), DateTime.now()]);
   final expenses = futureSignal(
-    () async => Database().getExpenses(
+    () async => expensesService.getExpenses(
         start: expensesController.dateRange.first,
         end: expensesController.dateRange.last),
   );

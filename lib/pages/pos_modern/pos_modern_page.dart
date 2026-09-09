@@ -6,9 +6,10 @@ import 'package:pos/model/penjualan_model.dart';
 import 'package:pos/model/store_model.dart';
 import 'package:pos/controller/store_controller.dart';
 import 'package:pos/enum/payment_enum.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:pos/utils/constant.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:usb_esc_printer_windows/usb_esc_printer_windows.dart' as usb_esc_printer_windows;
-import 'package:pos/service/database.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,6 +56,9 @@ class _PosModernPageState extends State<PosModernPage> {
     } else {
       if (!Platform.isMacOS) _checkConnection();
     }
+    // Always (re)fetch menu items when the POS page is opened so the
+    // catalog is populated even if the signal was idle/errored previously.
+    inventoryController.menuItems.reload();
   }
 
   void _checkConnection() async {
@@ -81,11 +85,16 @@ class _PosModernPageState extends State<PosModernPage> {
     final inventoryState = inventoryController.menuItems.watch(context);
     final allProducts = inventoryState.value ?? [];
 
-    // Extract Pseudo-Categories
+    // Extract menu categories from the real menuCategory field.
+    // Legacy rows without a category fall under "Others".
+    const othersCategory = 'Others';
     final Set<String> uniqueCategories = {'All'};
+    final hasUncategorized = allProducts.any((p) => p.menuCategory == null);
+    if (hasUncategorized) uniqueCategories.add(othersCategory);
     for (var p in allProducts) {
-      if (p.nama.isNotEmpty) {
-        uniqueCategories.add(p.nama.split(' ').first);
+      final cat = p.menuCategory;
+      if (cat != null && cat.trim().isNotEmpty) {
+        uniqueCategories.add(cat.trim());
       }
     }
     final categories = uniqueCategories.toList();
@@ -96,12 +105,19 @@ class _PosModernPageState extends State<PosModernPage> {
 
     List<ItemModel> filteredProducts = allProducts.where((product) {
       final matchesSearch = product.nama.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesCategory = _selectedCategory == 'All' || product.nama.startsWith(_selectedCategory);
+      final bool matchesCategory;
+      if (_selectedCategory == 'All') {
+        matchesCategory = true;
+      } else if (_selectedCategory == othersCategory) {
+        matchesCategory = product.menuCategory == null;
+      } else {
+        matchesCategory = product.menuCategory == _selectedCategory;
+      }
       return matchesSearch && matchesCategory;
     }).toList();
 
     final isDesktop = MediaQuery.of(context).size.width >= 800;
-    
+
     Widget catalogWidget = CatalogPanel(
       searchQuery: _searchQuery,
       onSearchChanged: (query) => setState(() => _searchQuery = query),
@@ -109,6 +125,8 @@ class _PosModernPageState extends State<PosModernPage> {
       onCategorySelected: (category) => setState(() => _selectedCategory = category),
       products: filteredProducts,
       categories: categories,
+      // Wide tablets/desktops get a vertical category rail on the left.
+      showCategoryRail: MediaQuery.of(context).size.width >= 1000,
       onProductTap: _handleProductTap,
       onBarcodeScanned: (code) {
         final matchedProduct = allProducts.where((p) => p.code == code).firstOrNull;
@@ -134,7 +152,7 @@ class _PosModernPageState extends State<PosModernPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Modern POS'),
-        backgroundColor: Colors.teal,
+        backgroundColor: const Color(0xFF5D3A1A),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -152,7 +170,7 @@ class _PosModernPageState extends State<PosModernPage> {
         ],
       ),
       drawer: const NavDrawer(),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: context.pageBackground,
       body: SafeArea(
         child: isDesktop
             ? Row(
@@ -164,13 +182,13 @@ class _PosModernPageState extends State<PosModernPage> {
             : catalogWidget,
       ),
       bottomNavigationBar: isDesktop || cartItems.isEmpty
-          ? null
-          : Container(
+            ? null
+            : Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.panelBackground,
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -5))
+                  BoxShadow(color: context.appShadowColor, blurRadius: 10, offset: const Offset(0, -5))
                 ],
               ),
               child: SafeArea(
@@ -181,53 +199,83 @@ class _PosModernPageState extends State<PosModernPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${cartItems.length} items', style: const TextStyle(color: Colors.black54)),
+                        Text('${cartItems.length} items', style: TextStyle(color: context.secondaryTextColor)),
                         Text(
                           'Total RM ${(cartState.value?.totalPrice ?? 0).toStringAsFixed(2)}',
-                          style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18),
+                          style: TextStyle(color: context.appTextColor, fontWeight: FontWeight.bold, fontSize: 18),
                         ),
                       ],
                     ),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => Container(
-                            height: MediaQuery.of(context).size.height * 0.85,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: Watch((context) {
-                              final currentCart = getIt.get<SellingController>().cart.value.value?.items ?? [];
-                              return TicketPanel(
-                                cartItems: currentCart,
-                                onClear: () {
-                                  _handleClear();
-                                  Navigator.pop(context); // Close bottom sheet when cleared
-                                },
-                                onIncrement: _handleIncrement,
-                                onDecrement: _handleDecrement,
-                                onPay: () {
-                                  Navigator.pop(context); // Close bottom sheet
-                                  _handlePay(currentCart); // Proceed to pay
-                                },
-                              );
-                            }),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF8B5E3C),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.shopping_cart),
-                      label: const Text('View Cart', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) => Container(
+                                height: MediaQuery.of(context).size.height * 0.85,
+                                decoration: BoxDecoration(
+                                  color: context.panelBackground,
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: Watch((context) {
+                                  final currentCart = getIt.get<SellingController>().cart.value.value?.items ?? [];
+                                  return TicketPanel(
+                                    cartItems: currentCart,
+                                    onClear: () {
+                                      _handleClear();
+                                      Navigator.pop(context); // Close bottom sheet when cleared
+                                    },
+                                    onIncrement: _handleIncrement,
+                                    onDecrement: _handleDecrement,
+                                    onPay: () {
+                                      Navigator.pop(context); // Close bottom sheet
+                                      _handlePay(currentCart); // Proceed to pay
+                                    },
+                                  );
+                                }),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.shopping_cart),
+                          label: const Text('View Cart', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                        // Quantity badge on the cart button.
+                        Positioned(
+                          top: -8,
+                          right: -8,
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 22,
+                              minHeight: 22,
+                            ),
+                            child: Text(
+                              '${cartState.value?.totalItem ?? 0}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -237,7 +285,7 @@ class _PosModernPageState extends State<PosModernPage> {
   }
 
   void _handleProductTap(ItemModel product) async {
-    double itemPrice = product.hargaJual.toDouble();
+    double itemPrice = product.price;
     String newName = product.nama;
     String newDesc = product.deskripsi ?? '';
 
@@ -269,9 +317,14 @@ class _PosModernPageState extends State<PosModernPage> {
       quantity: 1, // Start with 1 qty when adding
       ukuran: product.ukuran,
       hargaDasar: product.hargaDasar,
-      hargaJual: itemPrice.toInt(),
+      hargaJual: product.hargaJual,
+      hargaJualExact: itemPrice, // sen-precise (base + surcharges/open price)
       isHargaJualPersen: product.isHargaJualPersen,
+      hargaJualPersen: product.hargaJualPersen,
+      diskonPersen: product.diskonPersen,
       deskripsi: newDesc,
+      category: product.category,
+      customizationsJson: product.customizationsJson,
     );
     
     getIt.get<SellingController>().dispatch(CartItemAdded(newItem));
@@ -292,8 +345,10 @@ class _PosModernPageState extends State<PosModernPage> {
   void _handlePay(List<ItemModel> cartItems) async {
     if (cartItems.isEmpty) return;
 
-    final store = storeController.store.value.value;
+    final store =
+        storeController.store.value.value ?? await storeService.getStore();
     if (store == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Store information is missing!')),
       );
@@ -322,6 +377,7 @@ class _PosModernPageState extends State<PosModernPage> {
           ..code = p.code
           ..quantity = p.quantity
           ..hargaJual = p.hargaJual
+          ..hargaJualExact = p.hargaJualExact
           ..ukuran = p.ukuran
           ..isHargaJualPersen = p.isHargaJualPersen
           ..hargaJualPersen = p.hargaJualPersen
@@ -329,7 +385,8 @@ class _PosModernPageState extends State<PosModernPage> {
           ..diskonPersen = p.diskonPersen
           ..deskripsi = p.deskripsi
           ..jumlahBarang = p.jumlahBarang
-          ..isSynced = p.isSynced,
+          ..isSynced = p.isSynced
+          ..category = p.category,
       );
     }
     
@@ -343,11 +400,19 @@ class _PosModernPageState extends State<PosModernPage> {
       totalItem: cartStateValue?.totalItem ?? 0,
       pembeli: pelanggan?.id,
       createdAt: DateTime.now(),
+      tenderedAmount: tipeBayar == TypePayment.cash ? paymentResult.cashAmount : totalPrice,
+      changeAmount: tipeBayar == TypePayment.cash ? (paymentResult.cashAmount - totalPrice) : 0.0,
+      paymentMethod: tipeBayar.name,
     );
 
     if (products.isEmpty) return;
+    if (!mounted) return;
 
-    Database().addPenjualan(newItem).whenComplete(() {
+    final messenger = ScaffoldMessenger.of(context);
+
+    reportService.addPenjualan(newItem).whenComplete(() {
+      // Print errors must not block the checkout flow; surface feedback
+      // instead of throwing an unhandled async error.
       letsPrint(
         store: store,
         model: newItem,
@@ -356,19 +421,27 @@ class _PosModernPageState extends State<PosModernPage> {
         total: paymentResult.cashAmount.toStringAsFixed(2),
         kembalian: (paymentResult.cashAmount - totalPrice).toStringAsFixed(2),
         printName: printName,
-      ).whenComplete(() {
-        sellingController.tipeBayar.value = TypePayment.qris;
+      ).then((_) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Payment processed and printed successfully!'),
+            backgroundColor: Color(0xFF8B5E3C),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }).catchError((Object e) {
+        debugPrint('Print failed: $e');
+        messenger.showSnackBar(
+          SnackBar(
+            content: const Text(
+                'Payment saved, but receipt was not printed (printer not connected).'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }).whenComplete(() {
         sellingController.updateBatch(cartItems).whenComplete(() {
           sellingController.dispatch(CartPaid());
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Payment processed and printed successfully!'),
-                backgroundColor: Colors.teal,
-                duration: Duration(seconds: 2),
-              ),
-            );
-          }
         });
       });
     });
@@ -383,6 +456,14 @@ class _PosModernPageState extends State<PosModernPage> {
     String? kembalian,
     String? printName,
   }) async {
+    // Bluetooth printers must be connected before printing; without this
+    // check a disconnected printer fails silently.
+    if (!Platform.isWindows && !Platform.isMacOS) {
+      isConnected = await PrintBluetoothThermal.connectionStatus;
+      if (!isConnected) {
+        throw Exception('Printer not connected');
+      }
+    }
     final profile = await CapabilityProfile.load();
     late CapabilityProfile winProfile;
     if (Platform.isWindows) {
@@ -402,7 +483,7 @@ class _PosModernPageState extends State<PosModernPage> {
     bytes += generator.text(store.phone, styles: const PosStyles(align: PosAlign.center));
     bytes += generator.feed(1);
     bytes += generator.hr();
-    bytes += generator.text('Date/Time : ${DateFormat.yMd().add_jm().format(DateTime.now())}');
+    bytes += generator.text('Date/Time : ${DateFormat('EEEE, dd MMM yyyy HH:mm').format(DateTime.now())}');
     bytes += generator.text('Staff   : $staffId');
     bytes += generator.feed(1);
 
@@ -415,17 +496,20 @@ class _PosModernPageState extends State<PosModernPage> {
     bytes += generator.hr();
     
     for (ProductItemModel i in model.items) {
-      bytes += generator.text(i.nama!);
+      final categoryStr = i.category != null ? ' [${i.category}]' : '';
+      bytes += generator.text('${i.nama ?? '-'}$categoryStr');
       bytes += generator.row([
         PosColumn(
-          text: '${i.diskonPersen == null || i.diskonPersen == 0.0 ? '' : 'Disc'} ${i.quantity} x ${i.diskonPersen == null || i.diskonPersen == 0.0 ? i.hargaJual : '${i.hargaJual} >> ${i.hargaJual! - i.hargaJual! * (i.diskonPersen! / 100)}'}',
+          text: i.diskonPersen == null || i.diskonPersen == 0.0
+              ? '${i.quantity ?? 0} x ${currency.format(i.price)}'
+              : '${i.quantity ?? 0} x ${currency.format(i.price)} >> ${currency.format(i.price - i.price * (i.diskonPersen! / 100))} (Disc ${i.diskonPersen!.toStringAsFixed(0)}%)',
           width: 6,
           styles: const PosStyles(align: PosAlign.left),
         ),
         PosColumn(
           text: i.diskonPersen == null || i.diskonPersen == 0.0
-              ? '${i.quantity! * i.hargaJual!}'
-              : '${i.quantity! * (i.hargaJual! - i.hargaJual! * (i.diskonPersen! / 100))}',
+              ? currency.format((i.quantity ?? 0) * i.price)
+              : currency.format((i.quantity ?? 0) * (i.price - i.price * (i.diskonPersen! / 100))),
           width: 6,
           styles: const PosStyles(align: PosAlign.right),
         ),

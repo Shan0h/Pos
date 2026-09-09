@@ -4,7 +4,7 @@ import 'package:pos/controller/salary_controller.dart';
 import 'package:pos/controller/user_controller.dart';
 import 'package:pos/model/salary_model.dart';
 import 'package:pos/model/user_model.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:pos/utils/constant.dart';
 import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
@@ -315,7 +315,7 @@ class _SalariesFormState extends State<SalariesForm> {
                             createdAt: DateTime.now(),
                           );
 
-                          Database().addSalary(salary).whenComplete(() {
+                          salaryService.addSalary(salary).whenComplete(() {
                             salaryController.salaries.refresh();
                             if (context.mounted) {
                               Navigator.of(context).pop(false);

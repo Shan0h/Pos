@@ -27,20 +27,30 @@ const ExpensesModelSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'isSynced': PropertySchema(
+    r'isDeleted': PropertySchema(
       id: 2,
+      name: r'isDeleted',
+      type: IsarType.bool,
+    ),
+    r'isSynced': PropertySchema(
+      id: 3,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'note': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'note',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'title',
       type: IsarType.string,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 6,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _expensesModelEstimateSize,
@@ -81,9 +91,11 @@ void _expensesModelSerialize(
 ) {
   writer.writeLong(offsets[0], object.amount);
   writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeBool(offsets[2], object.isSynced);
-  writer.writeString(offsets[3], object.note);
-  writer.writeString(offsets[4], object.title);
+  writer.writeBool(offsets[2], object.isDeleted);
+  writer.writeBool(offsets[3], object.isSynced);
+  writer.writeString(offsets[4], object.note);
+  writer.writeString(offsets[5], object.title);
+  writer.writeDateTime(offsets[6], object.updatedAt);
 }
 
 ExpensesModel _expensesModelDeserialize(
@@ -96,9 +108,11 @@ ExpensesModel _expensesModelDeserialize(
     amount: reader.readLong(offsets[0]),
     createdAt: reader.readDateTimeOrNull(offsets[1]),
     id: id,
-    isSynced: reader.readBoolOrNull(offsets[2]) ?? true,
-    note: reader.readStringOrNull(offsets[3]),
-    title: reader.readString(offsets[4]),
+    isDeleted: reader.readBoolOrNull(offsets[2]) ?? false,
+    isSynced: reader.readBoolOrNull(offsets[3]) ?? true,
+    note: reader.readStringOrNull(offsets[4]),
+    title: reader.readString(offsets[5]),
+    updatedAt: reader.readDateTimeOrNull(offsets[6]),
   );
   return object;
 }
@@ -115,11 +129,15 @@ P _expensesModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
       return (reader.readString(offset)) as P;
+    case 6:
+      return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -423,6 +441,16 @@ extension ExpensesModelQueryFilter
   }
 
   QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      isDeletedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDeleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
       isSyncedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -720,6 +748,80 @@ extension ExpensesModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      updatedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      updatedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      updatedAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      updatedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      updatedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      updatedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension ExpensesModelQueryObject
@@ -752,6 +854,19 @@ extension ExpensesModelQuerySortBy
       sortByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      sortByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
     });
   }
 
@@ -789,6 +904,19 @@ extension ExpensesModelQuerySortBy
   QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByTitleDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 }
@@ -832,6 +960,19 @@ extension ExpensesModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      thenByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
   QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByIsSynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSynced', Sort.asc);
@@ -868,6 +1009,19 @@ extension ExpensesModelQuerySortThenBy
       return query.addSortBy(r'title', Sort.desc);
     });
   }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension ExpensesModelQueryWhereDistinct
@@ -881,6 +1035,12 @@ extension ExpensesModelQueryWhereDistinct
   QueryBuilder<ExpensesModel, ExpensesModel, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QDistinct> distinctByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDeleted');
     });
   }
 
@@ -901,6 +1061,12 @@ extension ExpensesModelQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'title', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QDistinct> distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
     });
   }
 }
@@ -925,6 +1091,12 @@ extension ExpensesModelQueryProperty
     });
   }
 
+  QueryBuilder<ExpensesModel, bool, QQueryOperations> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDeleted');
+    });
+  }
+
   QueryBuilder<ExpensesModel, bool, QQueryOperations> isSyncedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isSynced');
@@ -940,6 +1112,12 @@ extension ExpensesModelQueryProperty
   QueryBuilder<ExpensesModel, String, QQueryOperations> titleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'title');
+    });
+  }
+
+  QueryBuilder<ExpensesModel, DateTime?, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 }

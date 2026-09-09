@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pos/widget/responsive_wrapper.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,10 +25,9 @@ class _RegisterState extends State<Register> {
         title: const Text('Register'),
       ),
       body: Center(
-        child: ShadForm(
-          key: formKey,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 350),
+        child: ResponsiveConstrainedBox(
+          child: ShadForm(
+            key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -103,11 +103,15 @@ class _RegisterState extends State<Register> {
                           }
                         }
                       } on AuthException catch (e) {
-                        ShadAlert.destructive(
-                          iconSrc: LucideIcons.circleAlert,
-                          title: const Text('Error'),
-                          description: Text(e.message),
-                        );
+                        if (context.mounted) {
+                          ShadToaster.of(context).show(
+                            ShadToast(
+                              backgroundColor: Colors.red,
+                              title: const Text('Error'),
+                              description: Text(e.message),
+                            ),
+                          );
+                        }
                       }
                     }
                   },

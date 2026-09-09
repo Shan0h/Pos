@@ -1,7 +1,7 @@
 import 'package:pos/controller/customer_controller.dart';
 import 'package:pos/pages/customer/customer_list.dart';
-import 'package:pos/pages/drawer.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -14,14 +14,14 @@ class Customer extends HookWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Customers'),
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
+        backgroundColor: context.panelBackground,
+        foregroundColor: context.appTextColor,
         centerTitle: false,
         actions: [
           PopupMenuButton<String>(
             onSelected: (item) async {
               if (item == 'sync') {
-                await Database().syncCustomers();
+                await customerService.syncCustomers();
                 customerController.customer.refresh();
               }
             },
@@ -43,8 +43,8 @@ class Customer extends HookWidget {
       ),
       body: const CustomerList(),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
+                  backgroundColor: context.panelBackground,
+                  foregroundColor: context.appTextColor,
         onPressed: () => context.push('/customer/form'),
         tooltip: 'Add Customer',
         child: const Icon(Icons.add),

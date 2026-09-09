@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pos/enum/payment_enum.dart';
+import 'package:pos/controller/store_controller.dart';
+import 'dart:convert';
+import 'package:pos/utils/extension.dart';
 
 class PaymentResult {
   final TypePayment type;
@@ -43,8 +46,9 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = context.appTextColor;
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: context.panelBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: 600,
@@ -57,9 +61,9 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Payment',
-                  style: TextStyle(color: Colors.black87, fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -73,10 +77,15 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
             Center(
               child: Column(
                 children: [
-                  const Text('Total Amount', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  Text('Total Amount', style: TextStyle(fontSize: 16, color: context.secondaryTextColor)),
                   Text(
                     'RM ${widget.totalAmount.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.teal),
+                    style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: context.isDarkMode
+                            ? const Color(0xFFD7A86E)
+                            : const Color(0xFF8B5E3C)),
                   ),
                 ],
               ),
@@ -84,7 +93,7 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
             const SizedBox(height: 32),
 
             // Payment Methods
-            const Text('Payment Method', style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('Payment Method', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -99,18 +108,17 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
 
             // Cash Options (Only if Cash is selected)
             if (_selectedType == TypePayment.cash) ...[
-              const Text('Quick Cash', style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('Quick Cash', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
+                  // Only sensible denominations: exact amount and bills
+                  // at/above the total (tapping RM 5 on a RM 12 order just
+                  // confuses the cashier).
                   _buildQuickCashButton(widget.totalAmount, 'Exact'),
-                  _buildQuickCashButton(5.0, 'RM 5'),
-                  _buildQuickCashButton(10.0, 'RM 10'),
-                  _buildQuickCashButton(20.0, 'RM 20'),
-                  _buildQuickCashButton(50.0, 'RM 50'),
-                  _buildQuickCashButton(100.0, 'RM 100'),
+                  ..._quickCashDenominations(),
                 ],
               ),
               const SizedBox(height: 16),
@@ -119,12 +127,12 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
               TextField(
                 controller: _customAmountController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: Colors.black87),
+                style: TextStyle(color: textColor),
                 decoration: InputDecoration(
                   labelText: 'Custom Cash Amount',
-                  labelStyle: const TextStyle(color: Colors.black54),
+                  labelStyle: TextStyle(color: context.secondaryTextColor),
                   prefixText: 'RM ',
-                  prefixStyle: const TextStyle(color: Colors.black87),
+                  prefixStyle: TextStyle(color: textColor),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 onChanged: (val) {
@@ -146,18 +154,27 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Change', style: TextStyle(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text('Change', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
                     Text(
                       'RM ${(_tenderedAmount >= widget.totalAmount ? (_tenderedAmount - widget.totalAmount) : 0.0).toStringAsFixed(2)}',
                       style: TextStyle(
-                        fontSize: 24, 
-                        fontWeight: FontWeight.bold, 
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                         color: _tenderedAmount >= widget.totalAmount ? Colors.green : Colors.red,
                       ),
                     ),
                   ],
                 ),
               ),
+              if (_tenderedAmount < widget.totalAmount) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Cash received (RM ${_tenderedAmount.toStringAsFixed(2)}) is less than the total. '
+                  'Increase the amount to confirm.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ],
             ],
 
             const SizedBox(height: 32),
@@ -167,16 +184,36 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
               height: 56,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: const Color(0xFF8B5E3C),
                   foregroundColor: Colors.white,
+                  disabledBackgroundColor: context.mutedBackground,
+                  disabledForegroundColor: context.secondaryTextColor,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
-                onPressed: (_selectedType == TypePayment.cash && _tenderedAmount < widget.totalAmount) ? null : () {
-                  Navigator.pop(context, PaymentResult(
-                    type: _selectedType,
-                    cashAmount: _selectedType == TypePayment.cash ? _tenderedAmount : widget.totalAmount,
-                  ));
+                onPressed: (_selectedType == TypePayment.cash && _tenderedAmount < widget.totalAmount) ? null : () async {
+                  if (_selectedType == TypePayment.qris) {
+                    final store = storeController.store.value.value;
+                    final qr1 = store?.qrDuitNow1;
+                    final qr2 = store?.qrDuitNow2;
+                    
+                    if (qr1 != null || qr2 != null) {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => QRVerificationDialog(qr1: qr1, qr2: qr2),
+                      );
+                      if (confirmed != true) {
+                        return; // Cancelled
+                      }
+                    }
+                  }
+
+                  if (context.mounted) {
+                    Navigator.pop(context, PaymentResult(
+                      type: _selectedType,
+                      cashAmount: _selectedType == TypePayment.cash ? _tenderedAmount : widget.totalAmount,
+                    ));
+                  }
                 },
                 child: const Text('CONFIRM PAYMENT', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
@@ -201,18 +238,18 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.teal : Colors.grey[100],
+          color: isSelected ? const Color(0xFF8B5E3C) : context.mutedBackground,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? Colors.teal : Colors.grey.shade300, width: 2),
+          border: Border.all(color: isSelected ? const Color(0xFF8B5E3C) : context.borderColor, width: 2),
         ),
         child: Column(
           children: [
-            Icon(icon, color: isSelected ? Colors.white : Colors.black87, size: 32),
+            Icon(icon, color: isSelected ? Colors.white : context.appTextColor, size: 32),
             const SizedBox(height: 8),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
+                color: isSelected ? Colors.white : context.appTextColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -222,10 +259,29 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
     );
   }
 
+  /// Bill denominations at or above the current total (common cash notes).
+  List<Widget> _quickCashDenominations() {
+    const bills = [5.0, 10.0, 20.0, 50.0, 100.0];
+    final usable = bills
+        .where((b) => b >= widget.totalAmount)
+        .map((b) => MapEntry(b, 'RM ${b.toStringAsFixed(0)}'))
+        .toList();
+    final entries = usable.isNotEmpty
+        ? usable
+        : [
+            // Total above RM 100 — offer the next sensible rounded bill up.
+            MapEntry(((widget.totalAmount / 50).ceil() * 50).toDouble(),
+                'RM ${((widget.totalAmount / 50).ceil() * 50).toStringAsFixed(0)}'),
+          ];
+    return entries
+        .map((e) => _buildQuickCashButton(e.key, e.value))
+        .toList();
+  }
+
   Widget _buildQuickCashButton(double amount, String label) {
     return ActionChip(
-      label: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-      backgroundColor: Colors.grey[200],
+      label: Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.appTextColor)),
+      backgroundColor: context.mutedBackground,
       onPressed: () {
         setState(() {
           _tenderedAmount = amount;
@@ -235,3 +291,135 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
     );
   }
 }
+
+class QRVerificationDialog extends StatelessWidget {
+  final String? qr1;
+  final String? qr2;
+
+  const QRVerificationDialog({super.key, this.qr1, this.qr2});
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = context.appTextColor;
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        color: context.panelBackground,
+        width: (qr1 != null && qr2 != null) ? 600 : 350,
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.qr_code_scanner, size: 48, color: Color(0xFF8B5E3C)),
+              const SizedBox(height: 16),
+              Text(
+                'Scan QR Code',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Please ask the customer to scan the QR code below:',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: context.secondaryTextColor),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (qr1 != null) _buildZoomableQR(context, 'DuitNow 1', qr1!),
+                  if (qr1 != null && qr2 != null) const SizedBox(width: 24),
+                  if (qr2 != null) _buildZoomableQR(context, 'DuitNow 2', qr2!),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'Has the customer scanned the QR code and is the payment confirmed?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        side: BorderSide(color: context.borderColor),
+                      ),
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text('NO (CANCEL)', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: const Color(0xFF8B5E3C),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('YES (CONFIRM)', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildZoomableQR(BuildContext context, String title, String base64qr) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: context.appTextColor)),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) => Dialog(
+                  backgroundColor: Colors.transparent,
+                  insetPadding: const EdgeInsets.all(16),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      InteractiveViewer(
+                        panEnabled: true,
+                        minScale: 1.0,
+                        maxScale: 4.0,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.memory(base64Decode(base64qr), fit: BoxFit.contain),
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.memory(base64Decode(base64qr), height: 200, fit: BoxFit.contain),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

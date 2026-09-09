@@ -5,40 +5,37 @@ import 'package:pos/model/item_model.dart';
 class CartService {
   final _items = <ItemModel>[];
 
+  List<ItemModel> get items => _items.map((i) => i.copy()).toList();
+
   Future<List<ItemModel>> loadProducts() =>
       Future.delayed(const Duration(milliseconds: 100) * 10, () => _items);
 
+  bool _sameLine(ItemModel a, ItemModel b) =>
+      a.id == b.id && a.nama == b.nama && a.hargaJual == b.hargaJual;
+
   void add(ItemModel item) {
-    final isSame = _items.firstWhereOrNull((val) => val.code == item.code);
-    if (isSame != null) {
-      final data = _items.firstWhere((val) => val.id == item.id);
-      data.quantity = data.quantity + 1;
+    final existing = _items.firstWhereOrNull((val) => _sameLine(val, item));
+    if (existing != null) {
+      existing.quantity = existing.quantity + 1;
     } else {
       _items.add(item);
     }
   }
 
-  void update(ItemModel item) {
-    final isSame = _items.firstWhereOrNull((val) => val.code == item.code);
-    if (isSame != null) {
-      final data = _items.firstWhere((val) => val.id == item.id);
-      data.quantity = data.quantity + 1;
-    }
-  }
-
   void decrement(ItemModel item) {
-    final isSame = _items.firstWhereOrNull((val) => val.code == item.code);
-    if (isSame != null) {
-      final data = _items.firstWhere((val) => val.id == item.id);
-      if (data.quantity > 1) {
-        data.quantity = data.quantity - 1;
-      } else {
-        _items.remove(data);
-      }
+    final existing = _items.firstWhereOrNull((val) => _sameLine(val, item));
+    if (existing == null) return;
+    if (existing.quantity > 1) {
+      existing.quantity = existing.quantity - 1;
+    } else {
+      _items.remove(existing);
     }
   }
 
-  void remove(ItemModel item) => _items.remove(item);
+  void remove(ItemModel item) {
+    final existing = _items.firstWhereOrNull((val) => _sameLine(val, item));
+    if (existing != null) _items.remove(existing);
+  }
 
   void clear() => _items.clear();
 }

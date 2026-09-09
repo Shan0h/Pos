@@ -3,22 +3,49 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' show window;
+import 'package:pos/widget/responsive_wrapper.dart';
 
 extension MediaQueryValues on BuildContext {
   double get width => MediaQuery.of(this).size.width;
   double get height => MediaQuery.of(this).size.height;
-  bool get isMobile => MediaQuery.of(this).size.width <= 450;
+  bool get isMobile => MediaQuery.of(this).size.width <= Breakpoints.mobileMax;
   bool get isTablet =>
-      MediaQuery.of(this).size.width >= 451 &&
-      MediaQuery.of(this).size.width <= 1200;
+      MediaQuery.of(this).size.width > Breakpoints.mobileMax &&
+      MediaQuery.of(this).size.width <= Breakpoints.tabletMax;
+  bool get isDesktop => MediaQuery.of(this).size.width > Breakpoints.tabletMax;
 }
 
 extension DarkMode on BuildContext {
   /// is dark mode currently enabled?
   bool get isDarkMode {
-    final brightness = MediaQuery.of(this).platformBrightness;
-    return brightness == Brightness.dark;
+    return Theme.of(this).brightness == Brightness.dark;
   }
+
+  ThemeData get theme => Theme.of(this);
+
+  Color get pageBackground =>
+      isDarkMode ? const Color(0xFF1A1410) : const Color(0xFFFAF6F2);
+
+  Color get panelBackground =>
+      isDarkMode ? const Color(0xFF241C16) : Colors.white;
+
+  Color get mutedBackground =>
+      isDarkMode ? const Color(0xFF2D2318) : const Color(0xFFF5EDE4);
+
+  Color get borderColor => isDarkMode
+      ? Colors.white.withValues(alpha: 0.12)
+      : Colors.black.withValues(alpha: 0.08);
+
+  Color get appTextColor => theme.colorScheme.onSurface;
+
+  Color get secondaryTextColor =>
+      isDarkMode ? Colors.white70 : Colors.black54;
+
+  Color get subtleTextColor =>
+      isDarkMode ? Colors.white60 : Colors.grey.shade600;
+
+  Color get appShadowColor =>
+      Colors.black.withValues(alpha: isDarkMode ? 0.25 : 0.05);
 }
 
 extension PlatformExtension on Platform {

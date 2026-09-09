@@ -1,6 +1,6 @@
 import 'package:pos/controller/customer_controller.dart';
 import 'package:pos/model/customer_model.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -133,7 +133,7 @@ class CustomerForm extends HookWidget {
                           ShadButton.destructive(
                             child: const Text('Delete'),
                             onPressed: () {
-                              Database()
+                              customerService
                                   .deleteCustomer(customer.id!)
                                   .whenComplete(() async {
                                 await customerController.customer.refresh();
@@ -154,9 +154,14 @@ class CustomerForm extends HookWidget {
                                   status: status.value,
                                   phone: editingPhone.text,
                                   keterangan: editingKeterangan.text,
+                                  masuk: customer.masuk,
+                                  createdAt: customer.createdAt,
+                                  updatedAt: customer.updatedAt,
+                                  isDeleted: customer.isDeleted,
+                                  isSynced: customer.isSynced,
                                 );
 
-                                Database()
+                                customerService
                                     .updateCustomer(updateCustomer)
                                     .whenComplete(() {
                                   Future.delayed(Durations.short1).then((_) {
@@ -177,7 +182,7 @@ class CustomerForm extends HookWidget {
                                   createdAt: DateTime.now(),
                                 );
 
-                                Database()
+                                customerService
                                     .addNewCustomer(newCustomer)
                                     .whenComplete(() {
                                   customerController.customer.refresh();

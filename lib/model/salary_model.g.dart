@@ -28,44 +28,54 @@ const SalaryModelSchema = CollectionSchema(
       type: IsarType.objectList,
       target: r'ItemSalary',
     ),
-    r'isSynced': PropertySchema(
+    r'isDeleted': PropertySchema(
       id: 2,
+      name: r'isDeleted',
+      type: IsarType.bool,
+    ),
+    r'isSynced': PropertySchema(
+      id: 3,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'items': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'items',
       type: IsarType.objectList,
       target: r'ItemSalary',
     ),
     r'management': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'management',
       type: IsarType.string,
     ),
     r'note': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'note',
       type: IsarType.string,
     ),
     r'periode': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'periode',
       type: IsarType.string,
     ),
     r'status': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'status',
       type: IsarType.string,
     ),
     r'total': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'total',
       type: IsarType.long,
     ),
+    r'updatedAt': PropertySchema(
+      id: 10,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
+    ),
     r'userId': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'userId',
       type: IsarType.long,
     )
@@ -142,19 +152,21 @@ void _salaryModelSerialize(
     ItemSalarySchema.serialize,
     object.deductions,
   );
-  writer.writeBool(offsets[2], object.isSynced);
+  writer.writeBool(offsets[2], object.isDeleted);
+  writer.writeBool(offsets[3], object.isSynced);
   writer.writeObjectList<ItemSalary>(
-    offsets[3],
+    offsets[4],
     allOffsets,
     ItemSalarySchema.serialize,
     object.items,
   );
-  writer.writeString(offsets[4], object.management);
-  writer.writeString(offsets[5], object.note);
-  writer.writeString(offsets[6], object.periode);
-  writer.writeString(offsets[7], object.status);
-  writer.writeLong(offsets[8], object.total);
-  writer.writeLong(offsets[9], object.userId);
+  writer.writeString(offsets[5], object.management);
+  writer.writeString(offsets[6], object.note);
+  writer.writeString(offsets[7], object.periode);
+  writer.writeString(offsets[8], object.status);
+  writer.writeLong(offsets[9], object.total);
+  writer.writeDateTime(offsets[10], object.updatedAt);
+  writer.writeLong(offsets[11], object.userId);
 }
 
 SalaryModel _salaryModelDeserialize(
@@ -172,20 +184,22 @@ SalaryModel _salaryModelDeserialize(
       ItemSalary(),
     ),
     id: id,
-    isSynced: reader.readBoolOrNull(offsets[2]) ?? true,
+    isDeleted: reader.readBoolOrNull(offsets[2]) ?? false,
+    isSynced: reader.readBoolOrNull(offsets[3]) ?? true,
     items: reader.readObjectList<ItemSalary>(
-          offsets[3],
+          offsets[4],
           ItemSalarySchema.deserialize,
           allOffsets,
           ItemSalary(),
         ) ??
         [],
-    management: reader.readStringOrNull(offsets[4]),
-    note: reader.readStringOrNull(offsets[5]),
-    periode: reader.readString(offsets[6]),
-    status: reader.readString(offsets[7]),
-    total: reader.readLongOrNull(offsets[8]),
-    userId: reader.readLong(offsets[9]),
+    management: reader.readStringOrNull(offsets[5]),
+    note: reader.readStringOrNull(offsets[6]),
+    periode: reader.readString(offsets[7]),
+    status: reader.readString(offsets[8]),
+    total: reader.readLongOrNull(offsets[9]),
+    updatedAt: reader.readDateTimeOrNull(offsets[10]),
+    userId: reader.readLong(offsets[11]),
   );
   return object;
 }
@@ -207,8 +221,10 @@ P _salaryModelDeserializeProp<P>(
         ItemSalary(),
       )) as P;
     case 2:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 3:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 4:
       return (reader.readObjectList<ItemSalary>(
             offset,
             ItemSalarySchema.deserialize,
@@ -216,17 +232,19 @@ P _salaryModelDeserializeProp<P>(
             ItemSalary(),
           ) ??
           []) as P;
-    case 4:
-      return (reader.readStringOrNull(offset)) as P;
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 9:
+      return (reader.readLongOrNull(offset)) as P;
+    case 10:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 11:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -572,6 +590,16 @@ extension SalaryModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterFilterCondition>
+      isDeletedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDeleted',
+        value: value,
       ));
     });
   }
@@ -1315,6 +1343,80 @@ extension SalaryModelQueryFilter
     });
   }
 
+  QueryBuilder<SalaryModel, SalaryModel, QAfterFilterCondition>
+      updatedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterFilterCondition>
+      updatedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterFilterCondition>
+      updatedAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterFilterCondition>
+      updatedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterFilterCondition>
+      updatedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterFilterCondition>
+      updatedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<SalaryModel, SalaryModel, QAfterFilterCondition> userIdEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -1404,6 +1506,18 @@ extension SalaryModelQuerySortBy
     });
   }
 
+  QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> sortByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> sortByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
   QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> sortByIsSynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSynced', Sort.asc);
@@ -1476,6 +1590,18 @@ extension SalaryModelQuerySortBy
     });
   }
 
+  QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> sortByUserId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'userId', Sort.asc);
@@ -1512,6 +1638,18 @@ extension SalaryModelQuerySortThenBy
   QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> thenByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> thenByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
     });
   }
 
@@ -1587,6 +1725,18 @@ extension SalaryModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<SalaryModel, SalaryModel, QAfterSortBy> thenByUserId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'userId', Sort.asc);
@@ -1605,6 +1755,12 @@ extension SalaryModelQueryWhereDistinct
   QueryBuilder<SalaryModel, SalaryModel, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
+    });
+  }
+
+  QueryBuilder<SalaryModel, SalaryModel, QDistinct> distinctByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDeleted');
     });
   }
 
@@ -1648,6 +1804,12 @@ extension SalaryModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<SalaryModel, SalaryModel, QDistinct> distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
+    });
+  }
+
   QueryBuilder<SalaryModel, SalaryModel, QDistinct> distinctByUserId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'userId');
@@ -1673,6 +1835,12 @@ extension SalaryModelQueryProperty
       deductionsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'deductions');
+    });
+  }
+
+  QueryBuilder<SalaryModel, bool, QQueryOperations> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDeleted');
     });
   }
 
@@ -1716,6 +1884,12 @@ extension SalaryModelQueryProperty
   QueryBuilder<SalaryModel, int?, QQueryOperations> totalProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'total');
+    });
+  }
+
+  QueryBuilder<SalaryModel, DateTime?, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 

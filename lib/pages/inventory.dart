@@ -1,7 +1,8 @@
 import 'package:pos/controller/inventory_controller.dart';
 import 'package:pos/pages/drawer.dart';
 import 'package:pos/pages/inventory/inventory_list.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -15,14 +16,14 @@ class Inventory extends StatelessWidget {
       drawer: const NavDrawer(),
       appBar: AppBar(
         title: const Text('Inventory Data'),
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
+        backgroundColor: context.panelBackground,
+        foregroundColor: context.appTextColor,
         centerTitle: false,
         actions: [
           PopupMenuButton<String>(
             onSelected: (item) async {
               if (item == 'sync') {
-                await Database().checkIsInventorySynced();
+                await inventoryService.checkIsInventorySynced();
                 inventoryController.inventorys.refresh();
               } else if (item == 'clear') {
                 showShadDialog(
@@ -40,10 +41,10 @@ class Inventory extends StatelessWidget {
                         child: const Text('Cancel'),
                         onPressed: () => Navigator.of(context).pop(false),
                       ),
-                      ShadButton(
-                        child: const Text('Continue'),
-                        onPressed: () {
-                          Database().clearInventory().whenComplete(() {
+                        ShadButton(
+                          child: const Text('Continue'),
+                          onPressed: () {
+                          inventoryService.clearInventory().whenComplete(() {
                             if (context.mounted) context.go('/');
                           });
                           Navigator.of(context).pop(true);
@@ -85,8 +86,8 @@ class Inventory extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/inventory/form'),
         tooltip: 'Add',
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
+        backgroundColor: context.panelBackground,
+        foregroundColor: context.appTextColor,
         child: const Icon(Icons.add),
       ),
     );

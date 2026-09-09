@@ -1,7 +1,7 @@
 import 'package:pos/controller/inventory_controller.dart';
 import 'package:pos/main.dart';
 import 'package:pos/model/item_model.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
@@ -157,7 +157,7 @@ class InventoryForm extends HookWidget {
                         ShadButton.destructive(
                           child: const Text('Delete'),
                           onPressed: () {
-                            Database()
+                            inventoryService
                                 .deleteInventory(item.id!)
                                 .whenComplete(() {
                               inventoryController.inventorys.refresh();
@@ -198,10 +198,13 @@ class InventoryForm extends HookWidget {
                                 diskonPersen: 0.0,
                                 jumlahBarang: stock.value,
                                 createdAt: item.createdAt,
+                                updatedAt: item.updatedAt,
+                                isDeleted: item.isDeleted,
+                                isSynced: item.isSynced,
                                 category: 'Raw Material',
                               );
 
-                              Database()
+                              inventoryService
                                   .updateInventory(updateitem)
                                   .whenComplete(() {
                                 Future.delayed(Durations.short1).then((_) {
@@ -223,12 +226,12 @@ class InventoryForm extends HookWidget {
                                   hargaJualPersen: 0.0,
                                   hargaDasar: int.tryParse(editingHargaDasar.text) ?? 0,
                                   diskonPersen: 0.0,
-                                  jumlahBarang: stock.value,
-                                  createdAt: DateTime.now(),
-                                  category: 'Raw Material',
-                              );
+                                   jumlahBarang: stock.value,
+                                   createdAt: DateTime.now(),
+                                   category: 'Raw Material',
+                               );
 
-                              Database().addInventory(newItem).whenComplete(() {
+                              inventoryService.addInventory(newItem).whenComplete(() {
                                 inventoryController.inventorys.refresh();
                                 if (context.mounted) context.pop();
                               });

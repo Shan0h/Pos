@@ -1,8 +1,7 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:pos/controller/expenses_controller.dart';
-import 'package:pos/pages/drawer.dart';
 import 'package:pos/pages/expenses/expenses_form.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:pos/utils/constant.dart';
 import 'package:pos/utils/date_utils.dart';
 import 'package:pos/utils/extension.dart';
@@ -20,8 +19,8 @@ class Expanses extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Expenses'),
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
+        backgroundColor: context.panelBackground,
+        foregroundColor: context.appTextColor,
         centerTitle: false,
         actions: [
           ShadButton.ghost(
@@ -40,7 +39,7 @@ class Expanses extends StatelessWidget {
           PopupMenuButton<String>(
             onSelected: (item) async {
               if (item == 'sync') {
-                await Database().expensesSync();
+                await expensesService.expensesSync();
                 await expensesController.expenses.refresh();
               }
             },
@@ -118,8 +117,8 @@ class Expanses extends StatelessWidget {
                               child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 leading: CircleAvatar(
-                                  backgroundColor: Colors.green.withValues(alpha: 0.1),
-                                  child: const Icon(Icons.monetization_on, color: Colors.green),
+                                  backgroundColor: const Color(0xFF8B5E3C).withValues(alpha: 0.1),
+                                  child: const Icon(Icons.monetization_on, color: Color(0xFF8B5E3C)),
                                 ),
                                 title: Text(v.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                                 subtitle: Column(
@@ -166,10 +165,11 @@ class Expanses extends StatelessWidget {
                                   DataCell(Text(val.note ?? '')),
                                   DataCell(Text(dateWithTime.format(
                                       val.createdAt ?? DateTime.now()))),
-                                  DataCell(
-                                    ShadButton.destructive(
-                                      onPressed: () {
-                                        expensesController.expenses.refresh();
+                                   DataCell(
+                                     ShadButton.destructive(
+                                      onPressed: () async {
+                                        await expensesService.deleteExpenses(val.id!);
+                                        await expensesController.expenses.refresh();
                                       },
                                       icon: const Padding(
                                         padding: EdgeInsets.only(right: 8),
@@ -196,8 +196,8 @@ class Expanses extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
+        backgroundColor: context.panelBackground,
+        foregroundColor: context.appTextColor,
         onPressed: () => showShadSheet(
           side: ShadSheetSide.right,
           context: context,

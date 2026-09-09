@@ -5,7 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
 import 'package:pos/controller/inventory_controller.dart';
 import 'package:pos/model/item_model.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -39,6 +39,7 @@ class _CsvPreviewState extends State<CsvPreview> {
           hargaJualPersen: double.parse(val[9].toString()),
           diskonPersen: double.tryParse(val[10].toString()),
           isHargaJualPersen: val[11] == 'TRUE' ? true : false,
+          category: 'Raw Material',
           isSynced: false);
     }).toList();
   }
@@ -52,7 +53,7 @@ class _CsvPreviewState extends State<CsvPreview> {
         actions: [
           ShadButton(
             onPressed: () => d.isNotEmpty
-                ? Database().addAllInventory(d).whenComplete(() {
+                ? inventoryService.addAllInventory(d).whenComplete(() {
                     inventoryController.listItemFromCsv.clear();
                     inventoryController.inventorys.refresh();
                     if (context.mounted) context.pop();

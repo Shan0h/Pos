@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pos/utils/extension.dart';
 
 class PriceNumpadDialog extends StatefulWidget {
   final String itemName;
@@ -68,7 +69,7 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 10,
-      backgroundColor: Colors.white,
+      backgroundColor: context.panelBackground,
       child: Container(
         width: 400, // Fixed width for tablet friendly UI
         padding: const EdgeInsets.all(24.0),
@@ -83,17 +84,17 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
                 Expanded(
                   child: Text(
                     widget.itemName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: context.appTextColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.grey),
+                  icon: Icon(Icons.close, color: context.secondaryTextColor),
                   onPressed: () => Navigator.of(context).pop(), // Returns null
                   splashRadius: 24,
                 ),
@@ -104,19 +105,19 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
             // Display Screen
             Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: context.mutedBackground,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.teal.shade200, width: 2),
+                border: Border.all(color: const Color(0xFF8B5E3C), width: 2),
               ),
               child: Text(
                 'RM ${_currentPrice.toStringAsFixed(2)}',
                 textAlign: TextAlign.right,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
-                  color: Colors.teal,
+                  color: context.isDarkMode ? const Color(0xFFD7A86E) : const Color(0xFF8B5E3C),
                   letterSpacing: 1.2,
                 ),
               ),
@@ -159,8 +160,9 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  disabledBackgroundColor: Colors.grey.shade300,
+                  backgroundColor: const Color(0xFF8B5E3C),
+                  disabledBackgroundColor: context.mutedBackground,
+                  disabledForegroundColor: context.secondaryTextColor,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -184,23 +186,23 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
 
   Widget _buildNumpadButton(String text) {
     return Material(
-      color: Colors.white,
+      color: context.mutedBackground,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () => _onDigitTap(text),
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: context.borderColor),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: context.appTextColor,
               ),
             ),
           ),
@@ -211,20 +213,20 @@ class _PriceNumpadDialogState extends State<PriceNumpadDialog> {
 
   Widget _buildBackspaceButton() {
     return Material(
-      color: Colors.grey.shade100,
+      color: context.mutedBackground,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: _onBackspaceTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: context.borderColor),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Center(
+          child: Center(
             child: Icon(
               Icons.backspace_outlined,
-              color: Colors.black87,
+              color: context.appTextColor,
               size: 28,
             ),
           ),

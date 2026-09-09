@@ -1,5 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:pos/model/item_model.dart';
+import 'package:pos/utils/extension.dart';
+
+/// Category used for legacy/uncategorized menu items.
+const posOthersCategory = 'Others';
+
+/// Stable color per menu category (hash-based but constrained to a
+/// pleasant, readable palette instead of random 24-bit colors).
+Color categoryColor(String category) {
+  const palette = <Color>[
+    Color(0xFF8B5E3C), // coffee brown
+    Color(0xFFA0522D), // sienna
+    Color(0xFF6B8E23), // olive
+    Color(0xFF2E7D32), // green
+    Color(0xFFB5651D), // caramel
+    Color(0xFF7B4B94), // plum
+    Color(0xFF2F6690), // blue
+    Color(0xFFC0392B), // red
+    Color(0xFF0F766E), // teal-dark
+    Color(0xFF946B2D), // gold-brown
+  ];
+  return palette[category.hashCode.abs() % palette.length];
+}
 
 class CatalogPanel extends StatelessWidget {
   final String searchQuery;
@@ -10,6 +32,7 @@ class CatalogPanel extends StatelessWidget {
   final ValueChanged<ItemModel> onProductTap;
   final ValueChanged<String> onBarcodeScanned;
   final List<String> categories;
+  final bool showCategoryRail;
 
   const CatalogPanel({
     super.key,
@@ -21,42 +44,57 @@ class CatalogPanel extends StatelessWidget {
     required this.onProductTap,
     required this.onBarcodeScanned,
     required this.categories,
+    this.showCategoryRail = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final titleColor = context.appTextColor;
     return Container(
-      color: Colors.grey[100],
+      color: context.pageBackground,
       child: Column(
         children: [
           // Header & Search
           Container(
             padding: const EdgeInsets.all(16.0),
-            color: Colors.white,
+            color: context.panelBackground,
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Products',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: titleColor,
                   ),
                 ),
                 const SizedBox(width: 24),
                 Expanded(
                   child: TextField(
+                    controller: TextEditingController(text: searchQuery)
+                      ..selection =
+                          TextSelection.collapsed(offset: searchQuery.length),
                     onChanged: onSearchChanged,
                     onSubmitted: (value) {
                       onBarcodeScanned(value);
                     },
-                    style: const TextStyle(color: Colors.black87),
+                    style: TextStyle(color: context.appTextColor),
                     decoration: InputDecoration(
                       hintText: 'Search or Scan Barcode...',
-                      hintStyle: const TextStyle(color: Colors.black54),
-                      prefixIcon: const Icon(Icons.qr_code_scanner, color: Colors.teal),
+                      hintStyle: TextStyle(color: context.secondaryTextColor),
+                      prefixIcon: Icon(Icons.qr_code_scanner,
+                          color: const Color(0xFF8B5E3C)),
+                      // Clear button: only shown when there is text.
+                      suffixIcon: searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear,
+                                  color: context.secondaryTextColor),
+                              onPressed: () => onSearchChanged(''),
+                              tooltip: 'Clear',
+                            )
+                          : null,
                       filled: true,
-                      fillColor: Colors.grey[200],
+                      fillColor: context.mutedBackground,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -70,58 +108,203 @@ class CatalogPanel extends StatelessWidget {
             ),
           ),
 
-          // Category Choice Chips
-          if (categories.isNotEmpty)
-            Container(
-              height: 60,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: categories.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final cat = categories[index];
-                  final isSelected = cat == selectedCategory;
-                  return ChoiceChip(
-                    label: Text(
-                      cat,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                    selected: isSelected,
-                    selectedColor: Colors.teal,
-                    backgroundColor: Colors.white,
-                    onSelected: (selected) {
-                      if (selected) onCategorySelected(cat);
-                    },
-                  );
-                },
-              ),
-            ),
-          // Products Grid
+          // Products Grid (chips move to the left rail on wide tablets)
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 220,
-                  childAspectRatio: 0.85,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (showCategoryRail)
+                  _CategoryRail(
+                    categories: categories,
+                    selectedCategory: selectedCategory,
+                    onCategorySelected: onCategorySelected,
+                  ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      if (!showCategoryRail && categories.isNotEmpty)
+                        _CategoryChips(
+                          categories: categories,
+                          selectedCategory: selectedCategory,
+                          onCategorySelected: onCategorySelected,
+                        ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: products.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.search_off,
+                                          size: 48,
+                                          color: context.secondaryTextColor),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'No products found',
+                                        style: TextStyle(
+                                            color: context.appTextColor,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Check the spelling or scan a valid barcode.',
+                                        style: TextStyle(
+                                            color:
+                                                context.secondaryTextColor),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : GridView.builder(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 220,
+                                    childAspectRatio: 0.85,
+                                    crossAxisSpacing: 16,
+                                    mainAxisSpacing: 16,
+                                  ),
+                                  itemCount: products.length,
+                                  itemBuilder: (context, index) {
+                                    final product = products[index];
+                                    return ProductCard(
+                                      product: product,
+                                      onTap: () => onProductTap(product),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final product = products[index];
-                  return ProductCard(
-                    product: product,
-                    onTap: () => onProductTap(product),
-                  );
-                },
-              ),
+              ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryChips extends StatelessWidget {
+  final List<String> categories;
+  final String selectedCategory;
+  final ValueChanged<String> onCategorySelected;
+
+  const _CategoryChips({
+    required this.categories,
+    required this.selectedCategory,
+    required this.onCategorySelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: categories.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final cat = categories[index];
+          final isSelected = cat == selectedCategory;
+          final catColor = cat == 'All' || cat == posOthersCategory
+              ? const Color(0xFF8B5E3C)
+              : categoryColor(cat);
+          return ChoiceChip(
+            label: Text(
+              cat,
+              style: TextStyle(
+                color: isSelected ? Colors.white : context.appTextColor,
+                fontWeight:
+                    isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+            selected: isSelected,
+            selectedColor: catColor,
+            backgroundColor: context.panelBackground,
+            side: BorderSide(color: context.borderColor),
+            onSelected: (selected) {
+              if (selected) onCategorySelected(cat);
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CategoryRail extends StatelessWidget {
+  final List<String> categories;
+  final String selectedCategory;
+  final ValueChanged<String> onCategorySelected;
+
+  const _CategoryRail({
+    required this.categories,
+    required this.selectedCategory,
+    required this.onCategorySelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 120,
+      color: context.panelBackground,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        children: [
+          for (final cat in categories)
+            InkWell(
+              onTap: () => onCategorySelected(cat),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                decoration: BoxDecoration(
+                  color: cat == selectedCategory
+                      ? const Color(0xFF8B5E3C).withValues(alpha: 0.15)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                  border: cat == selectedCategory
+                      ? Border.all(color: const Color(0xFF8B5E3C))
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: cat == 'All' || cat == posOthersCategory
+                            ? const Color(0xFF8B5E3C)
+                            : categoryColor(cat),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        cat,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: cat == selectedCategory
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: cat == selectedCategory
+                              ? const Color(0xFF8B5E3C)
+                              : context.appTextColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -136,9 +319,9 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Generate a pseudo-random color based on the item code or name
-    final colorHash = product.nama.hashCode;
-    final color = Color((colorHash & 0xFFFFFF) | 0xFF000000).withValues(alpha: 0.8);
+    final color = product.menuCategory == null || product.menuCategory!.trim().isEmpty
+        ? const Color(0xFF8B5E3C)
+        : categoryColor(product.menuCategory!);
     final isOutOfStock = product.jumlahBarang == 0;
 
     return InkWell(
@@ -148,11 +331,11 @@ class ProductCard extends StatelessWidget {
         opacity: isOutOfStock ? 0.5 : 1.0,
         child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.panelBackground,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: context.appShadowColor,
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -198,23 +381,25 @@ class ProductCard extends StatelessWidget {
                 children: [
                   Text(
                     product.nama,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: Colors.black87,
+                      color: context.appTextColor,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    product.hargaJual == 0 
+                    product.price == 0
                         ? 'Open Price'
-                        : 'RM ${product.hargaJual.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                        : 'RM ${product.price.toStringAsFixed(2)}',
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: Colors.teal,
+                      color: context.isDarkMode
+                          ? const Color(0xFFD7A86E)
+                          : const Color(0xFF8B5E3C),
                     ),
                   ),
                   if (isOutOfStock)

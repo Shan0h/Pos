@@ -10,6 +10,9 @@ class StoreModel {
   late String phone;
   String? footer;
   String? subFooter;
+  String? ownerPin;
+  String? qrDuitNow1;
+  String? qrDuitNow2;
 
   StoreModel({
     this.id,
@@ -18,6 +21,9 @@ class StoreModel {
     required this.phone,
     this.footer,
     this.subFooter,
+    this.ownerPin,
+    this.qrDuitNow1,
+    this.qrDuitNow2,
   });
 
   Map<String, dynamic> toJson() {
@@ -28,6 +34,9 @@ class StoreModel {
       'phone': phone,
       'footer': footer,
       'subFooter': subFooter,
+      'ownerPin': ownerPin,
+      'qrDuitNow1': qrDuitNow1,
+      'qrDuitNow2': qrDuitNow2,
     };
   }
 
@@ -39,6 +48,9 @@ class StoreModel {
       phone: json['phone'],
       footer: json['footer'],
       subFooter: json['subFooter'],
+      ownerPin: json['ownerPin'],
+      qrDuitNow1: json['qrDuitNow1'],
+      qrDuitNow2: json['qrDuitNow2'],
     );
   }
 }

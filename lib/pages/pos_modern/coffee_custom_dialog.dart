@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pos/model/item_model.dart';
+import 'package:pos/utils/extension.dart';
 
 class CustomizationResult {
   final String appendedName;
@@ -84,15 +85,15 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onSelected(),
-      selectedColor: Colors.brown[100],
+      selectedColor: const Color(0xFF8B5E3C).withValues(alpha: 0.15),
       labelStyle: TextStyle(
-        color: isSelected ? Colors.brown[900] : Colors.black87,
+        color: isSelected ? const Color(0xFF5D3A1A) : context.appTextColor,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
-          color: isSelected ? Colors.brown : Colors.grey[300]!,
+          color: isSelected ? const Color(0xFF8B5E3C) : context.borderColor,
         ),
       ),
     );
@@ -103,16 +104,16 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onSelected(),
-      selectedColor: Colors.brown[100],
-      checkmarkColor: Colors.brown[900],
+      selectedColor: const Color(0xFF8B5E3C).withValues(alpha: 0.15),
+      checkmarkColor: const Color(0xFF5D3A1A),
       labelStyle: TextStyle(
-        color: isSelected ? Colors.brown[900] : Colors.black87,
+        color: isSelected ? const Color(0xFF5D3A1A) : context.appTextColor,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
-          color: isSelected ? Colors.brown : Colors.grey[300]!,
+          color: isSelected ? const Color(0xFF8B5E3C) : context.borderColor,
         ),
       ),
     );
@@ -129,12 +130,23 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
     if (_sizes.isEmpty && _sugarLevels.isEmpty && _addons.isEmpty) {
       // If there are no customizations, return an empty dialog or just add immediately
       return AlertDialog(
-        title: Text('Add ${widget.item.nama}'),
-        content: const Text('Are you sure you want to add this item?'),
+        backgroundColor: context.panelBackground,
+        title: Text('Add ${widget.item.nama}', style: TextStyle(color: context.appTextColor)),
+        content: Text(
+          'Are you sure you want to add this item?',
+          style: TextStyle(color: context.appTextColor),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: context.secondaryTextColor)),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, CustomizationResult(appendedName: widget.item.nama, description: '', extraPrice: 0)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF8B5E3C),
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Add'),
           )
         ],
@@ -143,6 +155,7 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: context.panelBackground,
       child: Container(
         width: 600,
         padding: const EdgeInsets.all(24),
@@ -156,7 +169,7 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
                 children: [
                   Text(
                     'Customize: ${widget.item.nama}',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.appTextColor),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -167,7 +180,7 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
               const Divider(height: 32),
               
               if (_sizes.isNotEmpty) ...[
-                const Text('Size', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Size', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.appTextColor)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -182,7 +195,7 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
               ],
 
               if (_sugarLevels.isNotEmpty) ...[
-                const Text('Sugar Level', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Sugar Level', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.appTextColor)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -197,7 +210,7 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
               ],
 
               if (_addons.isNotEmpty) ...[
-                const Text('Add-ons', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Add-ons', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.appTextColor)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -221,7 +234,7 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: context.mutedBackground,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -230,16 +243,16 @@ class _CoffeeCustomDialogState extends State<CoffeeCustomDialog> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Total Price', style: TextStyle(color: Colors.black54)),
+                        Text('Total Price', style: TextStyle(color: context.secondaryTextColor)),
                         Text(
-                          'RM ${(widget.item.hargaJual + _extraPrice).toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.brown),
+                          'RM ${(widget.item.price + _extraPrice).toStringAsFixed(2)}',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.appTextColor),
                         ),
                       ],
                     ),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.brown,
+                        backgroundColor: const Color(0xFF8B5E3C),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

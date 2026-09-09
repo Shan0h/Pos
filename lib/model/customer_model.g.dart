@@ -27,40 +27,50 @@ const CustomerModelSchema = CollectionSchema(
       name: r'dob',
       type: IsarType.dateTime,
     ),
-    r'isSynced': PropertySchema(
+    r'isDeleted': PropertySchema(
       id: 2,
+      name: r'isDeleted',
+      type: IsarType.bool,
+    ),
+    r'isSynced': PropertySchema(
+      id: 3,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'keterangan': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'keterangan',
       type: IsarType.string,
     ),
     r'ktp': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'ktp',
       type: IsarType.string,
     ),
     r'masuk': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'masuk',
       type: IsarType.dateTime,
     ),
     r'nama': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'nama',
       type: IsarType.string,
     ),
     r'phone': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'phone',
       type: IsarType.string,
     ),
     r'status': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'status',
       type: IsarType.bool,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 10,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _customerModelEstimateSize,
@@ -113,13 +123,15 @@ void _customerModelSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.createdAt);
   writer.writeDateTime(offsets[1], object.dob);
-  writer.writeBool(offsets[2], object.isSynced);
-  writer.writeString(offsets[3], object.keterangan);
-  writer.writeString(offsets[4], object.ktp);
-  writer.writeDateTime(offsets[5], object.masuk);
-  writer.writeString(offsets[6], object.nama);
-  writer.writeString(offsets[7], object.phone);
-  writer.writeBool(offsets[8], object.status);
+  writer.writeBool(offsets[2], object.isDeleted);
+  writer.writeBool(offsets[3], object.isSynced);
+  writer.writeString(offsets[4], object.keterangan);
+  writer.writeString(offsets[5], object.ktp);
+  writer.writeDateTime(offsets[6], object.masuk);
+  writer.writeString(offsets[7], object.nama);
+  writer.writeString(offsets[8], object.phone);
+  writer.writeBool(offsets[9], object.status);
+  writer.writeDateTime(offsets[10], object.updatedAt);
 }
 
 CustomerModel _customerModelDeserialize(
@@ -132,13 +144,15 @@ CustomerModel _customerModelDeserialize(
     createdAt: reader.readDateTimeOrNull(offsets[0]),
     dob: reader.readDateTimeOrNull(offsets[1]),
     id: id,
-    isSynced: reader.readBoolOrNull(offsets[2]) ?? true,
-    keterangan: reader.readStringOrNull(offsets[3]),
-    ktp: reader.readStringOrNull(offsets[4]),
-    masuk: reader.readDateTimeOrNull(offsets[5]),
-    nama: reader.readString(offsets[6]),
-    phone: reader.readStringOrNull(offsets[7]),
-    status: reader.readBool(offsets[8]),
+    isDeleted: reader.readBoolOrNull(offsets[2]) ?? false,
+    isSynced: reader.readBoolOrNull(offsets[3]) ?? true,
+    keterangan: reader.readStringOrNull(offsets[4]),
+    ktp: reader.readStringOrNull(offsets[5]),
+    masuk: reader.readDateTimeOrNull(offsets[6]),
+    nama: reader.readString(offsets[7]),
+    phone: reader.readStringOrNull(offsets[8]),
+    status: reader.readBool(offsets[9]),
+    updatedAt: reader.readDateTimeOrNull(offsets[10]),
   );
   return object;
 }
@@ -155,19 +169,23 @@ P _customerModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 6:
-      return (reader.readString(offset)) as P;
-    case 7:
       return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 7:
+      return (reader.readString(offset)) as P;
     case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
       return (reader.readBool(offset)) as P;
+    case 10:
+      return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -482,6 +500,16 @@ extension CustomerModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
+      isDeletedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDeleted',
+        value: value,
       ));
     });
   }
@@ -1174,6 +1202,80 @@ extension CustomerModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
+      updatedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
+      updatedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
+      updatedAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
+      updatedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
+      updatedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
+      updatedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension CustomerModelQueryObject
@@ -1206,6 +1308,19 @@ extension CustomerModelQuerySortBy
   QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy> sortByDobDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dob', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy> sortByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy>
+      sortByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
     });
   }
 
@@ -1294,6 +1409,19 @@ extension CustomerModelQuerySortBy
       return query.addSortBy(r'status', Sort.desc);
     });
   }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy>
+      sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension CustomerModelQuerySortThenBy
@@ -1332,6 +1460,19 @@ extension CustomerModelQuerySortThenBy
   QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy> thenByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy>
+      thenByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
     });
   }
 
@@ -1420,6 +1561,19 @@ extension CustomerModelQuerySortThenBy
       return query.addSortBy(r'status', Sort.desc);
     });
   }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QAfterSortBy>
+      thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension CustomerModelQueryWhereDistinct
@@ -1433,6 +1587,12 @@ extension CustomerModelQueryWhereDistinct
   QueryBuilder<CustomerModel, CustomerModel, QDistinct> distinctByDob() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'dob');
+    });
+  }
+
+  QueryBuilder<CustomerModel, CustomerModel, QDistinct> distinctByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDeleted');
     });
   }
 
@@ -1481,6 +1641,12 @@ extension CustomerModelQueryWhereDistinct
       return query.addDistinctBy(r'status');
     });
   }
+
+  QueryBuilder<CustomerModel, CustomerModel, QDistinct> distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
+    });
+  }
 }
 
 extension CustomerModelQueryProperty
@@ -1500,6 +1666,12 @@ extension CustomerModelQueryProperty
   QueryBuilder<CustomerModel, DateTime?, QQueryOperations> dobProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'dob');
+    });
+  }
+
+  QueryBuilder<CustomerModel, bool, QQueryOperations> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDeleted');
     });
   }
 
@@ -1542,6 +1714,12 @@ extension CustomerModelQueryProperty
   QueryBuilder<CustomerModel, bool, QQueryOperations> statusProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'status');
+    });
+  }
+
+  QueryBuilder<CustomerModel, DateTime?, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 }

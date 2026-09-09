@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pos/widget/responsive_wrapper.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -26,16 +27,15 @@ class _LoginState extends State<Login> {
           ShadButton.outline(
             child: const Text('Back'),
             onPressed: () {
-              context.go('/sync');
+              context.go('/');
             },
           ),
         ],
       ),
       body: Center(
-        child: ShadForm(
-          key: formKey,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 350),
+        child: ResponsiveConstrainedBox(
+          child: ShadForm(
+            key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -105,7 +105,7 @@ class _LoginState extends State<Login> {
                             );
                             Future.delayed(const Duration(seconds: 2))
                                 .then((_) {
-                              if (context.mounted) context.go('/sync');
+                              if (context.mounted) context.go('/');
                             });
                           }
                         }

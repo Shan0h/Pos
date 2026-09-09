@@ -67,40 +67,65 @@ const ItemModelSchema = CollectionSchema(
       name: r'hargaJual',
       type: IsarType.long,
     ),
-    r'hargaJualPersen': PropertySchema(
+    r'hargaJualExact': PropertySchema(
       id: 10,
+      name: r'hargaJualExact',
+      type: IsarType.double,
+    ),
+    r'hargaJualPersen': PropertySchema(
+      id: 11,
       name: r'hargaJualPersen',
       type: IsarType.double,
     ),
+    r'isDeleted': PropertySchema(
+      id: 12,
+      name: r'isDeleted',
+      type: IsarType.bool,
+    ),
     r'isHargaJualPersen': PropertySchema(
-      id: 11,
+      id: 13,
       name: r'isHargaJualPersen',
       type: IsarType.bool,
     ),
     r'isSynced': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'jumlahBarang': PropertySchema(
-      id: 13,
+      id: 15,
       name: r'jumlahBarang',
       type: IsarType.long,
     ),
+    r'menuCategory': PropertySchema(
+      id: 16,
+      name: r'menuCategory',
+      type: IsarType.string,
+    ),
     r'nama': PropertySchema(
-      id: 14,
+      id: 17,
       name: r'nama',
       type: IsarType.string,
     ),
+    r'price': PropertySchema(
+      id: 18,
+      name: r'price',
+      type: IsarType.double,
+    ),
     r'quantity': PropertySchema(
-      id: 15,
+      id: 19,
       name: r'quantity',
       type: IsarType.long,
     ),
     r'ukuran': PropertySchema(
-      id: 16,
+      id: 20,
       name: r'ukuran',
       type: IsarType.string,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 21,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _itemModelEstimateSize,
@@ -142,6 +167,12 @@ int _itemModelEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.menuCategory;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.nama.length * 3;
   bytesCount += 3 + object.ukuran.length * 3;
   return bytesCount;
@@ -163,13 +194,18 @@ void _itemModelSerialize(
   writer.writeDouble(offsets[7], object.diskonPersen);
   writer.writeLong(offsets[8], object.hargaDasar);
   writer.writeLong(offsets[9], object.hargaJual);
-  writer.writeDouble(offsets[10], object.hargaJualPersen);
-  writer.writeBool(offsets[11], object.isHargaJualPersen);
-  writer.writeBool(offsets[12], object.isSynced);
-  writer.writeLong(offsets[13], object.jumlahBarang);
-  writer.writeString(offsets[14], object.nama);
-  writer.writeLong(offsets[15], object.quantity);
-  writer.writeString(offsets[16], object.ukuran);
+  writer.writeDouble(offsets[10], object.hargaJualExact);
+  writer.writeDouble(offsets[11], object.hargaJualPersen);
+  writer.writeBool(offsets[12], object.isDeleted);
+  writer.writeBool(offsets[13], object.isHargaJualPersen);
+  writer.writeBool(offsets[14], object.isSynced);
+  writer.writeLong(offsets[15], object.jumlahBarang);
+  writer.writeString(offsets[16], object.menuCategory);
+  writer.writeString(offsets[17], object.nama);
+  writer.writeDouble(offsets[18], object.price);
+  writer.writeLong(offsets[19], object.quantity);
+  writer.writeString(offsets[20], object.ukuran);
+  writer.writeDateTime(offsets[21], object.updatedAt);
 }
 
 ItemModel _itemModelDeserialize(
@@ -189,14 +225,18 @@ ItemModel _itemModelDeserialize(
     diskonPersen: reader.readDoubleOrNull(offsets[7]),
     hargaDasar: reader.readLong(offsets[8]),
     hargaJual: reader.readLong(offsets[9]),
-    hargaJualPersen: reader.readDoubleOrNull(offsets[10]),
+    hargaJualExact: reader.readDoubleOrNull(offsets[10]),
+    hargaJualPersen: reader.readDoubleOrNull(offsets[11]),
     id: id,
-    isHargaJualPersen: reader.readBool(offsets[11]),
-    isSynced: reader.readBoolOrNull(offsets[12]) ?? true,
-    jumlahBarang: reader.readLong(offsets[13]),
-    nama: reader.readString(offsets[14]),
-    quantity: reader.readLong(offsets[15]),
-    ukuran: reader.readString(offsets[16]),
+    isDeleted: reader.readBoolOrNull(offsets[12]) ?? false,
+    isHargaJualPersen: reader.readBool(offsets[13]),
+    isSynced: reader.readBoolOrNull(offsets[14]) ?? true,
+    jumlahBarang: reader.readLong(offsets[15]),
+    menuCategory: reader.readStringOrNull(offsets[16]),
+    nama: reader.readString(offsets[17]),
+    quantity: reader.readLong(offsets[19]),
+    ukuran: reader.readString(offsets[20]),
+    updatedAt: reader.readDateTimeOrNull(offsets[21]),
   );
   return object;
 }
@@ -231,17 +271,27 @@ P _itemModelDeserializeProp<P>(
     case 10:
       return (reader.readDoubleOrNull(offset)) as P;
     case 11:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 12:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 13:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 14:
-      return (reader.readString(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 15:
       return (reader.readLong(offset)) as P;
     case 16:
+      return (reader.readStringOrNull(offset)) as P;
+    case 17:
       return (reader.readString(offset)) as P;
+    case 18:
+      return (reader.readDouble(offset)) as P;
+    case 19:
+      return (reader.readLong(offset)) as P;
+    case 20:
+      return (reader.readString(offset)) as P;
+    case 21:
+      return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1326,6 +1376,90 @@ extension ItemModelQueryFilter
   }
 
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      hargaJualExactIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'hargaJualExact',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      hargaJualExactIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'hargaJualExact',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      hargaJualExactEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hargaJualExact',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      hargaJualExactGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hargaJualExact',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      hargaJualExactLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hargaJualExact',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      hargaJualExactBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hargaJualExact',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
       hargaJualPersenIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1478,6 +1612,16 @@ extension ItemModelQueryFilter
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> isDeletedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDeleted',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
       isHargaJualPersenEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
@@ -1549,6 +1693,159 @@ extension ItemModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      menuCategoryIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'menuCategory',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      menuCategoryIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'menuCategory',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> menuCategoryEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'menuCategory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      menuCategoryGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'menuCategory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      menuCategoryLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'menuCategory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> menuCategoryBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'menuCategory',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      menuCategoryStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'menuCategory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      menuCategoryEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'menuCategory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      menuCategoryContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'menuCategory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> menuCategoryMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'menuCategory',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      menuCategoryIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'menuCategory',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      menuCategoryIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'menuCategory',
+        value: '',
       ));
     });
   }
@@ -1679,6 +1976,68 @@ extension ItemModelQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'nama',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> priceEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'price',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> priceGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'price',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> priceLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'price',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> priceBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'price',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
       ));
     });
   }
@@ -1865,6 +2224,77 @@ extension ItemModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> updatedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      updatedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> updatedAtEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      updatedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> updatedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> updatedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension ItemModelQueryObject
@@ -1995,6 +2425,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByHargaJualExact() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hargaJualExact', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByHargaJualExactDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hargaJualExact', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByHargaJualPersen() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'hargaJualPersen', Sort.asc);
@@ -2004,6 +2446,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByHargaJualPersenDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'hargaJualPersen', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
     });
   }
 
@@ -2044,6 +2498,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByMenuCategory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'menuCategory', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByMenuCategoryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'menuCategory', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByNama() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nama', Sort.asc);
@@ -2053,6 +2519,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByNamaDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nama', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByPrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'price', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByPriceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'price', Sort.desc);
     });
   }
 
@@ -2077,6 +2555,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByUkuranDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'ukuran', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 }
@@ -2204,6 +2694,18 @@ extension ItemModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByHargaJualExact() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hargaJualExact', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByHargaJualExactDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hargaJualExact', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByHargaJualPersen() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'hargaJualPersen', Sort.asc);
@@ -2225,6 +2727,18 @@ extension ItemModelQuerySortThenBy
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
     });
   }
 
@@ -2265,6 +2779,18 @@ extension ItemModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByMenuCategory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'menuCategory', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByMenuCategoryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'menuCategory', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByNama() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nama', Sort.asc);
@@ -2274,6 +2800,18 @@ extension ItemModelQuerySortThenBy
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByNamaDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nama', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByPrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'price', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByPriceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'price', Sort.desc);
     });
   }
 
@@ -2298,6 +2836,18 @@ extension ItemModelQuerySortThenBy
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByUkuranDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'ukuran', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 }
@@ -2369,9 +2919,21 @@ extension ItemModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByHargaJualExact() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hargaJualExact');
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByHargaJualPersen() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'hargaJualPersen');
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDeleted');
     });
   }
 
@@ -2393,10 +2955,23 @@ extension ItemModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByMenuCategory(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'menuCategory', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByNama(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'nama', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByPrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'price');
     });
   }
 
@@ -2410,6 +2985,12 @@ extension ItemModelQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'ukuran', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
     });
   }
 }
@@ -2483,9 +3064,21 @@ extension ItemModelQueryProperty
     });
   }
 
+  QueryBuilder<ItemModel, double?, QQueryOperations> hargaJualExactProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hargaJualExact');
+    });
+  }
+
   QueryBuilder<ItemModel, double?, QQueryOperations> hargaJualPersenProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'hargaJualPersen');
+    });
+  }
+
+  QueryBuilder<ItemModel, bool, QQueryOperations> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDeleted');
     });
   }
 
@@ -2507,9 +3100,21 @@ extension ItemModelQueryProperty
     });
   }
 
+  QueryBuilder<ItemModel, String?, QQueryOperations> menuCategoryProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'menuCategory');
+    });
+  }
+
   QueryBuilder<ItemModel, String, QQueryOperations> namaProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'nama');
+    });
+  }
+
+  QueryBuilder<ItemModel, double, QQueryOperations> priceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'price');
     });
   }
 
@@ -2522,6 +3127,12 @@ extension ItemModelQueryProperty
   QueryBuilder<ItemModel, String, QQueryOperations> ukuranProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'ukuran');
+    });
+  }
+
+  QueryBuilder<ItemModel, DateTime?, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 }

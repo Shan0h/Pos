@@ -2,12 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pos/controller/selling_controller.dart';
 import 'package:pos/service/get_it.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
-import 'package:print_bluetooth_thermal/print_bluetooth_thermal_windows.dart';
 import 'package:usb_esc_printer_windows/usb_esc_printer_windows.dart' as usb_esc_printer_windows;
 import 'package:esc_pos_utils/esc_pos_utils.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:signals/signals_flutter.dart';
 
 class ModernPrintSetting extends StatefulWidget {
   const ModernPrintSetting({super.key});
@@ -145,11 +143,11 @@ class _ModernPrintSettingState extends State<ModernPrintSetting> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Printer Settings', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: const Color(0xFF5D3A1A),
+        foregroundColor: Colors.white,
         elevation: 0.5,
       ),
-      backgroundColor: Colors.grey[50],
+      backgroundColor: context.pageBackground,
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 800),
@@ -160,20 +158,21 @@ class _ModernPrintSettingState extends State<ModernPrintSetting> {
               // Header Card
               Card(
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey[300]!)),
+                color: context.panelBackground,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: context.borderColor)),
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Primary Printer Configuration',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.appTextColor),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'Enter your printer name (Windows USB) or MAC Address (Bluetooth).',
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(color: context.secondaryTextColor),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -181,18 +180,20 @@ class _ModernPrintSettingState extends State<ModernPrintSetting> {
                           Expanded(
                             child: TextField(
                               controller: _printNameController,
+                              style: TextStyle(color: context.appTextColor),
                               decoration: InputDecoration(
                                 labelText: 'Printer Name / MAC Address',
+                                labelStyle: TextStyle(color: context.secondaryTextColor),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: context.mutedBackground,
                               ),
                             ),
                           ),
                           const SizedBox(width: 16),
                           ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
+                              backgroundColor: const Color(0xFF8B5E3C),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -242,50 +243,51 @@ class _ModernPrintSettingState extends State<ModernPrintSetting> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: context.mutedBackground,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue[200]!),
+                    border: Border.all(color: context.borderColor),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.blue[800], size: 20),
+                      Icon(Icons.info_outline, color: Colors.blue[300], size: 20),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(_statusMessage, style: TextStyle(color: Colors.blue[900])),
+                        child: Text(_statusMessage, style: TextStyle(color: context.appTextColor)),
                       ),
                     ],
                   ),
                 ),
-                
+
               const SizedBox(height: 16),
-              
+
               // Printer List
-              const Text('Discovered Printers', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('Discovered Printers', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.appTextColor)),
               const SizedBox(height: 8),
               Expanded(
-                child: _printers.isEmpty 
-                  ? Center(child: Text('No printers found. Click search.', style: TextStyle(color: Colors.grey[600])))
+                child: _printers.isEmpty
+                  ? Center(child: Text('No printers found. Click search.', style: TextStyle(color: context.secondaryTextColor)))
                   : ListView.builder(
                       itemCount: _printers.length,
                       itemBuilder: (context, index) {
                         final printer = _printers[index];
                         return Card(
                           elevation: 0,
+                          color: context.panelBackground,
                           margin: const EdgeInsets.only(bottom: 8),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8), 
-                            side: BorderSide(color: Colors.grey[300]!)
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: context.borderColor)
                           ),
                           child: ListTile(
                             leading: const CircleAvatar(
-                              backgroundColor: Colors.blue,
+                              backgroundColor: Color(0xFF8B5E3C),
                               child: Icon(Icons.bluetooth, color: Colors.white),
                             ),
                             title: Text(printer.name.isNotEmpty ? printer.name : 'Unknown Device', style: const TextStyle(fontWeight: FontWeight.bold)),
                             subtitle: Text(printer.macAdress),
                             trailing: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
+                                backgroundColor: const Color(0xFF8B5E3C),
                                 foregroundColor: Colors.white,
                               ),
                               onPressed: () {

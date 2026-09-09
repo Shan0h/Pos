@@ -1,6 +1,6 @@
 import 'package:pos/controller/expenses_controller.dart';
 import 'package:pos/model/expenses_model.dart';
-import 'package:pos/service/database.dart';
+import 'package:pos/service/app_services.dart';
 import 'package:pos/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,13 +27,13 @@ class ExpensesForm extends HookWidget {
           ShadButton(
               onPressed: () async {
                 if (expensesFormKey.currentState!.validate()) {
-                  final newItem = ExpensesModel(
-                      id: DateTime.now().microsecondsSinceEpoch,
-                      title: title.text,
-                      amount: int.parse(amount.text),
-                      note: note.text,
-                      createdAt: date.value);
-                  await Database().addExpenses(newItem).whenComplete(() {
+                   final newItem = ExpensesModel(
+                       id: DateTime.now().microsecondsSinceEpoch,
+                       title: title.text,
+                       amount: int.parse(amount.text),
+                       note: note.text,
+                       createdAt: date.value);
+                  await expensesService.addExpenses(newItem).whenComplete(() {
                     expensesController.expenses.refresh();
                     if (context.mounted) context.pop();
                   });

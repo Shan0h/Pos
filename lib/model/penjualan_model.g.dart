@@ -17,46 +17,76 @@ const PenjualanModelSchema = CollectionSchema(
   name: r'PenjualanModel',
   id: -8600692590387439898,
   properties: {
-    r'createdAt': PropertySchema(
+    r'changeAmount': PropertySchema(
       id: 0,
+      name: r'changeAmount',
+      type: IsarType.double,
+    ),
+    r'createdAt': PropertySchema(
+      id: 1,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'diskon': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'diskon',
       type: IsarType.double,
     ),
+    r'isDeleted': PropertySchema(
+      id: 3,
+      name: r'isDeleted',
+      type: IsarType.bool,
+    ),
+    r'isSynced': PropertySchema(
+      id: 4,
+      name: r'isSynced',
+      type: IsarType.bool,
+    ),
     r'items': PropertySchema(
-      id: 2,
+      id: 5,
       name: r'items',
       type: IsarType.objectList,
       target: r'ProductItemModel',
     ),
     r'keterangan': PropertySchema(
-      id: 3,
+      id: 6,
       name: r'keterangan',
       type: IsarType.string,
     ),
+    r'paymentMethod': PropertySchema(
+      id: 7,
+      name: r'paymentMethod',
+      type: IsarType.string,
+    ),
     r'pembeli': PropertySchema(
-      id: 4,
+      id: 8,
       name: r'pembeli',
       type: IsarType.long,
     ),
     r'staffId': PropertySchema(
-      id: 5,
+      id: 9,
       name: r'staffId',
       type: IsarType.long,
     ),
+    r'tenderedAmount': PropertySchema(
+      id: 10,
+      name: r'tenderedAmount',
+      type: IsarType.double,
+    ),
     r'totalHarga': PropertySchema(
-      id: 6,
+      id: 11,
       name: r'totalHarga',
       type: IsarType.double,
     ),
     r'totalItem': PropertySchema(
-      id: 7,
+      id: 12,
       name: r'totalItem',
       type: IsarType.long,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 13,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _penjualanModelEstimateSize,
@@ -94,6 +124,12 @@ int _penjualanModelEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.paymentMethod;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -103,19 +139,25 @@ void _penjualanModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTime(offsets[0], object.createdAt);
-  writer.writeDouble(offsets[1], object.diskon);
+  writer.writeDouble(offsets[0], object.changeAmount);
+  writer.writeDateTime(offsets[1], object.createdAt);
+  writer.writeDouble(offsets[2], object.diskon);
+  writer.writeBool(offsets[3], object.isDeleted);
+  writer.writeBool(offsets[4], object.isSynced);
   writer.writeObjectList<ProductItemModel>(
-    offsets[2],
+    offsets[5],
     allOffsets,
     ProductItemModelSchema.serialize,
     object.items,
   );
-  writer.writeString(offsets[3], object.keterangan);
-  writer.writeLong(offsets[4], object.pembeli);
-  writer.writeLong(offsets[5], object.staffId);
-  writer.writeDouble(offsets[6], object.totalHarga);
-  writer.writeLong(offsets[7], object.totalItem);
+  writer.writeString(offsets[6], object.keterangan);
+  writer.writeString(offsets[7], object.paymentMethod);
+  writer.writeLong(offsets[8], object.pembeli);
+  writer.writeLong(offsets[9], object.staffId);
+  writer.writeDouble(offsets[10], object.tenderedAmount);
+  writer.writeDouble(offsets[11], object.totalHarga);
+  writer.writeLong(offsets[12], object.totalItem);
+  writer.writeDateTime(offsets[13], object.updatedAt);
 }
 
 PenjualanModel _penjualanModelDeserialize(
@@ -125,21 +167,27 @@ PenjualanModel _penjualanModelDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = PenjualanModel(
-    createdAt: reader.readDateTime(offsets[0]),
-    diskon: reader.readDouble(offsets[1]),
+    changeAmount: reader.readDoubleOrNull(offsets[0]),
+    createdAt: reader.readDateTime(offsets[1]),
+    diskon: reader.readDouble(offsets[2]),
     id: id,
+    isDeleted: reader.readBoolOrNull(offsets[3]) ?? false,
+    isSynced: reader.readBoolOrNull(offsets[4]) ?? true,
     items: reader.readObjectList<ProductItemModel>(
-          offsets[2],
+          offsets[5],
           ProductItemModelSchema.deserialize,
           allOffsets,
           ProductItemModel(),
         ) ??
         [],
-    keterangan: reader.readStringOrNull(offsets[3]),
-    pembeli: reader.readLongOrNull(offsets[4]),
-    staffId: reader.readLong(offsets[5]),
-    totalHarga: reader.readDouble(offsets[6]),
-    totalItem: reader.readLong(offsets[7]),
+    keterangan: reader.readStringOrNull(offsets[6]),
+    paymentMethod: reader.readStringOrNull(offsets[7]),
+    pembeli: reader.readLongOrNull(offsets[8]),
+    staffId: reader.readLong(offsets[9]),
+    tenderedAmount: reader.readDoubleOrNull(offsets[10]),
+    totalHarga: reader.readDouble(offsets[11]),
+    totalItem: reader.readLong(offsets[12]),
+    updatedAt: reader.readDateTimeOrNull(offsets[13]),
   );
   return object;
 }
@@ -152,10 +200,16 @@ P _penjualanModelDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 1:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 2:
+      return (reader.readDouble(offset)) as P;
+    case 3:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 4:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 5:
       return (reader.readObjectList<ProductItemModel>(
             offset,
             ProductItemModelSchema.deserialize,
@@ -163,16 +217,22 @@ P _penjualanModelDeserializeProp<P>(
             ProductItemModel(),
           ) ??
           []) as P;
-    case 3:
-      return (reader.readStringOrNull(offset)) as P;
-    case 4:
-      return (reader.readLongOrNull(offset)) as P;
-    case 5:
-      return (reader.readLong(offset)) as P;
     case 6:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
+      return (reader.readLongOrNull(offset)) as P;
+    case 9:
       return (reader.readLong(offset)) as P;
+    case 10:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 11:
+      return (reader.readDouble(offset)) as P;
+    case 12:
+      return (reader.readLong(offset)) as P;
+    case 13:
+      return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -274,6 +334,90 @@ extension PenjualanModelQueryWhere
 
 extension PenjualanModelQueryFilter
     on QueryBuilder<PenjualanModel, PenjualanModel, QFilterCondition> {
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      changeAmountIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'changeAmount',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      changeAmountIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'changeAmount',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      changeAmountEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'changeAmount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      changeAmountGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'changeAmount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      changeAmountLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'changeAmount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      changeAmountBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'changeAmount',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
       createdAtEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -465,6 +609,26 @@ extension PenjualanModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      isDeletedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDeleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      isSyncedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isSynced',
+        value: value,
       ));
     });
   }
@@ -713,6 +877,160 @@ extension PenjualanModelQueryFilter
   }
 
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'paymentMethod',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'paymentMethod',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'paymentMethod',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'paymentMethod',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'paymentMethod',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'paymentMethod',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'paymentMethod',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'paymentMethod',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'paymentMethod',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'paymentMethod',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'paymentMethod',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      paymentMethodIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'paymentMethod',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
       pembeliIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -843,6 +1161,90 @@ extension PenjualanModelQueryFilter
   }
 
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      tenderedAmountIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'tenderedAmount',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      tenderedAmountIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'tenderedAmount',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      tenderedAmountEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tenderedAmount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      tenderedAmountGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'tenderedAmount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      tenderedAmountLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'tenderedAmount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      tenderedAmountBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'tenderedAmount',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
       totalHargaEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -963,6 +1365,80 @@ extension PenjualanModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      updatedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      updatedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      updatedAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      updatedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      updatedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      updatedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension PenjualanModelQueryObject
@@ -980,6 +1456,20 @@ extension PenjualanModelQueryLinks
 
 extension PenjualanModelQuerySortBy
     on QueryBuilder<PenjualanModel, PenjualanModel, QSortBy> {
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByChangeAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'changeAmount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByChangeAmountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'changeAmount', Sort.desc);
+    });
+  }
+
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -1006,6 +1496,32 @@ extension PenjualanModelQuerySortBy
     });
   }
 
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> sortByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> sortByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
+    });
+  }
+
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
       sortByKeterangan() {
     return QueryBuilder.apply(this, (query) {
@@ -1017,6 +1533,20 @@ extension PenjualanModelQuerySortBy
       sortByKeteranganDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'keterangan', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByPaymentMethod() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentMethod', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByPaymentMethodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentMethod', Sort.desc);
     });
   }
 
@@ -1047,6 +1577,20 @@ extension PenjualanModelQuerySortBy
   }
 
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByTenderedAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tenderedAmount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByTenderedAmountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tenderedAmount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
       sortByTotalHarga() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'totalHarga', Sort.asc);
@@ -1072,10 +1616,37 @@ extension PenjualanModelQuerySortBy
       return query.addSortBy(r'totalItem', Sort.desc);
     });
   }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension PenjualanModelQuerySortThenBy
     on QueryBuilder<PenjualanModel, PenjualanModel, QSortThenBy> {
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByChangeAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'changeAmount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByChangeAmountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'changeAmount', Sort.desc);
+    });
+  }
+
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> thenByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -1114,6 +1685,32 @@ extension PenjualanModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> thenByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> thenByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
+    });
+  }
+
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
       thenByKeterangan() {
     return QueryBuilder.apply(this, (query) {
@@ -1125,6 +1722,20 @@ extension PenjualanModelQuerySortThenBy
       thenByKeteranganDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'keterangan', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByPaymentMethod() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentMethod', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByPaymentMethodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentMethod', Sort.desc);
     });
   }
 
@@ -1155,6 +1766,20 @@ extension PenjualanModelQuerySortThenBy
   }
 
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByTenderedAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tenderedAmount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByTenderedAmountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tenderedAmount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
       thenByTotalHarga() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'totalHarga', Sort.asc);
@@ -1180,10 +1805,30 @@ extension PenjualanModelQuerySortThenBy
       return query.addSortBy(r'totalItem', Sort.desc);
     });
   }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension PenjualanModelQueryWhereDistinct
     on QueryBuilder<PenjualanModel, PenjualanModel, QDistinct> {
+  QueryBuilder<PenjualanModel, PenjualanModel, QDistinct>
+      distinctByChangeAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'changeAmount');
+    });
+  }
+
   QueryBuilder<PenjualanModel, PenjualanModel, QDistinct>
       distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
@@ -1197,10 +1842,31 @@ extension PenjualanModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<PenjualanModel, PenjualanModel, QDistinct>
+      distinctByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDeleted');
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QDistinct> distinctByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isSynced');
+    });
+  }
+
   QueryBuilder<PenjualanModel, PenjualanModel, QDistinct> distinctByKeterangan(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'keterangan', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QDistinct>
+      distinctByPaymentMethod({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'paymentMethod',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -1217,6 +1883,13 @@ extension PenjualanModelQueryWhereDistinct
   }
 
   QueryBuilder<PenjualanModel, PenjualanModel, QDistinct>
+      distinctByTenderedAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'tenderedAmount');
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QDistinct>
       distinctByTotalHarga() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'totalHarga');
@@ -1229,6 +1902,13 @@ extension PenjualanModelQueryWhereDistinct
       return query.addDistinctBy(r'totalItem');
     });
   }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QDistinct>
+      distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
+    });
+  }
 }
 
 extension PenjualanModelQueryProperty
@@ -1236,6 +1916,13 @@ extension PenjualanModelQueryProperty
   QueryBuilder<PenjualanModel, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<PenjualanModel, double?, QQueryOperations>
+      changeAmountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'changeAmount');
     });
   }
 
@@ -1248,6 +1935,18 @@ extension PenjualanModelQueryProperty
   QueryBuilder<PenjualanModel, double, QQueryOperations> diskonProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'diskon');
+    });
+  }
+
+  QueryBuilder<PenjualanModel, bool, QQueryOperations> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDeleted');
+    });
+  }
+
+  QueryBuilder<PenjualanModel, bool, QQueryOperations> isSyncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isSynced');
     });
   }
 
@@ -1264,6 +1963,13 @@ extension PenjualanModelQueryProperty
     });
   }
 
+  QueryBuilder<PenjualanModel, String?, QQueryOperations>
+      paymentMethodProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'paymentMethod');
+    });
+  }
+
   QueryBuilder<PenjualanModel, int?, QQueryOperations> pembeliProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pembeli');
@@ -1276,6 +1982,13 @@ extension PenjualanModelQueryProperty
     });
   }
 
+  QueryBuilder<PenjualanModel, double?, QQueryOperations>
+      tenderedAmountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'tenderedAmount');
+    });
+  }
+
   QueryBuilder<PenjualanModel, double, QQueryOperations> totalHargaProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'totalHarga');
@@ -1285,6 +1998,13 @@ extension PenjualanModelQueryProperty
   QueryBuilder<PenjualanModel, int, QQueryOperations> totalItemProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'totalItem');
+    });
+  }
+
+  QueryBuilder<PenjualanModel, DateTime?, QQueryOperations>
+      updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 }
@@ -1310,73 +2030,88 @@ const ProductItemModelSchema = Schema(
       name: r'barangMasuk',
       type: IsarType.dateTime,
     ),
-    r'code': PropertySchema(
+    r'category': PropertySchema(
       id: 2,
+      name: r'category',
+      type: IsarType.string,
+    ),
+    r'code': PropertySchema(
+      id: 3,
       name: r'code',
       type: IsarType.string,
     ),
     r'createdAt': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'deskripsi': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'deskripsi',
       type: IsarType.string,
     ),
     r'diskonPersen': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'diskonPersen',
       type: IsarType.double,
     ),
     r'hargaDasar': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'hargaDasar',
       type: IsarType.long,
     ),
     r'hargaJual': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'hargaJual',
       type: IsarType.long,
     ),
+    r'hargaJualExact': PropertySchema(
+      id: 9,
+      name: r'hargaJualExact',
+      type: IsarType.double,
+    ),
     r'hargaJualPersen': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'hargaJualPersen',
       type: IsarType.double,
     ),
     r'id': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'id',
       type: IsarType.long,
     ),
     r'isHargaJualPersen': PropertySchema(
-      id: 10,
+      id: 12,
       name: r'isHargaJualPersen',
       type: IsarType.bool,
     ),
     r'isSynced': PropertySchema(
-      id: 11,
+      id: 13,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'jumlahBarang': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'jumlahBarang',
       type: IsarType.long,
     ),
     r'nama': PropertySchema(
-      id: 13,
+      id: 15,
       name: r'nama',
       type: IsarType.string,
     ),
+    r'price': PropertySchema(
+      id: 16,
+      name: r'price',
+      type: IsarType.double,
+    ),
     r'quantity': PropertySchema(
-      id: 14,
+      id: 17,
       name: r'quantity',
       type: IsarType.long,
     ),
     r'ukuran': PropertySchema(
-      id: 15,
+      id: 18,
       name: r'ukuran',
       type: IsarType.string,
     )
@@ -1393,6 +2128,12 @@ int _productItemModelEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.category;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   {
     final value = object.code;
     if (value != null) {
@@ -1428,20 +2169,23 @@ void _productItemModelSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.barangKeluar);
   writer.writeDateTime(offsets[1], object.barangMasuk);
-  writer.writeString(offsets[2], object.code);
-  writer.writeDateTime(offsets[3], object.createdAt);
-  writer.writeString(offsets[4], object.deskripsi);
-  writer.writeDouble(offsets[5], object.diskonPersen);
-  writer.writeLong(offsets[6], object.hargaDasar);
-  writer.writeLong(offsets[7], object.hargaJual);
-  writer.writeDouble(offsets[8], object.hargaJualPersen);
-  writer.writeLong(offsets[9], object.id);
-  writer.writeBool(offsets[10], object.isHargaJualPersen);
-  writer.writeBool(offsets[11], object.isSynced);
-  writer.writeLong(offsets[12], object.jumlahBarang);
-  writer.writeString(offsets[13], object.nama);
-  writer.writeLong(offsets[14], object.quantity);
-  writer.writeString(offsets[15], object.ukuran);
+  writer.writeString(offsets[2], object.category);
+  writer.writeString(offsets[3], object.code);
+  writer.writeDateTime(offsets[4], object.createdAt);
+  writer.writeString(offsets[5], object.deskripsi);
+  writer.writeDouble(offsets[6], object.diskonPersen);
+  writer.writeLong(offsets[7], object.hargaDasar);
+  writer.writeLong(offsets[8], object.hargaJual);
+  writer.writeDouble(offsets[9], object.hargaJualExact);
+  writer.writeDouble(offsets[10], object.hargaJualPersen);
+  writer.writeLong(offsets[11], object.id);
+  writer.writeBool(offsets[12], object.isHargaJualPersen);
+  writer.writeBool(offsets[13], object.isSynced);
+  writer.writeLong(offsets[14], object.jumlahBarang);
+  writer.writeString(offsets[15], object.nama);
+  writer.writeDouble(offsets[16], object.price);
+  writer.writeLong(offsets[17], object.quantity);
+  writer.writeString(offsets[18], object.ukuran);
 }
 
 ProductItemModel _productItemModelDeserialize(
@@ -1453,21 +2197,23 @@ ProductItemModel _productItemModelDeserialize(
   final object = ProductItemModel(
     barangKeluar: reader.readDateTimeOrNull(offsets[0]),
     barangMasuk: reader.readDateTimeOrNull(offsets[1]),
-    code: reader.readStringOrNull(offsets[2]),
-    createdAt: reader.readDateTimeOrNull(offsets[3]),
-    deskripsi: reader.readStringOrNull(offsets[4]),
-    diskonPersen: reader.readDoubleOrNull(offsets[5]),
-    hargaDasar: reader.readLongOrNull(offsets[6]),
-    hargaJual: reader.readLongOrNull(offsets[7]),
-    hargaJualPersen: reader.readDoubleOrNull(offsets[8]),
-    id: reader.readLongOrNull(offsets[9]),
-    isHargaJualPersen: reader.readBoolOrNull(offsets[10]),
-    isSynced: reader.readBoolOrNull(offsets[11]),
-    jumlahBarang: reader.readLongOrNull(offsets[12]),
-    nama: reader.readStringOrNull(offsets[13]),
-    quantity: reader.readLongOrNull(offsets[14]),
-    ukuran: reader.readStringOrNull(offsets[15]),
+    category: reader.readStringOrNull(offsets[2]),
+    code: reader.readStringOrNull(offsets[3]),
+    createdAt: reader.readDateTimeOrNull(offsets[4]),
+    deskripsi: reader.readStringOrNull(offsets[5]),
+    diskonPersen: reader.readDoubleOrNull(offsets[6]),
+    hargaDasar: reader.readLongOrNull(offsets[7]),
+    hargaJual: reader.readLongOrNull(offsets[8]),
+    hargaJualPersen: reader.readDoubleOrNull(offsets[10]),
+    id: reader.readLongOrNull(offsets[11]),
+    isHargaJualPersen: reader.readBoolOrNull(offsets[12]),
+    isSynced: reader.readBoolOrNull(offsets[13]),
+    jumlahBarang: reader.readLongOrNull(offsets[14]),
+    nama: reader.readStringOrNull(offsets[15]),
+    quantity: reader.readLongOrNull(offsets[17]),
+    ukuran: reader.readStringOrNull(offsets[18]),
   );
+  object.hargaJualExact = reader.readDoubleOrNull(offsets[9]);
   return object;
 }
 
@@ -1485,30 +2231,36 @@ P _productItemModelDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 4:
       return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 5:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 7:
       return (reader.readLongOrNull(offset)) as P;
     case 8:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 9:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 10:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 11:
-      return (reader.readBoolOrNull(offset)) as P;
-    case 12:
       return (reader.readLongOrNull(offset)) as P;
+    case 12:
+      return (reader.readBoolOrNull(offset)) as P;
     case 13:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 14:
       return (reader.readLongOrNull(offset)) as P;
     case 15:
+      return (reader.readStringOrNull(offset)) as P;
+    case 16:
+      return (reader.readDouble(offset)) as P;
+    case 17:
+      return (reader.readLongOrNull(offset)) as P;
+    case 18:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1661,6 +2413,160 @@ extension ProductItemModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'category',
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'category',
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'category',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'category',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'category',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      categoryIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'category',
+        value: '',
       ));
     });
   }
@@ -2280,6 +3186,90 @@ extension ProductItemModelQueryFilter
   }
 
   QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      hargaJualExactIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'hargaJualExact',
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      hargaJualExactIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'hargaJualExact',
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      hargaJualExactEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hargaJualExact',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      hargaJualExactGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hargaJualExact',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      hargaJualExactLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hargaJualExact',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      hargaJualExactBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hargaJualExact',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
       hargaJualPersenIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -2717,6 +3707,72 @@ extension ProductItemModelQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'nama',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      priceEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'price',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      priceGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'price',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      priceLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'price',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ProductItemModel, ProductItemModel, QAfterFilterCondition>
+      priceBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'price',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
       ));
     });
   }

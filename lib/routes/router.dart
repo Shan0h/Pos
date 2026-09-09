@@ -1,7 +1,5 @@
 import 'package:pos/pages/customer.dart';
 import 'package:pos/pages/customer/customer_form.dart';
-import 'package:pos/pages/due_payment.dart';
-import 'package:pos/pages/due_payment/due_payment_form.dart';
 import 'package:pos/pages/expenses.dart';
 import 'package:pos/pages/home.dart';
 import 'package:pos/pages/inventory.dart';
@@ -10,15 +8,11 @@ import 'package:pos/pages/inventory/inventory_form.dart';
 import 'package:pos/pages/login.dart';
 import 'package:pos/pages/register.dart';
 import 'package:pos/pages/report.dart';
-import 'package:pos/pages/request.dart';
-import 'package:pos/pages/request/request_form.dart';
 import 'package:pos/pages/salaries.dart';
 import 'package:pos/pages/salaries/salaries_form.dart';
 
 import 'package:pos/pages/pos_modern/modern_print_setting.dart';
 import 'package:pos/pages/store.dart';
-import 'package:pos/pages/sync.dart';
-import 'package:pos/pages/testing.dart';
 import 'package:pos/pages/users.dart';
 import 'package:pos/pages/users/user_form.dart';
 import 'package:pos/pages/pos_modern/pos_modern_page.dart';
@@ -170,14 +164,6 @@ class ExpensesRoute extends GoRouteData {
   Widget build(BuildContext context, GoRouterState state) => const Expanses();
 }
 
-@TypedGoRoute<SyncRoute>(path: '/sync')
-class SyncRoute extends GoRouteData {
-  const SyncRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const Sync();
-}
-
 @TypedGoRoute<SalariesRoute>(
   path: '/salaries',
   routes: <TypedGoRoute<GoRouteData>>[
@@ -199,58 +185,4 @@ class SalariesFormRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const SalariesForm();
-}
-
-@TypedGoRoute<DuePaymentRoute>(
-  path: '/due-payment',
-  routes: <TypedGoRoute<GoRouteData>>[
-    TypedGoRoute<DuePaymentFormRoute>(
-      path: 'form',
-    )
-  ],
-)
-class DuePaymentRoute extends GoRouteData {
-  const DuePaymentRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const DuePayment();
-}
-
-class DuePaymentFormRoute extends GoRouteData {
-  const DuePaymentFormRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => DuePaymentForm();
-}
-
-@TypedGoRoute<RequestRoute>(
-  path: '/request',
-  routes: <TypedGoRoute<GoRouteData>>[
-    TypedGoRoute<RequestFormRoute>(
-      path: 'form',
-    )
-  ],
-)
-class RequestRoute extends GoRouteData {
-  const RequestRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const Request();
-}
-
-class RequestFormRoute extends GoRouteData {
-  const RequestFormRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const RequestForm();
-}
-
-@TypedGoRoute<TestingRoute>(path: '/testing')
-class TestingRoute extends GoRouteData {
-  const TestingRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const TestingPage();
 }

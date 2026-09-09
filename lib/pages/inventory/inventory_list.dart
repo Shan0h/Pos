@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:signals/signals_flutter.dart';
 
 class InventoryList extends HookWidget {
@@ -169,8 +168,8 @@ class InventoryList extends HookWidget {
                               child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 leading: CircleAvatar(
-                                  backgroundColor: Colors.brown[800]?.withValues(alpha: 0.1),
-                                  child: Text(item.id.toString(), style: TextStyle(color: Colors.brown[800], fontWeight: FontWeight.bold)),
+                                  backgroundColor: const Color(0xFF8B5E3C).withValues(alpha: 0.1),
+                                  child: Text(item.id.toString(), style: const TextStyle(color: Color(0xFF8B5E3C), fontWeight: FontWeight.bold)),
                                 ),
                                 title: Text(item.nama, style: const TextStyle(fontWeight: FontWeight.bold)),
                                 subtitle: Column(
