@@ -58,8 +58,15 @@ class SalaryModel {
       userId: json['userId'],
       status: json['status'],
       periode: json['periode'],
-      items: json['items'],
-      deductions: json['deductions'],
+      // `items`/`deductions` arrive as List<dynamic> of maps — build real
+      // ItemSalary objects (raw maps would fail the Isar embedded-object
+      // contract on put()).
+      items: (json['items'] as List? ?? const [])
+          .map((e) => ItemSalary.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      deductions: (json['deductions'] as List? ?? const [])
+          .map((e) => ItemSalary.fromJson(e as Map<String, dynamic>))
+          .toList(),
       total: json['total'],
       note: json['note'],
       management: json['management'],

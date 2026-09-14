@@ -7,6 +7,7 @@ import 'package:pos/service/report_service.dart';
 import 'package:pos/service/expenses_service.dart';
 import 'package:pos/service/salary_service.dart';
 import 'package:pos/service/store_service.dart';
+import 'package:pos/service/backup_service.dart';
 
 Database get database => getIt.get<Database>();
 UserService get userService => getIt.get<UserService>();
@@ -16,3 +17,4 @@ ReportService get reportService => getIt.get<ReportService>();
 ExpensesService get expensesService => getIt.get<ExpensesService>();
 SalaryService get salaryService => getIt.get<SalaryService>();
 StoreService get storeService => getIt.get<StoreService>();
+BackupService get backupService => getIt.get<BackupService>();

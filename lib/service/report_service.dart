@@ -58,6 +58,21 @@ class ReportService {
     await _database.isar.writeTxn(() async => await _collection.put(existing));
   }
 
+  // ---------------------------------------------------------------------------
+  // Revenue reporting
+  //
+  // Every revenue query below counts only FULFILLED orders: the worker has
+  // tapped "Mark as Done" (orderStatus == 'done') or the order is a legacy
+  // record from before fulfillment tracking existed (orderStatus == null).
+  // Orders still awaiting preparation (orderStatus == 'pending') are paid but
+  // not handed over yet, so they stay out of revenue until marked done.
+  // getReportAll()/checkIsReportSynced() intentionally have no such filter —
+  // sync must always see every record.
+  // The fulfillment condition (orderStatus is null OR == 'done') is inlined
+  // in each query — Isar's QueryBuilder is instance-scoped so it cannot be
+  // hoisted into a shared helper.
+  // ---------------------------------------------------------------------------
+
   Future<List<PenjualanModel>> getReport({required DateTime start, required DateTime end}) async {
     return _collection
         .where()
@@ -65,6 +80,10 @@ class ReportService {
         .isDeletedEqualTo(false)
         .createdAtBetween(start.copyWith(hour: 0, minute: 0, second: 0),
             end.copyWith(hour: 23, minute: 59, second: 59))
+        .group((q) => q
+            .orderStatusIsNull()
+            .or()
+            .orderStatusEqualTo(PenjualanModel.statusDone))
         .findAll();
   }
 
@@ -78,6 +97,10 @@ class ReportService {
           end.copyWith(hour: 23, minute: 59, second: 59),
         )
         .staffIdEqualTo(userId ?? 0)
+        .group((q) => q
+            .orderStatusIsNull()
+            .or()
+            .orderStatusEqualTo(PenjualanModel.statusDone))
         .findAll();
   }
 
@@ -88,6 +111,10 @@ class ReportService {
         .createdAtBetween(
             DateTime.now().copyWith(hour: 0, minute: 0, second: 0),
             DateTime.now().copyWith(hour: 23, minute: 59, second: 59))
+        .group((q) => q
+            .orderStatusIsNull()
+            .or()
+            .orderStatusEqualTo(PenjualanModel.statusDone))
         .findAll();
   }
 
@@ -98,11 +125,22 @@ class ReportService {
         .createdAtBetween(
             DateTime.now().subtract(const Duration(days: 1)).copyWith(hour: 0, minute: 0, second: 0),
             DateTime.now().subtract(const Duration(days: 1)).copyWith(hour: 23, minute: 59, second: 59))
+        .group((q) => q
+            .orderStatusIsNull()
+            .or()
+            .orderStatusEqualTo(PenjualanModel.statusDone))
         .findAll();
   }
 
   Future<Map<int, List<PenjualanModel>>> getSalesByUser() async {
-    final items = await _collection.filter().isDeletedEqualTo(false).findAll();
+    final items = await _collection
+        .filter()
+        .isDeletedEqualTo(false)
+        .group((q) => q
+            .orderStatusIsNull()
+            .or()
+            .orderStatusEqualTo(PenjualanModel.statusDone))
+        .findAll();
     return items.groupListsBy((i) => i.staffId);
   }
 
@@ -113,12 +151,79 @@ class ReportService {
         .isDeletedEqualTo(false)
         .createdAtBetween(start.copyWith(hour: 0, minute: 0, second: 0),
             end.copyWith(hour: 23, minute: 59, second: 59))
+        .group((q) => q
+            .orderStatusIsNull()
+            .or()
+            .orderStatusEqualTo(PenjualanModel.statusDone))
         .findAllSync();
     return items.groupListsBy((order) => DateTime(order.createdAt.year, order.createdAt.month, order.createdAt.day));
   }
 
   Future<List<PenjualanModel>> getReportAll() async {
     return _collection.where().findAll();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Awaiting Orders (local fulfillment tracking)
+  // Status lives only in Isar (PenjualanModel.orderStatus) and is intentionally
+  // excluded from the Supabase payload — see penjualan_model.dart.
+  // ---------------------------------------------------------------------------
+
+  /// Today's orders still awaiting preparation, newest first.
+  /// Legacy orders (orderStatus == null) are never listed.
+  Future<List<PenjualanModel>> getAwaitingOrders() async {
+    final now = DateTime.now();
+    return _collection
+        .filter()
+        .isDeletedEqualTo(false)
+        .createdAtBetween(
+          now.copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0),
+          now.copyWith(hour: 23, minute: 59, second: 59, millisecond: 999, microsecond: 999),
+        )
+        .orderStatusEqualTo(PenjualanModel.statusPending)
+        .sortByCreatedAtDesc()
+        .findAll();
+  }
+
+  /// Today's completed orders (orderStatus == 'done'), newest first.
+  /// Legacy orders (orderStatus == null) are never listed.
+  Future<List<PenjualanModel>> getCompletedOrdersToday() async {
+    final now = DateTime.now();
+    return _collection
+        .filter()
+        .isDeletedEqualTo(false)
+        .createdAtBetween(
+          now.copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0),
+          now.copyWith(hour: 23, minute: 59, second: 59, millisecond: 999, microsecond: 999),
+        )
+        .orderStatusEqualTo(PenjualanModel.statusDone)
+        .sortByCreatedAtDesc()
+        .findAll();
+  }
+
+  /// Number of today's orders awaiting preparation (for live badges).
+  Future<int> countAwaitingOrders() async {
+    final now = DateTime.now();
+    return _collection
+        .filter()
+        .isDeletedEqualTo(false)
+        .createdAtBetween(
+          now.copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0),
+          now.copyWith(hour: 23, minute: 59, second: 59, millisecond: 999, microsecond: 999),
+        )
+        .orderStatusEqualTo(PenjualanModel.statusPending)
+        .count();
+  }
+
+  /// Marks a local order as done. Isar-only by design: no Supabase write,
+  /// so no cloud schema change is required.
+  Future<void> markOrderDone(int id) async {
+    final order = await _collection.get(id);
+    if (order == null) return;
+    order
+      ..orderStatus = PenjualanModel.statusDone
+      ..updatedAt = _now;
+    await _database.isar.writeTxn(() async => await _collection.put(order));
   }
 
   Future<void> checkIsReportSynced() async {

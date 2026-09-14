@@ -23,6 +23,7 @@ class UserForm extends HookWidget {
   Widget build(BuildContext context) {
     final user = userController.userSelected.watch(context);
     final editingName = useTextEditingController(text: user?.nama ?? '');
+    final editingPin = useTextEditingController(text: user?.pin ?? '');
     final lahirTemp = useTextEditingController(
         text: user?.dob != null ? dateWithoutTime.format(user!.dob!) : '');
     final lahir = useState(user?.dob ?? DateTime.now());
@@ -54,6 +55,23 @@ class UserForm extends HookWidget {
                       val.isEmpty == true ? 'Name is required' : null,
                   label: const Text('Name'),
                   placeholder: const Text('Jhon Doe'),
+                ),
+                ShadInputFormField(
+                  controller: editingPin,
+                  label: const Text('Passcode (4 digits)'),
+                  placeholder: const Text('1234'),
+                  keyboardType: TextInputType.number,
+                  obscureText: true,
+                  maxLength: 4,
+                  description: const Text(
+                      'Used on the "Who\'s working?" screen. Leave empty to allow one-tap sign-in.'),
+                  validator: (val) {
+                    final v = val.trim();
+                    if (v.isEmpty) return null;
+                    if (v.length != 4) return 'Passcode must be exactly 4 digits';
+                    if (int.tryParse(v) == null) return 'Digits only';
+                    return null;
+                  },
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -143,7 +161,19 @@ class UserForm extends HookWidget {
                       ShadButton(
                         child: const Text('Save changes'),
                         onPressed: () {
-                          if (editingName.text.isEmpty) {
+                          final pinValue = editingPin.text.trim();
+                          final pinInvalid =
+                              pinValue.isNotEmpty && (pinValue.length != 4 || int.tryParse(pinValue) == null);
+                          if (editingName.text.isEmpty || pinInvalid) {
+                            if (pinInvalid && context.mounted) {
+                              ShadToaster.of(context).show(
+                                const ShadToast(
+                                  backgroundColor: Colors.red,
+                                  description: Text(
+                                      'Passcode must be exactly 4 digits (or left empty).'),
+                                ),
+                              );
+                            }
                             return;
                           } else {
                             if (user != null) {
@@ -158,6 +188,9 @@ class UserForm extends HookWidget {
                                 updatedAt: user.updatedAt,
                                 isDeleted: user.isDeleted,
                                 isSynced: user.isSynced,
+                                pin: editingPin.text.trim().isEmpty
+                                    ? null
+                                    : editingPin.text.trim(),
                               );
                               userService
                                   .updateUser(updateUser)
@@ -176,6 +209,9 @@ class UserForm extends HookWidget {
                                 keterangan: role.value,
                                 masuk: DateTime.now(),
                                 createdAt: DateTime.now(),
+                                pin: editingPin.text.trim().isEmpty
+                                    ? null
+                                    : editingPin.text.trim(),
                               );
 
                               userService.addNewUser(newUser).whenComplete(() {

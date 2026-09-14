@@ -307,8 +307,8 @@ class TicketPanel extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'PAY NOW',
+                    child: Text(
+                      'PAY NOW ($totalQty pcs)',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),

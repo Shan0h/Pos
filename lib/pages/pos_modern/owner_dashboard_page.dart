@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pos/service/app_services.dart';
+import 'package:pos/widget/backup_flow.dart';
 import 'package:pos/enum/payment_enum.dart';
 import 'package:pos/utils/extension.dart';
 import 'menu_management_page.dart';
@@ -86,65 +87,39 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
               ).then((_) => _loadData());
             },
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Database Settings',
-            onSelected: (item) async {
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-              if (item == 'backup') {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const Center(
-                    child: Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 16),
-                            Text('Backing up database...'),
-                          ],
-                        ),
-                      ),
-                    ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.settings),
+              tooltip: 'Database Settings',
+              onSelected: (item) async {
+                if (item == 'backup') {
+                  await BackupFlow.exportBackup(context);
+                } else if (item == 'restore') {
+                  await BackupFlow.restoreBackup(context);
+                } else if (item == 'restore-legacy') {
+                  await BackupFlow.restoreLegacyIsar(context);
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'backup',
+                  child: Row(
+                    children: [Icon(Icons.save, color: Colors.black54), SizedBox(width: 8), Text('Backup Database (recommended)')],
                   ),
-                );
-                
-                bool success = await database.createBackUp();
-                
-                if (context.mounted) Navigator.pop(context); // close dialog
-                
-                if (success) {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(content: Text('Backup Success! Data saved to selected folder.'), backgroundColor: Colors.green),
-                  );
-                }
-              } else if (item == 'restore') {
-                bool success = await database.restoreDB();
-                if (success) {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(content: Text('Restore Success! Restart app to see changes.'), backgroundColor: Colors.green),
-                  );
-                }
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'backup',
-                child: Row(
-                  children: [Icon(Icons.save, color: Colors.black54), SizedBox(width: 8), Text('Backup Config / DB')],
                 ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'restore',
-                child: Row(
-                  children: [Icon(Icons.restore, color: Colors.black54), SizedBox(width: 8), Text('Restore Config / DB')],
+                const PopupMenuItem<String>(
+                  value: 'restore',
+                  child: Row(
+                    children: [Icon(Icons.restore, color: Colors.black54), SizedBox(width: 8), Text('Restore Backup (recommended)')],
+                  ),
                 ),
-              ),
-            ],
-          ),
+                const PopupMenuItem<String>(
+                  value: 'restore-legacy',
+                  child: Row(
+                    children: [Icon(Icons.history, color: Colors.black54), SizedBox(width: 8), Text('Restore legacy .isar backup')],
+                  ),
+                ),
+              ],
+            ),
           IconButton(
             icon: const Icon(Icons.exit_to_app),
             tooltip: 'Back to Cashier Mode',

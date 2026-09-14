@@ -1,5 +1,5 @@
 import 'package:pos/controller/report_controller.dart';
-import 'package:pos/model/penjualan_model.dart';
+import 'package:pos/utils/extension.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -14,70 +14,64 @@ class ReportVisitorWeekLy extends StatefulWidget {
 
 class _ReportVisitorWeekLyState extends State<ReportVisitorWeekLy> {
   bool loading = true;
-  List<MapEntry<DateTime, List<PenjualanModel>>> sun = [];
-  List<MapEntry<DateTime, List<PenjualanModel>>> mon = [];
-  List<MapEntry<DateTime, List<PenjualanModel>>> tue = [];
-  List<MapEntry<DateTime, List<PenjualanModel>>> wed = [];
-  List<MapEntry<DateTime, List<PenjualanModel>>> thu = [];
-  List<MapEntry<DateTime, List<PenjualanModel>>> fri = [];
-  List<MapEntry<DateTime, List<PenjualanModel>>> sat = [];
+
+  /// Order counts per weekday (index 0 = Mon … 6 = Sun), derived fresh
+  /// from the current reportIncome data — never accumulated.
+  final List<int> _counts = List.filled(7, 0);
 
   @override
   void initState() {
-    final reportIncome = reportController.reportIncome.watch(context);
-    if (reportIncome.value != null) {
-      initiateData(reportIncome.value!);
-    } else {
-      loading = false;
-    }
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _recompute());
   }
 
-  Future<void> initiateData(Map<DateTime, List<PenjualanModel>> data) async {
-    await Future.forEach(data.entries, (i) {
-      if (i.key.weekday == 7) {
-        sun.add(i);
-      } else if (i.key.weekday == 1) {
-        mon.add(i);
-      } else if (i.key.weekday == 2) {
-        tue.add(i);
-      } else if (i.key.weekday == 3) {
-        wed.add(i);
-      } else if (i.key.weekday == 4) {
-        thu.add(i);
-      } else if (i.key.weekday == 5) {
-        fri.add(i);
-      } else if (i.key.weekday == 6) {
-        sat.add(i);
-      }
-    });
-    await Future.delayed(Durations.long1);
-    loading = false;
+  /// Rebuilds [_counts] from scratch using the LAST 7 days present in the
+  /// report data (sorted by date), grouped Mon..Sun.
+  void _recompute() {
+    final data = reportController.reportIncome.value.value;
+    _counts.fillRange(0, 7, 0);
 
-    setState(() {});
+    if (data != null && data.isNotEmpty) {
+      final recentDays = data.keys.toList()
+        ..sort((a, b) => b.compareTo(a)); // newest first
+      final last7 = recentDays.take(7);
+      for (final day in last7) {
+        // weekday: Mon=1 … Sun=7 → index 0..6
+        final idx = day.weekday - 1;
+        _counts[idx] += data[day]!.length;
+      }
+    }
+
+    if (mounted) {
+      setState(() => loading = false);
+    }
+  }
+
+  double get _maxY {
+    final maxCount = _counts.fold(0, (p, c) => p > c ? p : c);
+    final y = maxCount * 1.2;
+    return y < 5 ? 5 : y;
   }
 
   @override
   Widget build(BuildContext context) {
-    final reportIncome = reportController.reportIncome.watch(context);
+    // Watch keeps this card rebuilding when orders change.
+    reportController.reportIncome.watch(context);
     return ShadCard(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Visitor Weekly'),
+          const Text('Orders by Weekday'),
           ShadButton.ghost(
-            onPressed: () async {
-              setState(() {
-                loading = true;
-              });
-              if (reportIncome.hasValue) {
-                initiateData(reportIncome.value!);
-              } else {
-                setState(() {
-                  loading = false;
-                });
-              }
-            },
+            onPressed: loading
+                ? null
+                : () async {
+                    setState(() => loading = true);
+                    // Pull the latest orders, then rebuild counts from
+                    // scratch (never accumulated).
+                    await reportController.reportIncome.refresh();
+                    _recompute();
+                  },
             icon: const Padding(
               padding: EdgeInsets.only(right: 8),
               child: Icon(
@@ -89,6 +83,7 @@ class _ReportVisitorWeekLyState extends State<ReportVisitorWeekLy> {
           ),
         ],
       ),
+      description: const Text('Orders in the last 7 days'),
       child: Padding(
         padding: const EdgeInsets.only(top: 20.0),
         child: loading
@@ -100,12 +95,12 @@ class _ReportVisitorWeekLyState extends State<ReportVisitorWeekLy> {
                 child: BarChart(
                   BarChartData(
                     barTouchData: barTouchData,
-                    titlesData: titlesData,
-                    borderData: borderData,
+                    titlesData: titlesData(context),
+                    borderData: borderData(context),
                     barGroups: barGroups,
                     gridData: const FlGridData(show: false),
                     alignment: BarChartAlignment.spaceAround,
-                    maxY: 20,
+                    maxY: _maxY,
                   ),
                 ),
               ),
@@ -127,8 +122,10 @@ class _ReportVisitorWeekLyState extends State<ReportVisitorWeekLy> {
           ) {
             return BarTooltipItem(
               rod.toY.round().toString(),
-              const TextStyle(
-                color: Colors.cyan,
+              TextStyle(
+                color: context.isDarkMode
+                    ? const Color(0xFFD7A86E)
+                    : const Color(0xFF8B5E3C),
                 fontWeight: FontWeight.bold,
               ),
             );
@@ -137,46 +134,25 @@ class _ReportVisitorWeekLyState extends State<ReportVisitorWeekLy> {
       );
 
   Widget getTitles(double value, TitleMeta meta) {
-    const style = TextStyle(
-      color: Colors.blue,
-      fontWeight: FontWeight.bold,
-      fontSize: 14,
-    );
-    String text;
-    switch (value.toInt()) {
-      case 0:
-        text = 'Mon';
-        break;
-      case 1:
-        text = 'Tue';
-        break;
-      case 2:
-        text = 'Wed';
-        break;
-      case 3:
-        text = 'Thu';
-        break;
-      case 4:
-        text = 'Fri';
-        break;
-      case 5:
-        text = 'Sat';
-        break;
-      case 6:
-        text = 'Sun';
-        break;
-      default:
-        text = '';
-        break;
-    }
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final text = (value.toInt() >= 0 && value.toInt() < 7)
+        ? labels[value.toInt()]
+        : '';
     return SideTitleWidget(
       axisSide: meta.axisSide,
       space: 4,
-      child: Text(text, style: style),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: context.secondaryTextColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      ),
     );
   }
 
-  FlTitlesData get titlesData => FlTitlesData(
+  FlTitlesData titlesData(BuildContext context) => FlTitlesData(
         show: true,
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
@@ -196,89 +172,30 @@ class _ReportVisitorWeekLyState extends State<ReportVisitorWeekLy> {
         ),
       );
 
-  FlBorderData get borderData => FlBorderData(
+  FlBorderData borderData(BuildContext context) => FlBorderData(
         show: false,
       );
 
   LinearGradient get _barsGradient => const LinearGradient(
         colors: [
-          Colors.blue,
-          Colors.cyan,
+          Color(0xFF8B5E3C),
+          Color(0xFFD7A86E),
         ],
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
       );
 
   List<BarChartGroupData> get barGroups => [
-        BarChartGroupData(
-          x: 0,
-          barRods: [
-            BarChartRodData(
-              toY: mon.fold(0, (p, c) => p + c.value.length),
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 1,
-          barRods: [
-            BarChartRodData(
-              toY: tue.fold(0, (p, c) => p + c.value.length),
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 2,
-          barRods: [
-            BarChartRodData(
-              toY: wed.fold(0, (p, c) => p + c.value.length),
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 3,
-          barRods: [
-            BarChartRodData(
-              toY: thu.fold(0, (p, c) => p + c.value.length),
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 4,
-          barRods: [
-            BarChartRodData(
-              toY: fri.fold(0, (p, c) => p + c.value.length),
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 5,
-          barRods: [
-            BarChartRodData(
-              toY: sat.fold(0, (p, c) => p + c.value.length),
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 6,
-          barRods: [
-            BarChartRodData(
-              toY: sun.fold(0, (p, c) => p + c.value.length),
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
+        for (var x = 0; x < 7; x++)
+          BarChartGroupData(
+            x: x,
+            barRods: [
+              BarChartRodData(
+                toY: _counts[x].toDouble(),
+                gradient: _barsGradient,
+              )
+            ],
+            showingTooltipIndicators: [0],
+          ),
       ];
 }

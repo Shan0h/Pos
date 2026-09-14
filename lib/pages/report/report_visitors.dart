@@ -13,25 +13,33 @@ class ReportVisitors extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reportIncome = reportController.reportIncome.watch(context);
+    // Sort by date and take the LATEST 7 days (the map itself has no
+    // guaranteed order). Each entry is one day's orders.
+    final days = (reportIncome.value?.keys.toList() ?? <DateTime>[])
+      ..sort((a, b) => b.compareTo(a));
+    final latest7 = days.take(7);
+
     return ShadCard(
       width: width,
-      title: const Text('Total Visitors'),
-      description: const Text('How many people come to buy'),
+      title: const Text('Daily Orders'),
+      description: const Text('How many orders per day (last 7 days)'),
       child: Column(
         children: [
           const SizedBox(height: 16),
           if (reportIncome.hasValue) ...[
-            for (var i in reportIncome.value!.entries.toList().reversed.take(7))
+            for (var day in latest7)
               Column(
                 children: [
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(dateWithoutTime.format(i.key)),
+                    title: Text(dateWithoutTime.format(day)),
                     subtitle: Text(
                       currency.format(
-                          i.value.fold(0, (p, c) => p + c.totalHarga.toInt())),
+                          reportIncome.value![day]!
+                              .fold<double>(0, (p, c) => p + c.totalHarga)),
                     ),
-                    trailing: Text('${i.value.length} People',
+                    trailing: Text(
+                        '${reportIncome.value![day]!.length} Orders',
                         style: ShadTheme.of(context).textTheme.muted),
                   ),
                   const Divider()

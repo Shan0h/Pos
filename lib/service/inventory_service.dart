@@ -72,6 +72,25 @@ class InventoryService {
     }
   }
 
+  /// Restores stock that was deducted at checkout — used when a paid,
+  /// not-yet-fulfilled order is cancelled from the Awaiting Orders screen
+  /// (the goods were never handed over, so they go back on the shelf).
+  /// Mirrors [decrementStock] including the Supabase sync write.
+  Future<void> incrementStock(int id, int qty) async {
+    final master = await _collection.get(id);
+    if (master == null) return;
+    master
+      ..jumlahBarang = master.jumlahBarang + qty
+      ..updatedAt = _now
+      ..isDeleted = false
+      ..isSynced = !_canSync;
+    await _database.isar.writeTxn(() async => await _collection.put(master));
+    if (_canSync) {
+      await _supabase.updateInventory(master);
+      await _markSynced(master.id!);
+    }
+  }
+
   Future<List<ItemModel>> getInventorys({String? value, String? category}) async {
     var query = _collection.filter().group((q) => q
             .namaContains(value ?? '', caseSensitive: false)

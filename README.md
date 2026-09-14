@@ -32,6 +32,7 @@
 
 ### 💳 2. Sales & Checkout
 - **Cart & Order Processing**: Fast product addition, discount handling, and order summary.
+- **Order Fulfillment (Awaiting Orders)**: Paid orders enter an *Awaiting Orders* queue — the worker taps **Mark as Done** when fulfilled, or **Cancel** to void the order (line items automatically return to stock). Revenue reports count **fulfilled orders only**, so sales appear the moment an order is actually handed over.
 - **Thermal Printing**: Direct ESC/POS thermal receipt printing via Bluetooth and USB (Windows & Android).
 - **Cash Drawer Integration**: Automatically triggers cash drawer kick-out on transaction completion.
 - **Multi-currency Support**: Default currency formatted in Malaysian Ringgit (`RM`).
@@ -41,7 +42,8 @@
 - **Revenue & Profit Breakdown**: Gross revenue, estimated profit, and expense tracking.
 - **Best Sellers**: Automatic ranking of top-performing items.
 - **Visual Charts**: Interactive revenue and visitor traffic charts by date range.
-- **Export & Receipts**: PDF receipt and report generation.
+- **Monthly Report PDF**: Export any calendar month via a dedicated **month picker** (future months disabled). The paginated PDF includes an explicit period line, revenue/orders/expenses/profit summary cards, payment-method breakdown, best sellers, a daily breakdown table, and a clear "No fulfilled sales in this period" notice when the month was empty.
+- **Export & Receipts**: Formal per-sale PDF receipts/invoices.
 
 ### 👥 4. Customer & User Management
 - **Customer Directory**: Store contact information, transaction history, and purchase logs.
@@ -50,11 +52,11 @@
 ### 🔄 5. Offline-First & Cloud Sync
 - **Local Database (Isar)**: Lightning-fast, ACID-compliant offline database for zero-latency local operations.
 - **Cloud Synchronization**: Optional two-way background sync with **Supabase**.
-- **Backup & Restore**: Export local database backups and restore on any device directly from the **Owner Dashboard** settings.
+- **Portable Backup & Restore**: Export the whole database as a **JSON backup (`.posbackup`)** — validated before anything is written and restored atomically in a single transaction. Backups travel between devices (send via WhatsApp/Telegram as a *document*), survive schema differences between app versions, and restore without an app restart. Legacy `.isar` file restore is still supported, now with validate-before-swap so a corrupt/incompatible file can never destroy live data.
 
 ### 🏢 6. Additional Modules
 - **Payroll Management**: Salary calculations, custom bonus/deduction line items, and PDF payslip generation.
-- **Modern POS UI**: A completely revamped tablet-optimized and Dark Mode compatible Staff and Owner Dashboard.
+- **Modern POS UI**: A completely revamped tablet-optimized and Dark Mode compatible Staff and Owner Dashboard — including staff **PIN quick sign-in** ("Who's working?" picker) and an Owner Dashboard with sales overview and database settings.
 
 ---
 

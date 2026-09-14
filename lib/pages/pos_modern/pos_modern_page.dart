@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:intl/intl.dart';
@@ -9,19 +10,24 @@ import 'package:pos/enum/payment_enum.dart';
 import 'package:pos/service/app_services.dart';
 import 'package:pos/utils/constant.dart';
 import 'package:pos/utils/extension.dart';
+import 'package:pos/utils/order_ref.dart';
 import 'package:usb_esc_printer_windows/usb_esc_printer_windows.dart' as usb_esc_printer_windows;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pos/controller/inventory_controller.dart';
+import 'package:pos/controller/awaiting_orders_controller.dart';
 import 'package:pos/controller/selling/events.dart';
 import 'package:pos/controller/selling_controller.dart';
 import 'package:pos/model/item_model.dart';
 import 'package:pos/service/get_it.dart';
 import 'package:signals/signals_flutter.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:pos/pages/home/users_sheet.dart';
 import 'catalog_panel.dart';
 import 'ticket_panel.dart';
 import 'price_numpad_dialog.dart';
+import 'awaiting_orders_page.dart';
 import 'package:pos/pages/drawer.dart';
 import 'coffee_custom_dialog.dart';
 import 'quick_payment_modal.dart';
@@ -36,10 +42,19 @@ class PosModernPage extends StatefulWidget {
 }
 
 class _PosModernPageState extends State<PosModernPage> {
+  /// Hard cap on the receipt print. The Bluetooth plugin can hang
+  /// indefinitely (printer off / out of range), so payment feedback must
+  /// never wait on it — see _handlePay.
+  static const Duration _printTimeout = Duration(seconds: 20);
+
   String _searchQuery = '';
   String _selectedCategory = 'All';
   bool isConnected = false;
   late Future<CapabilityProfile> _profile;
+
+  /// Re-entrancy guard: a quick double-tap on PAY NOW must not create
+  /// two orders / double-charge the customer.
+  bool _isProcessingPayment = false;
 
   @override
   void initState() {
@@ -128,17 +143,6 @@ class _PosModernPageState extends State<PosModernPage> {
       // Wide tablets/desktops get a vertical category rail on the left.
       showCategoryRail: MediaQuery.of(context).size.width >= 1000,
       onProductTap: _handleProductTap,
-      onBarcodeScanned: (code) {
-        final matchedProduct = allProducts.where((p) => p.code == code).firstOrNull;
-        if (matchedProduct != null) {
-          _handleProductTap(matchedProduct);
-          setState(() => _searchQuery = ''); // clear search
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Product with barcode $code not found!')),
-          );
-        }
-      },
     );
 
     Widget ticketWidget = TicketPanel(
@@ -156,6 +160,36 @@ class _PosModernPageState extends State<PosModernPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          // Identity chip: shows who is operating the register. Tap to
+          // switch staff (current order stays in the cart).
+          _StaffIdentityChip(
+            staffName:
+                getIt.get<SellingController>().staffId.value?.nama ?? 'Staff',
+            onTap: () {
+              showShadSheet(
+                side: isDesktop ? ShadSheetSide.right : ShadSheetSide.bottom,
+                context: context,
+                builder: (context) => const UsersSheet(),
+              );
+            },
+          ),
+          const SizedBox(width: 4),
+          // Awaiting Orders shortcut with a live pending-count badge so the
+          // worker can see unfinished orders at a glance.
+          Watch((context) {
+            final countState = awaitingOrdersController.pendingCount.watch(context);
+            final pendingCount = countState.value ?? 0;
+            return _PendingOrdersButton(
+              pendingCount: pendingCount,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AwaitingOrdersPage()),
+                );
+              },
+            );
+          }),
+          const SizedBox(width: 4),
           IconButton(
             icon: const Icon(Icons.lock_outline),
             tooltip: 'Owner Access',
@@ -302,11 +336,14 @@ class _PosModernPageState extends State<PosModernPage> {
     } else {
       // It's a standard priced item (like a coffee), show customization dialog
       final customResult = await CoffeeCustomDialog.show(context, item: product);
-      if (customResult != null) {
-        itemPrice += customResult.extraPrice;
-        newName = '${product.nama} ${customResult.appendedName}';
-        newDesc = customResult.description;
+      if (customResult == null) {
+        // User cancelled the customize dialog (X, Cancel, or tapped outside)
+        // — do NOT add the plain item to the cart.
+        return;
       }
+      itemPrice += customResult.extraPrice;
+      newName = '${product.nama} ${customResult.appendedName}';
+      newDesc = customResult.description;
     }
 
     final newItem = ItemModel(
@@ -342,9 +379,18 @@ class _PosModernPageState extends State<PosModernPage> {
     getIt.get<SellingController>().dispatch(CartPaid());
   }
 
-  void _handlePay(List<ItemModel> cartItems) async {
+  Future<void> _handlePay(List<ItemModel> cartItems) async {
     if (cartItems.isEmpty) return;
+    if (_isProcessingPayment) return;
+    _isProcessingPayment = true;
+    try {
+      await _processPayment(cartItems);
+    } finally {
+      _isProcessingPayment = false;
+    }
+  }
 
+  Future<void> _processPayment(List<ItemModel> cartItems) async {
     final store =
         storeController.store.value.value ?? await storeService.getStore();
     if (store == null) {
@@ -361,7 +407,19 @@ class _PosModernPageState extends State<PosModernPage> {
 
     // Show Quick Payment Modal
     final paymentResult = await QuickPaymentModal.show(context, totalPrice);
-    if (paymentResult == null) return; // User cancelled
+    if (paymentResult == null) {
+      // User closed/cancelled the payment dialog — tell them the order
+      // is still in the cart instead of failing silently.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment cancelled — order kept in cart.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
 
     final staffId = sellingController.staffId.value;
     final pelanggan = sellingController.pelanggan.value;
@@ -403,6 +461,9 @@ class _PosModernPageState extends State<PosModernPage> {
       tenderedAmount: tipeBayar == TypePayment.cash ? paymentResult.cashAmount : totalPrice,
       changeAmount: tipeBayar == TypePayment.cash ? (paymentResult.cashAmount - totalPrice) : 0.0,
       paymentMethod: tipeBayar.name,
+      // New orders start as "awaiting preparation" — the worker marks them
+      // done from the Awaiting Orders screen.
+      orderStatus: PenjualanModel.statusPending,
     );
 
     if (products.isEmpty) return;
@@ -410,9 +471,44 @@ class _PosModernPageState extends State<PosModernPage> {
 
     final messenger = ScaffoldMessenger.of(context);
 
-    reportService.addPenjualan(newItem).whenComplete(() {
-      // Print errors must not block the checkout flow; surface feedback
-      // instead of throwing an unhandled async error.
+    // 1) Save the order. A failed save must NOT clear the cart — the old
+    //    .whenComplete() chain cleared it even on save errors.
+    try {
+      await reportService.addPenjualan(newItem);
+    } catch (e) {
+      debugPrint('Failed to save order: $e');
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Payment could not be saved — order kept in cart. ($e)'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
+
+    // 2) Instant success feedback + instant cart clear. Payment confirmation
+    //    must never wait on the printer: the Bluetooth plugin can hang
+    //    indefinitely when the printer is off/out of range, which used to
+    //    swallow the notification and leave the cart stuck.
+    //    Revenue note: this order is NOT counted in revenue reports yet —
+    //    it only counts once the worker taps "Mark as Done" on the Awaiting
+    //    Orders screen (or if it is a legacy order with no status).
+    awaitingOrdersController.refreshAll();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+            'Payment successful! Order #${orderRef(newItem.id)} saved — awaiting preparation.'),
+        backgroundColor: Colors.green.shade700,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+    sellingController.updateBatch(cartItems); // stock decrement in background
+    sellingController.dispatch(CartPaid()); // cart clears immediately
+
+    // 3) Receipt printing runs in the background with a hard timeout and
+    //    reports its own failure — it can no longer block checkout.
+    unawaited(
       letsPrint(
         store: store,
         model: newItem,
@@ -421,30 +517,20 @@ class _PosModernPageState extends State<PosModernPage> {
         total: paymentResult.cashAmount.toStringAsFixed(2),
         kembalian: (paymentResult.cashAmount - totalPrice).toStringAsFixed(2),
         printName: printName,
-      ).then((_) {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Payment processed and printed successfully!'),
-            backgroundColor: Color(0xFF8B5E3C),
-            duration: Duration(seconds: 2),
-          ),
-        );
+      ).timeout(_printTimeout).then((_) {
+        debugPrint('Receipt printed for order ${orderRef(newItem.id)}');
       }).catchError((Object e) {
         debugPrint('Print failed: $e');
         messenger.showSnackBar(
-          SnackBar(
-            content: const Text(
-                'Payment saved, but receipt was not printed (printer not connected).'),
+          const SnackBar(
+            content: Text(
+                'Receipt was not printed (printer not connected or timed out).'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            duration: Duration(seconds: 3),
           ),
         );
-      }).whenComplete(() {
-        sellingController.updateBatch(cartItems).whenComplete(() {
-          sellingController.dispatch(CartPaid());
-        });
-      });
-    });
+      }),
+    );
   }
 
   Future<void> letsPrint({
@@ -549,5 +635,114 @@ class _PosModernPageState extends State<PosModernPage> {
     } else {
       await PrintBluetoothThermal.writeBytes(bytes);
     }
+  }
+}
+
+/// App-bar chip showing the staff operating the register. Tapping opens
+/// the switch-staff sheet.
+class _StaffIdentityChip extends StatelessWidget {
+  final String staffName;
+  final VoidCallback onTap;
+
+  const _StaffIdentityChip({
+    required this.staffName,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final initial =
+        staffName.isNotEmpty ? staffName[0].toUpperCase() : '?';
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              child: Text(
+                initial,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 120),
+              child: Text(
+                staffName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+            const Icon(Icons.keyboard_arrow_down,
+                size: 18, color: Colors.white70),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// App-bar icon button opening the Awaiting Orders page. Shows a red badge
+/// with the number of pending orders when there is at least one.
+class _PendingOrdersButton extends StatelessWidget {
+  final int pendingCount;
+  final VoidCallback onPressed;
+
+  const _PendingOrdersButton({
+    required this.pendingCount,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: 'Awaiting Orders',
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Icon(Icons.receipt_long),
+          if (pendingCount > 0)
+            Positioned(
+              top: -6,
+              right: -8,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 18,
+                  minHeight: 18,
+                ),
+                child: Text(
+                  pendingCount > 9 ? '9+' : '$pendingCount',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+      onPressed: onPressed,
+    );
   }
 }

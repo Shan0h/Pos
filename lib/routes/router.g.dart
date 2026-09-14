@@ -7,7 +7,9 @@ part of 'router.dart';
 // **************************************************************************
 
 List<RouteBase> get $appRoutes => [
+      $staffPickerRoute,
       $posModernRoute,
+      $awaitingOrdersRoute,
       $homeRoute,
       $storeRoute,
       $inventoryRoute,
@@ -22,6 +24,29 @@ List<RouteBase> get $appRoutes => [
       $salariesRoute,
     ];
 
+RouteBase get $staffPickerRoute => GoRouteData.$route(
+      path: '/staff',
+      factory: $StaffPickerRouteExtension._fromState,
+    );
+
+extension $StaffPickerRouteExtension on StaffPickerRoute {
+  static StaffPickerRoute _fromState(GoRouterState state) =>
+      const StaffPickerRoute();
+
+  String get location => GoRouteData.$location(
+        '/staff',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
 RouteBase get $posModernRoute => GoRouteData.$route(
       path: '/',
       factory: $PosModernRouteExtension._fromState,
@@ -33,6 +58,29 @@ extension $PosModernRouteExtension on PosModernRoute {
 
   String get location => GoRouteData.$location(
         '/',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $awaitingOrdersRoute => GoRouteData.$route(
+      path: '/awaiting-orders',
+      factory: $AwaitingOrdersRouteExtension._fromState,
+    );
+
+extension $AwaitingOrdersRouteExtension on AwaitingOrdersRoute {
+  static AwaitingOrdersRoute _fromState(GoRouterState state) =>
+      const AwaitingOrdersRoute();
+
+  String get location => GoRouteData.$location(
+        '/awaiting-orders',
       );
 
   void go(BuildContext context) => context.go(location);

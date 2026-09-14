@@ -12,6 +12,8 @@ import 'package:pos/pages/salaries.dart';
 import 'package:pos/pages/salaries/salaries_form.dart';
 
 import 'package:pos/pages/pos_modern/modern_print_setting.dart';
+import 'package:pos/pages/pos_modern/staff_picker_page.dart';
+import 'package:pos/pages/pos_modern/awaiting_orders_page.dart';
 import 'package:pos/pages/store.dart';
 import 'package:pos/pages/users.dart';
 import 'package:pos/pages/users/user_form.dart';
@@ -21,12 +23,30 @@ import 'package:go_router/go_router.dart';
 
 part 'router.g.dart';
 
+@TypedGoRoute<StaffPickerRoute>(path: '/staff')
+class StaffPickerRoute extends GoRouteData {
+  const StaffPickerRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const StaffPickerPage();
+}
+
 @TypedGoRoute<PosModernRoute>(path: '/')
 class PosModernRoute extends GoRouteData {
   const PosModernRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const PosModernPage();
+}
+
+@TypedGoRoute<AwaitingOrdersRoute>(path: '/awaiting-orders')
+class AwaitingOrdersRoute extends GoRouteData {
+  const AwaitingOrdersRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const AwaitingOrdersPage();
 }
 
 

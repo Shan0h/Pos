@@ -100,8 +100,7 @@ class _QuickPaymentModalState extends State<QuickPaymentModal> {
                 Expanded(child: _buildMethodButton(TypePayment.cash, Icons.money, 'Cash')),
                 const SizedBox(width: 8),
                 Expanded(child: _buildMethodButton(TypePayment.qris, Icons.qr_code, 'QR DuitNow')),
-                const SizedBox(width: 8),
-                Expanded(child: _buildMethodButton(TypePayment.transfer, Icons.credit_card, 'Card')),
+                // Card/transfer removed — this shop does not accept card.
               ],
             ),
             const SizedBox(height: 32),

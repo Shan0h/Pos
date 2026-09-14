@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:csv/csv.dart';
 import 'package:pos/controller/inventory_controller.dart';
@@ -99,19 +101,28 @@ class InventoryList extends HookWidget {
                         if (!fileCsv.existsSync()) {
                           fileCsv.create(recursive: true);
                         }
+                        final csvBytes = Uint8List.fromList(utf8.encode(csv));
                         String defaultFileName = 'inventory-${DateTime.now().millisecondsSinceEpoch}.csv';
+                        // bytes are REQUIRED by file_picker on Android/iOS —
+                        // the plugin writes them via SAF and the returned path
+                        // is a virtual URI that dart:io cannot open. Same
+                        // pattern as the database backup and PDF export.
                         String? outputFile = await FilePicker.platform.saveFile(
                           dialogTitle: 'Save Inventory CSV',
                           fileName: defaultFileName,
-                          type: FileType.custom,
-                          allowedExtensions: ['csv'],
+                          type: FileType.any,
+                          bytes: csvBytes,
                         );
 
                         if (outputFile != null) {
-                          if (!outputFile.endsWith('.csv')) {
-                            outputFile += '.csv';
+                          if (!Platform.isAndroid && !Platform.isIOS) {
+                            // Desktop: verify the plugin wrote the content and
+                            // fall back to a plain copy if it did not.
+                            final target = File(outputFile);
+                            if (!await target.exists() || await target.length() == 0) {
+                              await fileCsv.copy(outputFile);
+                            }
                           }
-                          await fileCsv.copy(outputFile);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Export CSV Success!')),

@@ -22,6 +22,23 @@ void main() {
     expect(json['isSynced'], isFalse);
   });
 
+  test('UserModel round-trips staff passcode', () {
+    final user = UserModel(
+      id: 5,
+      nama: 'Alya',
+      status: true,
+      createdAt: DateTime.parse('2026-09-07T08:00:00Z'),
+      pin: '1234',
+    );
+
+    final restored = UserModel.fromJson(user.toJson());
+    expect(restored.pin, '1234');
+
+    // Null pin (one-tap sign-in profiles) survives the round-trip too.
+    final noPin = user.toJson()..['pin'] = null;
+    expect(UserModel.fromJson(noPin).pin, isNull);
+  });
+
   test('CustomerModel restores sync metadata defaults', () {
     final customer = CustomerModel.fromJson({
       'id': 7,

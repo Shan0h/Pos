@@ -1,4 +1,5 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:intl/intl.dart';
 import 'package:pos/controller/expenses_controller.dart';
 import 'package:pos/controller/inventory_controller.dart';
 import 'package:pos/controller/report_controller.dart';
@@ -13,6 +14,7 @@ import 'package:pos/pages/report/report_visitors.dart';
 import 'package:pos/service/app_services.dart';
 import 'package:pos/widget/pdf_receipt_generator.dart';
 import 'package:pos/widget/monthly_report_pdf_generator.dart';
+import 'package:pos/widget/month_picker_dialog.dart';
 import 'package:pos/controller/store_controller.dart';
 import 'package:pos/utils/constant.dart';
 import 'package:pos/utils/date_utils.dart';
@@ -514,12 +516,22 @@ class _ReportState extends State<Report> {
   }
 
   Future<void> _generateMonthlyPdf(BuildContext context) async {
+    // Let the user pick which month to export — the previous behaviour
+    // derived the month from the page's date filter (default "last 31
+    // days"), which usually pointed at a past month with no sales and
+    // produced a template-only PDF.
+    final picked = await MonthPickerDialog.show(context);
+    if (picked == null) return; // dismissed — silent no-op
+    if (!context.mounted) return;
+
     if (isGeneratingPdf.value) return;
     isGeneratingPdf.value = true;
     try {
-      final now = DateTime.now();
-      final firstDay = DateTime(now.year, now.month, 1);
-      final lastDay = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+      // Exact calendar-month window of the PICKED month.
+      final firstDay = DateTime(picked.year, picked.month, 1);
+      final lastDay =
+          DateTime(picked.year, picked.month + 1, 0, 23, 59, 59);
+      final monthName = DateFormat('MMMM yyyy').format(firstDay);
 
       final store = storeController.store.value.value ??
           await storeService.getStore();
@@ -545,16 +557,16 @@ class _ReportState extends State<Report> {
         store: store,
         sales: monthlySales,
         expenses: monthlyExpenses,
-        month: now,
+        month: firstDay,
       );
 
       if (context.mounted) {
         switch (result) {
           case PdfExportResult.saved:
             ShadToaster.of(context).show(
-              const ShadToast(
-                backgroundColor: Color(0xFF8B5E3C),
-                description: Text('Monthly report PDF saved!'),
+              ShadToast(
+                backgroundColor: const Color(0xFF8B5E3C),
+                description: Text('Monthly report ($monthName) saved!'),
               ),
             );
           case PdfExportResult.cancelled:

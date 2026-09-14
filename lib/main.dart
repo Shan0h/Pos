@@ -85,7 +85,12 @@ void main() async {
   runApp(const MyApp());
 }
 
-final _router = GoRouter(routes: $appRoutes);
+final _router = GoRouter(
+  // The register always starts at the "Who's working?" profile picker —
+  // an explicit staff sign-in is required before reaching the POS.
+  initialLocation: '/staff',
+  routes: $appRoutes,
+);
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});

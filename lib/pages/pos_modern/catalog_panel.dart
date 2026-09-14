@@ -30,7 +30,6 @@ class CatalogPanel extends StatelessWidget {
   final ValueChanged<String> onCategorySelected;
   final List<ItemModel> products;
   final ValueChanged<ItemModel> onProductTap;
-  final ValueChanged<String> onBarcodeScanned;
   final List<String> categories;
   final bool showCategoryRail;
 
@@ -42,7 +41,6 @@ class CatalogPanel extends StatelessWidget {
     required this.onCategorySelected,
     required this.products,
     required this.onProductTap,
-    required this.onBarcodeScanned,
     required this.categories,
     this.showCategoryRail = false,
   });
@@ -75,14 +73,11 @@ class CatalogPanel extends StatelessWidget {
                       ..selection =
                           TextSelection.collapsed(offset: searchQuery.length),
                     onChanged: onSearchChanged,
-                    onSubmitted: (value) {
-                      onBarcodeScanned(value);
-                    },
                     style: TextStyle(color: context.appTextColor),
                     decoration: InputDecoration(
-                      hintText: 'Search or Scan Barcode...',
+                      hintText: 'Search products...',
                       hintStyle: TextStyle(color: context.secondaryTextColor),
-                      prefixIcon: Icon(Icons.qr_code_scanner,
+                      prefixIcon: Icon(Icons.search,
                           color: const Color(0xFF8B5E3C)),
                       // Clear button: only shown when there is text.
                       suffixIcon: searchQuery.isNotEmpty
@@ -149,7 +144,7 @@ class CatalogPanel extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Check the spelling or scan a valid barcode.',
+                                        'Try a different search.',
                                         style: TextStyle(
                                             color:
                                                 context.secondaryTextColor),

@@ -1,6 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Android 11+ package visibility: lets the file_picker plugin's
+         resolveActivity check find the system documents provider so the
+         save-file dialog (ACTION_CREATE_DOCUMENT) can open. Without this
+         the backup/save dialogs silently fail to appear. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.CREATE_DOCUMENT" />
+            <data android:mimeType="*/*" />
+        </intent>
+    </queries>
     <application
         android:label="POS"
         android:name="${applicationName}"

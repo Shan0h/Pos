@@ -10,9 +10,12 @@ class ReportVisitorAll extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Newest day first.
+    final sortedDays = items.keys.toList()..sort((a, b) => b.compareTo(a));
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Visitor'),
+        title: const Text('All Orders by Day'),
         centerTitle: false,
       ),
       body: SingleChildScrollView(
@@ -21,17 +24,15 @@ class ReportVisitorAll extends StatelessWidget {
           children: [
             ...ListTile.divideTiles(
               context: context,
-              tiles: items.entries
-                  .toList()
-                  .reversed
+              tiles: sortedDays
                   .map(
-                    (i) => ListTile(
-                      title: Text(dateWithoutTime.format(i.key)),
+                    (day) => ListTile(
+                      title: Text(dateWithoutTime.format(day)),
                       subtitle: Text(
-                        currency.format(i.value
-                            .fold(0, (p, c) => p + c.totalHarga.toInt())),
+                        currency.format(items[day]!
+                            .fold<double>(0, (p, c) => p + c.totalHarga)),
                       ),
-                      trailing: Text('${i.value.length} People',
+                      trailing: Text('${items[day]!.length} Orders',
                           style: ShadTheme.of(context).textTheme.muted),
                     ),
                   )

@@ -53,38 +53,43 @@ const PenjualanModelSchema = CollectionSchema(
       name: r'keterangan',
       type: IsarType.string,
     ),
-    r'paymentMethod': PropertySchema(
+    r'orderStatus': PropertySchema(
       id: 7,
+      name: r'orderStatus',
+      type: IsarType.string,
+    ),
+    r'paymentMethod': PropertySchema(
+      id: 8,
       name: r'paymentMethod',
       type: IsarType.string,
     ),
     r'pembeli': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'pembeli',
       type: IsarType.long,
     ),
     r'staffId': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'staffId',
       type: IsarType.long,
     ),
     r'tenderedAmount': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'tenderedAmount',
       type: IsarType.double,
     ),
     r'totalHarga': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'totalHarga',
       type: IsarType.double,
     ),
     r'totalItem': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'totalItem',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -125,6 +130,12 @@ int _penjualanModelEstimateSize(
     }
   }
   {
+    final value = object.orderStatus;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.paymentMethod;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -151,13 +162,14 @@ void _penjualanModelSerialize(
     object.items,
   );
   writer.writeString(offsets[6], object.keterangan);
-  writer.writeString(offsets[7], object.paymentMethod);
-  writer.writeLong(offsets[8], object.pembeli);
-  writer.writeLong(offsets[9], object.staffId);
-  writer.writeDouble(offsets[10], object.tenderedAmount);
-  writer.writeDouble(offsets[11], object.totalHarga);
-  writer.writeLong(offsets[12], object.totalItem);
-  writer.writeDateTime(offsets[13], object.updatedAt);
+  writer.writeString(offsets[7], object.orderStatus);
+  writer.writeString(offsets[8], object.paymentMethod);
+  writer.writeLong(offsets[9], object.pembeli);
+  writer.writeLong(offsets[10], object.staffId);
+  writer.writeDouble(offsets[11], object.tenderedAmount);
+  writer.writeDouble(offsets[12], object.totalHarga);
+  writer.writeLong(offsets[13], object.totalItem);
+  writer.writeDateTime(offsets[14], object.updatedAt);
 }
 
 PenjualanModel _penjualanModelDeserialize(
@@ -181,13 +193,14 @@ PenjualanModel _penjualanModelDeserialize(
         ) ??
         [],
     keterangan: reader.readStringOrNull(offsets[6]),
-    paymentMethod: reader.readStringOrNull(offsets[7]),
-    pembeli: reader.readLongOrNull(offsets[8]),
-    staffId: reader.readLong(offsets[9]),
-    tenderedAmount: reader.readDoubleOrNull(offsets[10]),
-    totalHarga: reader.readDouble(offsets[11]),
-    totalItem: reader.readLong(offsets[12]),
-    updatedAt: reader.readDateTimeOrNull(offsets[13]),
+    orderStatus: reader.readStringOrNull(offsets[7]),
+    paymentMethod: reader.readStringOrNull(offsets[8]),
+    pembeli: reader.readLongOrNull(offsets[9]),
+    staffId: reader.readLong(offsets[10]),
+    tenderedAmount: reader.readDoubleOrNull(offsets[11]),
+    totalHarga: reader.readDouble(offsets[12]),
+    totalItem: reader.readLong(offsets[13]),
+    updatedAt: reader.readDateTimeOrNull(offsets[14]),
   );
   return object;
 }
@@ -222,16 +235,18 @@ P _penjualanModelDeserializeProp<P>(
     case 7:
       return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 9:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 10:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 11:
-      return (reader.readDouble(offset)) as P;
-    case 12:
       return (reader.readLong(offset)) as P;
+    case 11:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 12:
+      return (reader.readDouble(offset)) as P;
     case 13:
+      return (reader.readLong(offset)) as P;
+    case 14:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -871,6 +886,160 @@ extension PenjualanModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'keterangan',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'orderStatus',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'orderStatus',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'orderStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'orderStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'orderStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'orderStatus',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'orderStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'orderStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'orderStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'orderStatus',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'orderStatus',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterFilterCondition>
+      orderStatusIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'orderStatus',
         value: '',
       ));
     });
@@ -1537,6 +1706,20 @@ extension PenjualanModelQuerySortBy
   }
 
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByOrderStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'orderStatus', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      sortByOrderStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'orderStatus', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
       sortByPaymentMethod() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'paymentMethod', Sort.asc);
@@ -1726,6 +1909,20 @@ extension PenjualanModelQuerySortThenBy
   }
 
   QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByOrderStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'orderStatus', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
+      thenByOrderStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'orderStatus', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PenjualanModel, PenjualanModel, QAfterSortBy>
       thenByPaymentMethod() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'paymentMethod', Sort.asc);
@@ -1862,6 +2059,13 @@ extension PenjualanModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<PenjualanModel, PenjualanModel, QDistinct> distinctByOrderStatus(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'orderStatus', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<PenjualanModel, PenjualanModel, QDistinct>
       distinctByPaymentMethod({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1960,6 +2164,13 @@ extension PenjualanModelQueryProperty
   QueryBuilder<PenjualanModel, String?, QQueryOperations> keteranganProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'keterangan');
+    });
+  }
+
+  QueryBuilder<PenjualanModel, String?, QQueryOperations>
+      orderStatusProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'orderStatus');
     });
   }
 

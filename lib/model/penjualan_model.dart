@@ -6,6 +6,10 @@ part 'penjualan_model.g.dart';
 
 @collection
 class PenjualanModel {
+  /// Local fulfillment status values (see [orderStatus]).
+  static const String statusPending = 'pending';
+  static const String statusDone = 'done';
+
   Id? id = Isar.autoIncrement;
   List<ProductItemModel> items = [];
   late int totalItem;
@@ -24,6 +28,14 @@ class PenjualanModel {
   double? changeAmount;
   String? paymentMethod;
 
+  /// Local fulfillment status: 'pending' | 'done'.
+  /// Null = legacy order created before this field existed (treated as done
+  /// and hidden from the Awaiting Orders list). Intentionally NOT part of
+  /// toJson()/fromJson() so the Supabase `report` payload stays unchanged
+  /// (no cloud migration needed). Lives in the local Isar file so it
+  /// travels with database backups.
+  String? orderStatus;
+
   PenjualanModel({
     this.id,
     required this.items,
@@ -40,6 +52,7 @@ class PenjualanModel {
     this.tenderedAmount,
     this.changeAmount,
     this.paymentMethod,
+    this.orderStatus,
   });
 
   factory PenjualanModel.fromJson(json) {
@@ -200,8 +213,11 @@ class ProductItemModel {
       'hargaJualPersen': hargaJualPersen,
       'diskonPersen': diskonPersen,
       'isHargaJualPersen': isHargaJualPersen,
-      'barangMasuk': barangMasuk,
-      'barangKeluar': barangKeluar,
+      // ISO-encode dates: raw DateTime objects make jsonEncode throw
+      // ("Converting object to an encodable object failed") and broke the
+      // JSON backup export. fromJson() already parses ISO strings back.
+      'barangMasuk': barangMasuk?.toIso8601String(),
+      'barangKeluar': barangKeluar?.toIso8601String(),
       'createdAt': createdAt?.toIso8601String(),
       'category': category,
       'hargaJualExact': hargaJualExact,

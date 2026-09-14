@@ -1,6 +1,8 @@
 import 'package:pos/controller/auth_controller.dart';
+import 'package:pos/controller/awaiting_orders_controller.dart';
 import 'package:pos/controller/theme_controller.dart';
 import 'package:pos/service/app_services.dart';
+import 'package:pos/widget/backup_flow.dart';
 import 'package:pos/utils/date_utils.dart';
 import 'package:pos/utils/extension.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +59,47 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Point of Sale (POS)'),
               leading: const Icon(Icons.point_of_sale),
               onTap: () => context.go('/'),
+            ),
+            ListTile(
+              title: const Text('Switch Staff'),
+              leading: const Icon(Icons.people_alt),
+              onTap: () => context.go('/staff'),
+            ),
+            // Awaiting Orders: worker tool to check which paid orders are
+            // still pending preparation. Available to all staff — not
+            // owner-gated. Badge shows the live pending count.
+            ListTile(
+              title: const Text('Awaiting Orders'),
+              leading: const Icon(Icons.receipt_long),
+              trailing: Watch((context) {
+                final countState =
+                    awaitingOrdersController.pendingCount.watch(context);
+                final count = countState.value ?? 0;
+                if (count <= 0) return const SizedBox.shrink();
+                return Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints:
+                      const BoxConstraints(minWidth: 22, minHeight: 18),
+                  child: Text(
+                    count > 9 ? '9+' : '$count',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              }),
+              onTap: () {
+                Navigator.pop(context); // close the drawer first
+                context.push('/awaiting-orders');
+              },
             ),
             const Divider(),
             if (!isOwnerUnlocked.watch(context))
@@ -146,67 +189,20 @@ class NavDrawer extends StatelessWidget {
                   icon: const Icon(Icons.more_vert),
                   onSelected: (item) async {
                     if (item == 'restore') {
-                      ShadToaster.of(context).show(
-                        ShadToast(
-                          title: const Text('Restore Backup?'),
-                          description:
-                              const Text('Please pick isar file to restore'),
-                           action: ShadButton.outline(
-                             child: const Text('Select'),
-                             onPressed: () async {
-                               final toaster = ShadToaster.of(context);
-                               bool success = await database.restoreDB();
-                               if (success) {
-                                toaster.show(
-                                  const ShadToast(
-                                    title: Text('Restore Database Success!'),
-                                    description: Text('Please make sure all data is imported'),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      );
+                      // Real modal dialog instead of the old transient toast
+                      // (the toast's small "Select" button auto-dismissed in
+                      // seconds — on phones that read as "nothing happens").
+                      context.pop(); // close the drawer first
+                      await BackupFlow.restoreBackup(context);
+                    } else if (item == 'restore-legacy') {
+                      context.pop();
+                      await BackupFlow.restoreLegacyIsar(context);
                     } else if (item == 'login') {
                       context.pop();
                       context.push('/login');
                     } else if (item == 'backup') {
-                      final toaster = ShadToaster.of(context);
                       context.pop();
-                      
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => const Center(
-                          child: Card(
-                            child: Padding(
-                              padding: EdgeInsets.all(20.0),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(height: 16),
-                                  Text('Backing up database...'),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                      
-                      bool success = await database.createBackUp();
-                      
-                      if (context.mounted) Navigator.pop(context); // close dialog
-                      
-                      if (success) {
-                        toaster.show(
-                          const ShadToast(
-                            title: Text('Backup Database Success!'),
-                            description: Text('All your data on selected folder'),
-                          ),
-                        );
-                      }
+                      await BackupFlow.exportBackup(context);
                     } else if (item == 'clear') {
                       context.pop();
                       showShadDialog(
@@ -246,11 +242,15 @@ class NavDrawer extends StatelessWidget {
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                     const PopupMenuItem<String>(
                       value: 'restore',
-                      child: Text('Restore'),
+                      child: Text('Restore Backup'),
                     ),
                     const PopupMenuItem<String>(
                       value: 'backup',
-                      child: Text('Backup'),
+                      child: Text('Backup Database'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'restore-legacy',
+                      child: Text('Restore legacy .isar backup'),
                     ),
                     const PopupMenuItem<String>(
                       value: 'clear',

@@ -10,12 +10,14 @@ import 'package:pos/service/report_service.dart';
 import 'package:pos/service/expenses_service.dart';
 import 'package:pos/service/salary_service.dart';
 import 'package:pos/service/store_service.dart';
+import 'package:pos/service/backup_service.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
 
 void setup() {
   getIt.registerLazySingleton<Database>(() => Database());
+  getIt.registerLazySingleton<BackupService>(() => BackupService());
   getIt.registerLazySingleton<UserService>(() => UserService(getIt.get<Database>()));
   getIt.registerLazySingleton<CustomerService>(() => CustomerService(getIt.get<Database>()));
   getIt.registerLazySingleton<InventoryService>(() => InventoryService(getIt.get<Database>()));

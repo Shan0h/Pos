@@ -20,6 +20,13 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
   final year = month.year;
   final monthYear = DateFormat('MMMM yyyy').format(month);
 
+  // The exact period the report covers (first..last day of the month) —
+  // printed in the document so an empty-looking PDF is self-explanatory.
+  final periodStart = DateTime(month.year, month.month, 1);
+  final periodEnd = DateTime(month.year, month.month + 1, 0);
+  final periodLabel =
+      '${DateFormat('dd MMM yyyy').format(periodStart)} – ${DateFormat('dd MMM yyyy').format(periodEnd)}';
+
   // Calculate totals
   final totalRevenue = sales.fold<double>(0, (sum, s) => sum + s.totalHarga);
   final totalOrders = sales.length;
@@ -56,7 +63,9 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
     for (var item in sale.items) {
       final name = item.nama ?? 'Unknown';
       final qty = item.quantity ?? 1;
-      final price = (item.hargaJual ?? 0).toDouble();
+      // Sen-precise selling price (falls back to the legacy whole-Ringgit
+      // hargaJual when the exact override is absent).
+      final price = item.price;
       itemCounts[name] = (itemCounts[name] ?? 0) + qty;
       itemRevenue[name] = (itemRevenue[name] ?? 0) + (price * qty);
     }
@@ -65,11 +74,13 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
     ..sort((a, b) => b.value.compareTo(a.value));
 
   pdf.addPage(
-    pw.Page(
+    // MultiPage instead of Page+Column: a busy month paginates onto more
+    // pages instead of throwing "column overflow" and failing the export.
+    pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.all(40),
-      build: (pw.Context context) {
-        return pw.Column(
+      build: (pw.Context context) => [
+        pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             // Header
@@ -90,6 +101,16 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
                 style: pw.TextStyle(
                   color: PdfColors.brown,
                   fontSize: 18,
+                ),
+              ),
+            ),
+            pw.SizedBox(height: 4),
+            pw.Center(
+              child: pw.Text(
+                periodLabel,
+                style: const pw.TextStyle(
+                  color: PdfColors.grey600,
+                  fontSize: 11,
                 ),
               ),
             ),
@@ -136,6 +157,30 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
             ),
             pw.SizedBox(height: 20),
 
+            // Empty-period hint: the export worked, the period simply had no
+            // fulfilled sales — shown prominently so it never looks broken.
+            if (sales.isEmpty)
+              pw.Container(
+                width: double.infinity,
+                margin: const pw.EdgeInsets.only(bottom: 20),
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.amber50,
+                  border: pw.Border.all(color: PdfColors.amber200),
+                  borderRadius: pw.BorderRadius.circular(8),
+                ),
+                child: pw.Center(
+                  child: pw.Text(
+                    'No fulfilled sales in this period',
+                    style: pw.TextStyle(
+                      fontSize: 13,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.brown700,
+                    ),
+                  ),
+                ),
+              ),
+
             // Payment Methods
             pw.Text('Payment Methods', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 10),
@@ -150,6 +195,8 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
                     pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('Amount', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold))),
                   ],
                 ),
+                if (paymentCounts.isEmpty)
+                  _buildNoDataRow(3),
                 ...paymentCounts.entries.map((e) => pw.TableRow(
                   children: [
                     pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text(e.key.toUpperCase())),
@@ -164,17 +211,23 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
             // Best Sellers
             pw.Text('Best Sellers', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 10),
-            ...bestSellers.take(10).map((entry) => pw.Container(
-              padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 10),
-              decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300))),
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(entry.key),
-                  pw.Text('${entry.value} sold - RM ${_formatCurrency(itemRevenue[entry.key] ?? 0)}'),
-                ],
-              ),
-            )),
+            if (bestSellers.isEmpty)
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: pw.Text('No data', style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 11)),
+              )
+            else
+              ...bestSellers.take(10).map((entry) => pw.Container(
+                padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300))),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(entry.key),
+                    pw.Text('${entry.value} sold - RM ${_formatCurrency(itemRevenue[entry.key] ?? 0)}'),
+                  ],
+                ),
+              )),
             pw.SizedBox(height: 20),
 
             // Daily Breakdown
@@ -191,6 +244,8 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
                     pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('Revenue', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
                   ],
                 ),
+                if (sortedDates.isEmpty)
+                  _buildNoDataRow(3),
                 ...sortedDates.map((date) {
                   final daySales = dailySales[date]!;
                   final dayTotal = daySales.fold<double>(0, (sum, s) => sum + s.totalHarga);
@@ -214,8 +269,8 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
               ),
             ),
           ],
-        );
-      },
+        ),
+      ],
     ),
   );
 
@@ -295,6 +350,24 @@ pw.Widget _buildSummaryCard(String title, String value) {
         pw.SizedBox(height: 4),
         pw.Text(value, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.brown900)),
       ],
+    ),
+  );
+}
+
+/// A single italic "No data" row spanning [columns] cells, shown in the
+/// Payment Methods / Daily Breakdown tables when the period is empty.
+pw.TableRow _buildNoDataRow(int columns) {
+  return pw.TableRow(
+    children: List.generate(
+      columns,
+      (i) => pw.Padding(
+        padding: const pw.EdgeInsets.all(8),
+        child: i == 0
+            ? pw.Text('No data',
+                style: const pw.TextStyle(
+                    color: PdfColors.grey600, fontSize: 11, fontStyle: pw.FontStyle.italic))
+            : pw.SizedBox(),
+      ),
     ),
   );
 }

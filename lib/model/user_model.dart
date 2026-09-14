@@ -15,6 +15,10 @@ class UserModel {
   bool isDeleted;
   bool isSynced;
 
+  /// 4-digit staff passcode for the "Who's working?" picker.
+  /// Null/empty = profile signs in with one tap (no passcode set).
+  String? pin;
+
   UserModel({
     this.id,
     required this.nama,
@@ -26,6 +30,7 @@ class UserModel {
     this.updatedAt,
     this.isDeleted = false,
     this.isSynced = true,
+    this.pin,
   });
 
   Map<String, dynamic> toJson() {
@@ -40,6 +45,7 @@ class UserModel {
       'updatedAt': updatedAt?.toIso8601String(),
       'isDeleted': isDeleted,
       'isSynced': isSynced,
+      'pin': pin,
     };
   }
 
@@ -57,6 +63,7 @@ class UserModel {
           json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
       isDeleted: json['isDeleted'] ?? false,
       isSynced: json['isSynced'] ?? true,
+      pin: json['pin'] as String?,
     );
   }
 }
