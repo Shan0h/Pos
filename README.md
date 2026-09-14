@@ -22,6 +22,22 @@
 
 ---
 
+## 📸 Screenshots
+
+| | |
+|---|---|
+| ![Modern POS checkout](screenshots/pos_modern.png) | ![Awaiting Orders](screenshots/awaiting_orders.png) |
+| *Modern POS — catalog, cart & payment* | *Awaiting Orders — Cancel / Mark as Done* |
+| ![Reports & Analytics](screenshots/reports.png) | ![Backup & Restore](screenshots/backup_restore.png) |
+| *Reports & Analytics* | *Owner Dashboard — Backup / Restore database* |
+
+<p align="center">
+  <img width="70%" src="screenshots/month_picker.png" alt="Month picker"><br/>
+  <i>Monthly Report — month picker export</i>
+</p>
+
+---
+
 ## ✨ Features
 
 ### 📦 1. Inventory Management
