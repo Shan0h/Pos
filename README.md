@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="160" src="assets/logo.png" alt="POS Logo">
+  <img width="180" src="assets/icon/app_icon.png" alt="POS Modern Logo">
   
   # POS (Point of Sale)
 
@@ -90,6 +90,10 @@ The application features full **Dark Mode** support, tablet and desktop responsi
 - **Portable JSON Backup (`.posbackup`)**: One-click database export to portable, encrypted JSON format that restores atomically in a single transaction without requiring app restart.
 - **Legacy `.isar` Migration Safety**: Validate-before-swap integrity checking protects live data from corrupt or version-mismatched files.
 - **Supabase Cloud Sync**: Optional two-way synchronization to Supabase cloud backends.
+
+### 🎨 7. Modern Visual Identity & App Icon
+- **High-Resolution 3D Icon**: Custom-crafted isometric smart POS terminal badge with glowing touchscreen metrics, live sales graphs, and a contactless payment wave.
+- **Cross-Platform Launcher Automation**: Automated build configurations generating native launcher icons across Android (`mipmap-*`), Windows desktop (`.ico`), Web (`favicon.png` & web manifest), and iOS.
 
 ---
 
