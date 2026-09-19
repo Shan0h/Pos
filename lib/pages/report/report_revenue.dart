@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:pos/controller/report_controller.dart';
 import 'package:pos/model/penjualan_model.dart';
 import 'package:pos/utils/constant.dart';
@@ -12,40 +13,60 @@ class ReportRevenue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reportIncome = reportController.reportIncome.watch(context);
+    final dateRange = reportController.dateRange.watch(context);
     if (reportIncome.hasValue && reportIncome.value != null) {
       return SizedBox(
         height: 250,
-        child: LineChart(mainData(context, reportIncome.value!)),
+        child: LineChart(mainData(context, reportIncome.value!, dateRange)),
       );
     }
     return const SizedBox();
   }
 
   LineChartData mainData(BuildContext context,
-      Map<DateTime, List<PenjualanModel>> data) {
+      Map<DateTime, List<PenjualanModel>> data, List<DateTime> dateRange) {
+    DateTime start = dateRange.isNotEmpty
+        ? DateTime(dateRange.first.year, dateRange.first.month, dateRange.first.day)
+        : DateTime.now().subtract(const Duration(days: 30));
+    DateTime end = dateRange.length > 1
+        ? DateTime(dateRange.last.year, dateRange.last.month, dateRange.last.day)
+        : DateTime.now();
+
+    if (end.isBefore(start)) {
+      final temp = start;
+      start = end;
+      end = temp;
+    }
+
+    final totalDays = end.difference(start).inDays + 1;
+    final List<FlSpot> spots = [];
+    final List<DateTime> dateList = [];
     double maxVal = 0;
-    double minX = 1;
-    double maxX = 31;
 
-    if (data.isNotEmpty) {
-      final days = data.keys.map((d) => d.day).toList();
-      minX = days.reduce((a, b) => a < b ? a : b).toDouble();
-      maxX = days.reduce((a, b) => a > b ? a : b).toDouble();
-    }
-
-    for (var i in data.entries) {
-      double total = i.value.fold(0, (p, c) => p + c.totalHarga);
-      if (total > maxVal) {
-        maxVal = total;
+    for (int i = 0; i < totalDays; i++) {
+      final d = start.add(Duration(days: i));
+      final dayKey = DateTime(d.year, d.month, d.day);
+      dateList.add(dayKey);
+      final sales = data[dayKey] ?? [];
+      final double dayTotal = sales.fold<double>(0, (p, c) => p + c.totalHarga);
+      if (dayTotal > maxVal) {
+        maxVal = dayTotal;
       }
+      spots.add(FlSpot(i.toDouble(), dayTotal));
     }
+
     // 20% headroom above the chart; never collapse to zero.
     maxVal = maxVal * 1.2;
     if (maxVal < 100) maxVal = 100;
 
+    const double minX = 0;
+    final double maxX = (totalDays > 1 ? totalDays - 1 : 1).toDouble();
+    final double interval = (totalDays / 6).ceilToDouble().clamp(1, 30);
+
     final axisTextColor = context.secondaryTextColor;
     final lineColor =
         context.isDarkMode ? const Color(0xFFD7A86E) : const Color(0xFF8B5E3C);
+    final isMultiMonth = totalDays > 31 || start.month != end.month;
 
     return LineChartData(
       gridData: const FlGridData(show: false),
@@ -58,23 +79,26 @@ class ReportRevenue extends StatelessWidget {
           sideTitles: SideTitles(showTitles: false),
         ),
         bottomTitles: AxisTitles(
-          axisNameWidget: Text('Day',
+          axisNameWidget: Text(isMultiMonth ? 'Date' : 'Day',
               style: TextStyle(fontSize: 12, color: axisTextColor)),
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 30,
-            interval: ((maxX - minX) / 6).ceilToDouble().clamp(1, 10),
+            interval: interval,
             getTitlesWidget: (value, meta) {
-              // Only label whole days inside the range to avoid clutter.
-              if (value < minX || value > maxX) {
+              final idx = value.toInt();
+              if (idx < 0 || idx >= dateList.length) {
                 return const SizedBox();
               }
+              final date = dateList[idx];
+              final label = isMultiMonth
+                  ? DateFormat('d/M').format(date)
+                  : date.day.toString();
               return Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
-                  value.toInt().toString(),
-                  style:
-                      TextStyle(fontSize: 10, color: axisTextColor),
+                  label,
+                  style: TextStyle(fontSize: 10, color: axisTextColor),
                 ),
               );
             },
@@ -121,23 +145,21 @@ class ReportRevenue extends StatelessWidget {
       lineTouchData: LineTouchData(touchTooltipData:
           LineTouchTooltipData(getTooltipItems: (touchedSpots) {
         return touchedSpots.map((touchedSpot) {
+          final idx = touchedSpot.x.toInt();
+          final dateStr = (idx >= 0 && idx < dateList.length)
+              ? DateFormat('dd MMM yyyy').format(dateList[idx])
+              : '';
           return LineTooltipItem(
-              currency.format(touchedSpot.y),
+              '$dateStr\n${currency.format(touchedSpot.y)}',
               const TextStyle(
                   fontWeight: FontWeight.bold, color: Colors.white));
         }).toList();
       })),
       lineBarsData: [
         LineChartBarData(
-          spots: [
-            for (var i in data.entries)
-              FlSpot(
-                i.key.day.toDouble(),
-                i.value.fold(0, (p, c) => p + c.totalHarga),
-              ),
-          ],
-          isCurved: true,
-          barWidth: 5,
+          spots: spots,
+          isCurved: totalDays < 45,
+          barWidth: 4,
           color: lineColor,
           isStrokeCapRound: true,
           dotData: const FlDotData(show: false),

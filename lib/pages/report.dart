@@ -47,11 +47,35 @@ class _ReportState extends State<Report> {
     final isMobile = context.isMobile;
     final report = reportController.report.watch(context);
     final reportToday = reportController.reportToday.watch(context);
-    final reportYesteday = reportController.reportYesterday.watch(context);
+    final reportYesterday = reportController.reportYesterday.watch(context);
     final reportOutOfStcok = reportController.reportOutOfStcok.watch(context);
     final expenses = expensesController.expenses.watch(context);
     final theme = ShadTheme.of(context);
     final screen = isMobile ? context.width : (context.width - 60) / 3;
+
+    final salesList = report.value ?? [];
+    double cashTotal = 0;
+    double qrTotal = 0;
+    double cardTotal = 0;
+    double otherTotal = 0;
+
+    for (var s in salesList) {
+      final method = (s.paymentMethod ?? '').toLowerCase().trim();
+      if (method == 'cash' || method.isEmpty) {
+        cashTotal += s.totalHarga;
+      } else if (method.contains('qr') ||
+          method.contains('transfer') ||
+          method.contains('duitnow') ||
+          method.contains('online')) {
+        qrTotal += s.totalHarga;
+      } else if (method.contains('card') ||
+          method.contains('debit') ||
+          method.contains('credit')) {
+        cardTotal += s.totalHarga;
+      } else {
+        otherTotal += s.totalHarga;
+      }
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reports & Analytics'),
@@ -165,19 +189,42 @@ class _ReportState extends State<Report> {
                       }
                     }),
                 ShadButton(
+                  child: const Text('Today'),
+                  onPressed: () {
+                    final now = DateTime.now();
+                    reportController.dateRange.value = [now, now];
+                  },
+                ),
+                ShadButton(
+                  child: const Text('This Week'),
+                  onPressed: () {
+                    final now = DateTime.now();
+                    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+                    reportController.dateRange.value = [startOfWeek, now];
+                  },
+                ),
+                ShadButton(
+                  child: const Text('This Month'),
+                  onPressed: () {
+                    final now = DateTime.now();
+                    final startOfMonth = DateTime(now.year, now.month, 1);
+                    reportController.dateRange.value = [startOfMonth, now];
+                  },
+                ),
+                ShadButton(
+                  child: const Text('Last 30 Days'),
+                  onPressed: () => reportController.dateRange.value = [
+                    DateTime.now().subtract(const Duration(days: 30)),
+                    DateTime.now()
+                  ],
+                ),
+                ShadButton(
                   child: const Text('3 Months'),
                   onPressed: () => reportController.dateRange.value = [
                     DateTime.now().subtract(const Duration(days: 90)),
                     DateTime.now()
                   ],
                 ),
-                ShadButton(
-                  child: const Text('Reset'),
-                  onPressed: () => reportController.dateRange.value = [
-                    DateTime.now().subtract(const Duration(days: 30)),
-                    DateTime.now()
-                  ],
-                )
               ],
             ),
             const SizedBox(height: 20),
@@ -189,7 +236,7 @@ class _ReportState extends State<Report> {
                   children: [
                     _buildSummaryCard('Total Sales Today', currency.format(sumReport(reportToday.value ?? [])), Icons.today, const Color(0xFF8B5E3C), screen),
                     const SizedBox(height: 10),
-                    _buildSummaryCard('Total Sales Yesterday', currency.format(sumReport(reportYesteday.value ?? [])), Icons.history, const Color(0xFF6B4226), screen),
+                    _buildSummaryCard('Total Sales Yesterday', currency.format(sumReport(reportYesterday.value ?? [])), Icons.history, const Color(0xFF6B4226), screen),
                   ],
                 ),
                 if (report.hasValue)
@@ -205,9 +252,17 @@ class _ReportState extends State<Report> {
                     _buildSummaryCard('Total Orders Today', '${reportToday.value?.length ?? 0} Orders', Icons.receipt_long, const Color(0xFF7B5B3A), screen),
                     const SizedBox(height: 10),
                     if (expenses.hasValue)
-                      _buildSummaryCard('Total Expenses', currency.format(expenses.value!.fold(0, (p, c) => p + c.amount)), Icons.money_off, const Color(0xFF9C6634), screen),
+                      _buildSummaryCard('Total Expenses', currency.format(expenses.value!.fold<double>(0, (p, c) => p + c.realAmount)), Icons.money_off, const Color(0xFF9C6634), screen),
                   ],
                 ),
+                if (report.hasValue)
+                  _buildPaymentMethodSummaryCard(
+                    width: screen,
+                    cash: cashTotal,
+                    qr: qrTotal,
+                    card: cardTotal,
+                    other: otherTotal,
+                  ),
               ],
             ),
             const SizedBox(height: 10),
@@ -643,6 +698,100 @@ class _ReportState extends State<Report> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPaymentMethodSummaryCard({
+    required double width,
+    required double cash,
+    required double qr,
+    required double card,
+    required double other,
+  }) {
+    return Container(
+      width: width,
+      decoration: BoxDecoration(
+        color: context.panelBackground,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: context.appShadowColor,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2E7D32).withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.account_balance_wallet,
+                    color: Color(0xFF2E7D32), size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Payment Methods',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: context.secondaryTextColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _buildPaymentRow('Cash (Drawer)', currency.format(cash),
+              Icons.payments, const Color(0xFF2E7D32)),
+          const SizedBox(height: 8),
+          _buildPaymentRow('QR / Transfer', currency.format(qr),
+              Icons.qr_code, const Color(0xFF1976D2)),
+          const SizedBox(height: 8),
+          _buildPaymentRow('Card', currency.format(card),
+              Icons.credit_card, const Color(0xFF7B1FA2)),
+          if (other > 0) ...[
+            const SizedBox(height: 8),
+            _buildPaymentRow('Other', currency.format(other),
+                Icons.more_horiz, Colors.grey),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentRow(
+      String label, String amount, IconData icon, Color color) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: context.secondaryTextColor,
+            ),
+          ),
+        ),
+        Text(
+          amount,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: context.appTextColor,
+          ),
+        ),
+      ],
     );
   }
 }

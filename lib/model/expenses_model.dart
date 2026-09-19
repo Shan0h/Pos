@@ -13,6 +13,15 @@ class ExpensesModel {
   bool isDeleted;
   bool isSynced;
 
+  // New fields for enhanced expenses
+  String? imagePath;
+  String? storeName;
+  String? category;
+  double? amountExact;
+
+  /// Effective amount used by all display and calculation paths.
+  double get realAmount => amountExact ?? amount.toDouble();
+
   ExpensesModel({
     this.id,
     required this.title,
@@ -22,6 +31,10 @@ class ExpensesModel {
     this.updatedAt,
     this.isDeleted = false,
     this.isSynced = true,
+    this.imagePath,
+    this.storeName,
+    this.category,
+    this.amountExact,
   });
 
   Map<String, dynamic> toJson() {
@@ -34,6 +47,10 @@ class ExpensesModel {
       'updatedAt': updatedAt?.toIso8601String(),
       'isDeleted': isDeleted,
       'isSynced': isSynced,
+      'imagePath': imagePath,
+      'storeName': storeName,
+      'category': category,
+      'amountExact': amountExact,
     };
   }
 
@@ -42,13 +59,17 @@ class ExpensesModel {
       id: json['id'],
       title: json['title'],
       note: json['note'] != null ? json['note'] as String : null,
-      amount: json['amount'],
+      amount: json['amount'] is int ? json['amount'] : ((json['amount'] as num?)?.toInt() ?? 0),
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       updatedAt:
           json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
       isDeleted: json['isDeleted'] ?? false,
       isSynced: json['isSynced'] ?? true,
+      imagePath: json['imagePath'],
+      storeName: json['storeName'],
+      category: json['category'],
+      amountExact: (json['amountExact'] as num?)?.toDouble(),
     );
   }
 }

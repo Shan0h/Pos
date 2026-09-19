@@ -22,33 +22,58 @@ const ExpensesModelSchema = CollectionSchema(
       name: r'amount',
       type: IsarType.long,
     ),
-    r'createdAt': PropertySchema(
+    r'amountExact': PropertySchema(
       id: 1,
+      name: r'amountExact',
+      type: IsarType.double,
+    ),
+    r'category': PropertySchema(
+      id: 2,
+      name: r'category',
+      type: IsarType.string,
+    ),
+    r'createdAt': PropertySchema(
+      id: 3,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
+    r'imagePath': PropertySchema(
+      id: 4,
+      name: r'imagePath',
+      type: IsarType.string,
+    ),
     r'isDeleted': PropertySchema(
-      id: 2,
+      id: 5,
       name: r'isDeleted',
       type: IsarType.bool,
     ),
     r'isSynced': PropertySchema(
-      id: 3,
+      id: 6,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'note': PropertySchema(
-      id: 4,
+      id: 7,
       name: r'note',
       type: IsarType.string,
     ),
+    r'realAmount': PropertySchema(
+      id: 8,
+      name: r'realAmount',
+      type: IsarType.double,
+    ),
+    r'storeName': PropertySchema(
+      id: 9,
+      name: r'storeName',
+      type: IsarType.string,
+    ),
     r'title': PropertySchema(
-      id: 5,
+      id: 10,
       name: r'title',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 6,
+      id: 11,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -74,7 +99,25 @@ int _expensesModelEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
+    final value = object.category;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.imagePath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.note;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.storeName;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -90,12 +133,17 @@ void _expensesModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.amount);
-  writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeBool(offsets[2], object.isDeleted);
-  writer.writeBool(offsets[3], object.isSynced);
-  writer.writeString(offsets[4], object.note);
-  writer.writeString(offsets[5], object.title);
-  writer.writeDateTime(offsets[6], object.updatedAt);
+  writer.writeDouble(offsets[1], object.amountExact);
+  writer.writeString(offsets[2], object.category);
+  writer.writeDateTime(offsets[3], object.createdAt);
+  writer.writeString(offsets[4], object.imagePath);
+  writer.writeBool(offsets[5], object.isDeleted);
+  writer.writeBool(offsets[6], object.isSynced);
+  writer.writeString(offsets[7], object.note);
+  writer.writeDouble(offsets[8], object.realAmount);
+  writer.writeString(offsets[9], object.storeName);
+  writer.writeString(offsets[10], object.title);
+  writer.writeDateTime(offsets[11], object.updatedAt);
 }
 
 ExpensesModel _expensesModelDeserialize(
@@ -106,13 +154,17 @@ ExpensesModel _expensesModelDeserialize(
 ) {
   final object = ExpensesModel(
     amount: reader.readLong(offsets[0]),
-    createdAt: reader.readDateTimeOrNull(offsets[1]),
+    amountExact: reader.readDoubleOrNull(offsets[1]),
+    category: reader.readStringOrNull(offsets[2]),
+    createdAt: reader.readDateTimeOrNull(offsets[3]),
     id: id,
-    isDeleted: reader.readBoolOrNull(offsets[2]) ?? false,
-    isSynced: reader.readBoolOrNull(offsets[3]) ?? true,
-    note: reader.readStringOrNull(offsets[4]),
-    title: reader.readString(offsets[5]),
-    updatedAt: reader.readDateTimeOrNull(offsets[6]),
+    imagePath: reader.readStringOrNull(offsets[4]),
+    isDeleted: reader.readBoolOrNull(offsets[5]) ?? false,
+    isSynced: reader.readBoolOrNull(offsets[6]) ?? true,
+    note: reader.readStringOrNull(offsets[7]),
+    storeName: reader.readStringOrNull(offsets[9]),
+    title: reader.readString(offsets[10]),
+    updatedAt: reader.readDateTimeOrNull(offsets[11]),
   );
   return object;
 }
@@ -127,16 +179,26 @@ P _expensesModelDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 2:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 6:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
+      return (reader.readDouble(offset)) as P;
+    case 9:
+      return (reader.readStringOrNull(offset)) as P;
+    case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -296,6 +358,244 @@ extension ExpensesModelQueryFilter
   }
 
   QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      amountExactIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'amountExact',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      amountExactIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'amountExact',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      amountExactEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'amountExact',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      amountExactGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'amountExact',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      amountExactLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'amountExact',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      amountExactBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'amountExact',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'category',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'category',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'category',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'category',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'category',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'category',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      categoryIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'category',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
       createdAtIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -436,6 +736,160 @@ extension ExpensesModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'imagePath',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'imagePath',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'imagePath',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'imagePath',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'imagePath',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      imagePathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'imagePath',
+        value: '',
       ));
     });
   }
@@ -608,6 +1062,226 @@ extension ExpensesModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'note',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      realAmountEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'realAmount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      realAmountGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'realAmount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      realAmountLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'realAmount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      realAmountBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'realAmount',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'storeName',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'storeName',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'storeName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'storeName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'storeName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'storeName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'storeName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'storeName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'storeName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'storeName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'storeName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterFilterCondition>
+      storeNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'storeName',
         value: '',
       ));
     });
@@ -844,6 +1518,32 @@ extension ExpensesModelQuerySortBy
     });
   }
 
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByAmountExact() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'amountExact', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      sortByAmountExactDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'amountExact', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByCategory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      sortByCategoryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.desc);
+    });
+  }
+
   QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -854,6 +1554,19 @@ extension ExpensesModelQuerySortBy
       sortByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByImagePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      sortByImagePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.desc);
     });
   }
 
@@ -892,6 +1605,32 @@ extension ExpensesModelQuerySortBy
   QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByNoteDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'note', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByRealAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'realAmount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      sortByRealAmountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'realAmount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> sortByStoreName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'storeName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      sortByStoreNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'storeName', Sort.desc);
     });
   }
 
@@ -935,6 +1674,32 @@ extension ExpensesModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByAmountExact() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'amountExact', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      thenByAmountExactDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'amountExact', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByCategory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      thenByCategoryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.desc);
+    });
+  }
+
   QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -957,6 +1722,19 @@ extension ExpensesModelQuerySortThenBy
   QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByImagePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      thenByImagePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.desc);
     });
   }
 
@@ -998,6 +1776,32 @@ extension ExpensesModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByRealAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'realAmount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      thenByRealAmountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'realAmount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByStoreName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'storeName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy>
+      thenByStoreNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'storeName', Sort.desc);
+    });
+  }
+
   QueryBuilder<ExpensesModel, ExpensesModel, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -1032,9 +1836,30 @@ extension ExpensesModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ExpensesModel, ExpensesModel, QDistinct>
+      distinctByAmountExact() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'amountExact');
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QDistinct> distinctByCategory(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'category', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ExpensesModel, ExpensesModel, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QDistinct> distinctByImagePath(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'imagePath', caseSensitive: caseSensitive);
     });
   }
 
@@ -1054,6 +1879,19 @@ extension ExpensesModelQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'note', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QDistinct> distinctByRealAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'realAmount');
+    });
+  }
+
+  QueryBuilder<ExpensesModel, ExpensesModel, QDistinct> distinctByStoreName(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'storeName', caseSensitive: caseSensitive);
     });
   }
 
@@ -1085,9 +1923,27 @@ extension ExpensesModelQueryProperty
     });
   }
 
+  QueryBuilder<ExpensesModel, double?, QQueryOperations> amountExactProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'amountExact');
+    });
+  }
+
+  QueryBuilder<ExpensesModel, String?, QQueryOperations> categoryProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'category');
+    });
+  }
+
   QueryBuilder<ExpensesModel, DateTime?, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<ExpensesModel, String?, QQueryOperations> imagePathProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'imagePath');
     });
   }
 
@@ -1106,6 +1962,18 @@ extension ExpensesModelQueryProperty
   QueryBuilder<ExpensesModel, String?, QQueryOperations> noteProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'note');
+    });
+  }
+
+  QueryBuilder<ExpensesModel, double, QQueryOperations> realAmountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'realAmount');
+    });
+  }
+
+  QueryBuilder<ExpensesModel, String?, QQueryOperations> storeNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'storeName');
     });
   }
 

@@ -30,7 +30,7 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
   // Calculate totals
   final totalRevenue = sales.fold<double>(0, (sum, s) => sum + s.totalHarga);
   final totalOrders = sales.length;
-  final totalExpenses = expenses.fold<double>(0, (sum, e) => sum + e.amount);
+  final totalExpenses = expenses.fold<double>(0, (sum, e) => sum + e.realAmount);
   final totalHargaDasar = sales.fold<double>(0, (sum, s) {
     return sum + s.items.fold<double>(0, (p, c) {
       final cost = (c.hargaDasar ?? 0).toDouble();
@@ -54,7 +54,17 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
     final date = DateTime(sale.createdAt.year, sale.createdAt.month, sale.createdAt.day);
     dailySales[date] = [...(dailySales[date] ?? []), sale];
   }
-  final sortedDates = dailySales.keys.toList()..sort((a, b) => a.compareTo(b));
+
+  Map<DateTime, double> dailyExpenses = {};
+  for (var expense in expenses) {
+    if (expense.createdAt != null) {
+      final date = DateTime(expense.createdAt!.year, expense.createdAt!.month, expense.createdAt!.day);
+      dailyExpenses[date] = (dailyExpenses[date] ?? 0) + expense.realAmount;
+    }
+  }
+
+  final allDates = <DateTime>{...dailySales.keys, ...dailyExpenses.keys};
+  final sortedDates = allDates.toList()..sort((a, b) => a.compareTo(b));
 
   // Best sellers
   Map<String, int> itemCounts = {};
@@ -63,212 +73,211 @@ Future<PdfExportResult> monthlyReportPdfGenerator({
     for (var item in sale.items) {
       final name = item.nama ?? 'Unknown';
       final qty = item.quantity ?? 1;
-      // Sen-precise selling price (falls back to the legacy whole-Ringgit
-      // hargaJual when the exact override is absent).
-      final price = item.price;
+      // Effective selling price after item discount
+      final effectivePrice = (item.diskonPersen == null || item.diskonPersen == 0)
+          ? item.price
+          : item.price - (item.price * (item.diskonPersen! / 100));
       itemCounts[name] = (itemCounts[name] ?? 0) + qty;
-      itemRevenue[name] = (itemRevenue[name] ?? 0) + (price * qty);
+      itemRevenue[name] = (itemRevenue[name] ?? 0) + (effectivePrice * qty);
     }
   }
   final bestSellers = itemCounts.entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
 
   pdf.addPage(
-    // MultiPage instead of Page+Column: a busy month paginates onto more
-    // pages instead of throwing "column overflow" and failing the export.
+    // MultiPage with top-level items so busy months paginate onto more
+    // pages instead of failing with column overflow.
     pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.all(40),
       build: (pw.Context context) => [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
+        // Header
+        pw.Center(
+          child: pw.Text(
+            'MONTHLY REPORT',
+            style: pw.TextStyle(
+              color: PdfColors.brown,
+              fontSize: 28,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+        ),
+        pw.SizedBox(height: 10),
+        pw.Center(
+          child: pw.Text(
+            monthYear,
+            style: pw.TextStyle(
+              color: PdfColors.brown,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        pw.SizedBox(height: 4),
+        pw.Center(
+          child: pw.Text(
+            periodLabel,
+            style: const pw.TextStyle(
+              color: PdfColors.grey600,
+              fontSize: 11,
+            ),
+          ),
+        ),
+        pw.SizedBox(height: 20),
+
+        // Store Info
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.all(15),
+          decoration: pw.BoxDecoration(
+            color: PdfColors.grey200,
+            borderRadius: pw.BorderRadius.circular(8),
+          ),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(store.title, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text(store.description),
+              pw.Text(store.phone),
+              if (store.footer != null) pw.Text(store.footer!, style: pw.TextStyle(fontSize: 10)),
+            ],
+          ),
+        ),
+        pw.SizedBox(height: 20),
+
+        // Summary Cards
+        pw.Row(
           children: [
-            // Header
-            pw.Center(
-              child: pw.Text(
-                'MONTHLY REPORT',
-                style: pw.TextStyle(
-                  color: PdfColors.brown,
-                  fontSize: 28,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
+            pw.Expanded(
+              child: _buildSummaryCard('Total Revenue', 'RM ${_formatCurrency(totalRevenue)}'),
             ),
-            pw.SizedBox(height: 10),
-            pw.Center(
-              child: pw.Text(
-                monthYear,
-                style: pw.TextStyle(
-                  color: PdfColors.brown,
-                  fontSize: 18,
-                ),
-              ),
+            pw.SizedBox(width: 10),
+            pw.Expanded(
+              child: _buildSummaryCard('Total Orders', '$totalOrders'),
             ),
-            pw.SizedBox(height: 4),
-            pw.Center(
-              child: pw.Text(
-                periodLabel,
-                style: const pw.TextStyle(
-                  color: PdfColors.grey600,
-                  fontSize: 11,
-                ),
-              ),
+            pw.SizedBox(width: 10),
+            pw.Expanded(
+              child: _buildSummaryCard('Total Expenses', 'RM ${_formatCurrency(totalExpenses)}'),
             ),
-            pw.SizedBox(height: 20),
-
-            // Store Info
-            pw.Container(
-              padding: const pw.EdgeInsets.all(15),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.grey200,
-                borderRadius: pw.BorderRadius.circular(8),
-              ),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(store.title, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-                  pw.Text(store.description),
-                  pw.Text(store.phone),
-                  if (store.footer != null) pw.Text(store.footer!, style: pw.TextStyle(fontSize: 10)),
-                ],
-              ),
-            ),
-            pw.SizedBox(height: 20),
-
-            // Summary Cards
-            pw.Row(
-              children: [
-                pw.Expanded(
-                  child: _buildSummaryCard('Total Revenue', 'RM ${_formatCurrency(totalRevenue)}'),
-                ),
-                pw.SizedBox(width: 10),
-                pw.Expanded(
-                  child: _buildSummaryCard('Total Orders', '$totalOrders'),
-                ),
-                pw.SizedBox(width: 10),
-                pw.Expanded(
-                  child: _buildSummaryCard('Total Expenses', 'RM ${_formatCurrency(totalExpenses)}'),
-                ),
-                pw.SizedBox(width: 10),
-                pw.Expanded(
-                  child: _buildSummaryCard('Est. Profit', 'RM ${_formatCurrency(profit)}'),
-                ),
-              ],
-            ),
-            pw.SizedBox(height: 20),
-
-            // Empty-period hint: the export worked, the period simply had no
-            // fulfilled sales — shown prominently so it never looks broken.
-            if (sales.isEmpty)
-              pw.Container(
-                width: double.infinity,
-                margin: const pw.EdgeInsets.only(bottom: 20),
-                padding: const pw.EdgeInsets.all(16),
-                decoration: pw.BoxDecoration(
-                  color: PdfColors.amber50,
-                  border: pw.Border.all(color: PdfColors.amber200),
-                  borderRadius: pw.BorderRadius.circular(8),
-                ),
-                child: pw.Center(
-                  child: pw.Text(
-                    'No fulfilled sales in this period',
-                    style: pw.TextStyle(
-                      fontSize: 13,
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.brown700,
-                    ),
-                  ),
-                ),
-              ),
-
-            // Payment Methods
-            pw.Text('Payment Methods', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
-            pw.Table(
-              border: pw.TableBorder.all(color: PdfColors.grey300),
-              children: [
-                pw.TableRow(
-                  decoration: pw.BoxDecoration(color: PdfColors.brown),
-                  children: [
-                    pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('Method', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold))),
-                    pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('Transactions', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold))),
-                    pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('Amount', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold))),
-                  ],
-                ),
-                if (paymentCounts.isEmpty)
-                  _buildNoDataRow(3),
-                ...paymentCounts.entries.map((e) => pw.TableRow(
-                  children: [
-                    pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text(e.key.toUpperCase())),
-                    pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('${e.value}')),
-                    pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('RM ${_formatCurrency(paymentTotals[e.key] ?? 0)}')),
-                  ],
-                )),
-              ],
-            ),
-            pw.SizedBox(height: 20),
-
-            // Best Sellers
-            pw.Text('Best Sellers', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
-            if (bestSellers.isEmpty)
-              pw.Padding(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                child: pw.Text('No data', style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 11)),
-              )
-            else
-              ...bestSellers.take(10).map((entry) => pw.Container(
-                padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 10),
-                decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300))),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text(entry.key),
-                    pw.Text('${entry.value} sold - RM ${_formatCurrency(itemRevenue[entry.key] ?? 0)}'),
-                  ],
-                ),
-              )),
-            pw.SizedBox(height: 20),
-
-            // Daily Breakdown
-            pw.Text('Daily Breakdown', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
-            pw.Table(
-              border: pw.TableBorder.all(color: PdfColors.grey300),
-              children: [
-                pw.TableRow(
-                  decoration: pw.BoxDecoration(color: PdfColors.grey200),
-                  children: [
-                    pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('Date', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
-                    pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('Orders', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
-                    pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('Revenue', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
-                  ],
-                ),
-                if (sortedDates.isEmpty)
-                  _buildNoDataRow(3),
-                ...sortedDates.map((date) {
-                  final daySales = dailySales[date]!;
-                  final dayTotal = daySales.fold<double>(0, (sum, s) => sum + s.totalHarga);
-                  return pw.TableRow(
-                    children: [
-                      pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text(DateFormat('dd MMM yyyy').format(date))),
-                      pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('${daySales.length}')),
-                      pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('RM ${_formatCurrency(dayTotal)}')),
-                    ],
-                  );
-                }),
-              ],
-            ),
-            pw.SizedBox(height: 20),
-
-            // Footer
-            pw.Center(
-              child: pw.Text(
-                'Generated on ${DateFormat('dd MMM yyyy HH:mm').format(DateTime.now())}',
-                style: pw.TextStyle(color: PdfColors.grey600, fontSize: 10),
-              ),
+            pw.SizedBox(width: 10),
+            pw.Expanded(
+              child: _buildSummaryCard('Est. Profit', 'RM ${_formatCurrency(profit)}'),
             ),
           ],
+        ),
+        pw.SizedBox(height: 20),
+
+        // Empty-period hint: the export worked, the period simply had no
+        // fulfilled sales — shown prominently so it never looks broken.
+        if (sales.isEmpty)
+          pw.Container(
+            width: double.infinity,
+            margin: const pw.EdgeInsets.only(bottom: 20),
+            padding: const pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.amber50,
+              border: pw.Border.all(color: PdfColors.amber200),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Center(
+              child: pw.Text(
+                'No fulfilled sales in this period',
+                style: pw.TextStyle(
+                  fontSize: 13,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.brown700,
+                ),
+              ),
+            ),
+          ),
+
+        // Payment Methods
+        pw.Text('Payment Methods', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 10),
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey300),
+          children: [
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: PdfColors.brown),
+              children: [
+                pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('Method', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold))),
+                pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('Transactions', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold))),
+                pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('Amount', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold))),
+              ],
+            ),
+            if (paymentCounts.isEmpty)
+              _buildNoDataRow(3),
+            ...paymentCounts.entries.map((e) => pw.TableRow(
+              children: [
+                pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text(e.key.toUpperCase())),
+                pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('${e.value}')),
+                pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('RM ${_formatCurrency(paymentTotals[e.key] ?? 0)}')),
+              ],
+            )),
+          ],
+        ),
+        pw.SizedBox(height: 20),
+
+        // Best Sellers
+        pw.Text('Best Sellers', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 10),
+        if (bestSellers.isEmpty)
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: pw.Text('No data', style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 11)),
+          )
+        else
+          ...bestSellers.take(10).map((entry) => pw.Container(
+            padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+            decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300))),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Expanded(child: pw.Text(entry.key)),
+                pw.SizedBox(width: 8),
+                pw.Text('${entry.value} sold - RM ${_formatCurrency(itemRevenue[entry.key] ?? 0)}'),
+              ],
+            ),
+          )),
+        pw.SizedBox(height: 20),
+
+        // Daily Breakdown
+        pw.Text('Daily Breakdown', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 10),
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey300),
+          children: [
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: PdfColors.grey200),
+              children: [
+                pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('Date', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
+                pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('Revenue', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
+                pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('Expenses', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
+              ],
+            ),
+            if (sortedDates.isEmpty)
+              _buildNoDataRow(3),
+            ...sortedDates.map((date) {
+              final daySales = dailySales[date] ?? [];
+              final dayRevenue = daySales.fold<double>(0, (sum, s) => sum + s.totalHarga);
+              final dayExpense = dailyExpenses[date] ?? 0;
+              return pw.TableRow(
+                children: [
+                  pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text(DateFormat('dd MMM yyyy').format(date))),
+                  pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('RM ${_formatCurrency(dayRevenue)}')),
+                  pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text('RM ${_formatCurrency(dayExpense)}')),
+                ],
+              );
+            }),
+          ],
+        ),
+        pw.SizedBox(height: 20),
+
+        // Footer
+        pw.Center(
+          child: pw.Text(
+            'Generated on ${DateFormat('dd MMM yyyy HH:mm').format(DateTime.now())}',
+            style: pw.TextStyle(color: PdfColors.grey600, fontSize: 10),
+          ),
         ),
       ],
     ),
